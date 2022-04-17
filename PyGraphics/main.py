@@ -15,7 +15,7 @@ if __name__ == '__main__':
 	#mesh.read("fox_unify_normals.obj");
 	mmat = material();
 	mmat.setDiff("checkerboard-rainbow_.jpg");
-	mmat.diffuse.setTile(10,10);
+	mmat.diffuse.tile = vec2(10,10);
 
 	#gr.drawMeshSolidColor(frameBuffer, mesh); 
 	gr.drawMeshShaded(frameBuffer, mesh, mmat); 

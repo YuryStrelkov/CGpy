@@ -10,17 +10,17 @@ class vec2(object):
 
     def __str__(self):return "[%s, %s]" % (self.xy[0], self.xy[1]);
     
-    def __add__(self, other):return vec2(self.X + other.X, self.Y + other.Y);
+    def __add__(self, other):return vec2(self.x + other.x, self.y + other.y);
 
-    def __sub__(self, other):return vec2(self.X - other.X, self.Y - other.Y);
+    def __sub__(self, other):return vec2(self.x - other.x, self.y - other.y);
 
-    def __mul__(self, other):return vec2(self.X * other.X,self.Y * other.Y);
+    def __mul__(self, other):return vec2(self.x * other.x,self.y * other.y);
 
-    def __truediv__(self, other):return vec2(self.X / other.X,self.Y / other.Y);
+    def __truediv__(self, other):return vec2(self.x / other.x,self.y / other.y);
     
-    def __mul__(self, other:float):return vec2(self.X * other,self.Y * other);
+    def __mul__(self, other:float):return vec2(self.x * other,self.y * other);
 
-    def __truediv__(self, other:float):return vec2(self.X / other,self.Y / other);
+    def __truediv__(self, other:float):return vec2(self.x / other,self.y / other);
 
     def norm(self)->float:return np.sqrt(self.xy[0] * self.xy[0] + self.xy[1] * self.xy[1]);
 
@@ -31,16 +31,16 @@ class vec2(object):
         self.xy[1]/=nrm;
 
     @property 
-    def X(self)->float:return self.xy[0];
+    def x(self)->float:return self.xy[0];
     @property 
-    def Y(self)->float:return self.xy[1];
+    def y(self)->float:return self.xy[1];
 
-    @X.setter 
-    def X(self,x:float):self.xy[0] = x;
-    @Y.setter 
-    def Y(self,y:float):self.xy[1] = y;
+    @x.setter 
+    def x(self,x_:float):self.xy[0] = x_;
+    @y.setter 
+    def y(self,y_:float):self.xy[1] = y_;
 
-def dot(a:vec2, b:vec2)-> float:return a.X * b.X + a.Y * b.Y; 
+def dot(a:vec2, b:vec2)-> float:return a.x * b.x + a.y * b.y; 
 
 class vec3(object):
     def __init__(self):self.xyz:float = [0, 0, 0];
@@ -50,14 +50,14 @@ class vec3(object):
     def __repr__(self):return "<vec3 x:%s y:%s z:%s>" % (self.xyz[0], self.xyz[1], self.xyz[2]);
     def __str__(self):return "[%s, %s, %s]" % (self.xyz[0], self.xyz[1], self.xyz[2]);
 
-    def __add__(self, other):return vec3(self.X + other.X, self.Y + other.Y, self.Z + other.Z);
-    def __sub__(self, other):return vec3(self.X - other.X, self.Y - other.Y, self.Z - other.Z);
+    def __add__(self, other):return vec3(self.x + other.x, self.y + other.y, self.z + other.z);
+    def __sub__(self, other):return vec3(self.x - other.x, self.y - other.y, self.z - other.z);
 
-    def __mul__(self, other):return vec3(self.X * other.X,self.Y * other.Y, self.Z / other.Z);
-    def __truediv__(self, other):return vec3(self.X / other.X,self.Y / other.Y, self.Z / other.Z);
+    def __mul__(self, other):return vec3(self.x * other.x,self.y * other.y, self.z / other.z);
+    def __truediv__(self, other):return vec3(self.x / other.x,self.y / other.y, self.z / other.z);
     
-    def __mul__(self, other:float):return vec3(self.X * other, self.Y * other, self.Z * other);
-    def __truediv__(self, other:float):return vec3(self.X / other,self.Y / other,self.Z / other);
+    def __mul__(self, other:float):return vec3(self.x * other, self.y * other, self.z * other);
+    def __truediv__(self, other:float):return vec3(self.x / other,self.y / other,self.z / other);
 
     def normalize(self):
         nrm = self.norm();
@@ -67,22 +67,22 @@ class vec3(object):
         self.xyz[2]/=nrm;
 
     @property 
-    def X(self)->float:return self.xyz[0];
+    def x(self)->float:return self.xyz[0];
     @property 
-    def Y(self)->float:return self.xyz[1];
+    def y(self)->float:return self.xyz[1];
     @property 
-    def Z(self)->float:return self.xyz[2];
+    def z(self)->float:return self.xyz[2];
 
-    @X.setter 
-    def X(self,x:float):self.xyz[0] = x;
-    @Y.setter 
-    def Y(self,y:float):self.xyz[1] = y;
-    @Z.setter 
-    def Z(self,z:float):self.xyz[2] = z;
+    @x.setter 
+    def x(self,x:float):self.xyz[0] = x;
+    @y.setter 
+    def y(self,y:float):self.xyz[1] = y;
+    @z.setter 
+    def z(self,z:float):self.xyz[2] = z;
 
-def dot(a:vec3, b:vec3)-> float:return a.X * b.X + a.Y * b.Y +  a.Z *  b.Z; 
+def dot(a:vec3, b:vec3)-> float:return a.x * b.x + a.y * b.y +  a.z *  b.z; 
 
-def cross(a:vec3, b:vec3)-> vec3:return vec3(a.Z * b.Y - a.Y * b.Z, a.X * b.Z - a.Z * b.X, a.Y * b.X - a.X * b.Y);
+def cross(a:vec3, b:vec3)-> vec3:return vec3(a.z * b.y - a.y * b.z, a.x * b.z - a.z * b.x, a.y * b.x - a.x * b.y);
 
 class mat3(object):
     def __init__(self):self.data:float = [0,0,0,0,0,0,0,0,0];
@@ -342,7 +342,7 @@ def rotMtoEulerAngles(rot:mat4)-> vec3:
 
          if rot.m02 - 1 < 1e-6:return vec3(0, -3.141592653589793238462 * 0.5, math.atan2(-rot.m10, -rot.m20))
 
-         x1 = -asin(rot.Z);
+         x1 = -asin(rot.z);
          x2 = 3.141592653589793238462 - x1;
          y1 = math.atan2(rot.m12 / cos(x1), rot.m22 / cos(x1));
          y2 = math.atan2(rot.m12 / cos(x2), rot.m22 / cos(x2));
@@ -358,9 +358,9 @@ def lookAt(target:vec3,eye:vec3, up:vec3 = vec3(0,1,0))-> mat4:
          xaxis.normalize();
          yaxis = cross(zaxis,xaxis);# The "up" vector.
 
-         return mat4(xaxis.X, -yaxis.X, zaxis.X, eye.X,
-                    -xaxis.Y, -yaxis.Y, zaxis.Y, eye.Y,
-                     xaxis.Z, -yaxis.Z, zaxis.Z, eye.Z,
+         return mat4(xaxis.x, -yaxis.x, zaxis.x, eye.x,
+                    -xaxis.y, -yaxis.y, zaxis.y, eye.y,
+                     xaxis.z, -yaxis.z, zaxis.z, eye.z,
                      0,       0,     0, 1);
 
 def clamp(min_:float,max_:float,val:float)->float:

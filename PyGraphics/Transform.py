@@ -13,131 +13,163 @@ class transform(object):
      # переводит вектор в собственное пространство координат
      def transformVect(self, vec:vec3, w)->vec3:
          if w == 0:
-             return vec3(self.transformM.m00 * vec.X + self.transformM.m01 * vec.Y + self.transformM.m02 * vec.Z,
-                         self.transformM.m10 * vec.X + self.transformM.m11 * vec.Y + self.transformM.m12 * vec.Z,
-                         self.transformM.m20 * vec.X + self.transformM.m21 * vec.Y + self.transformM.m22 * vec.Z);
+             return vec3(self.transformM.m00 * vec.x + self.transformM.m01 * vec.y + self.transformM.m02 * vec.z,
+                         self.transformM.m10 * vec.x + self.transformM.m11 * vec.y + self.transformM.m12 * vec.z,
+                         self.transformM.m20 * vec.x + self.transformM.m21 * vec.y + self.transformM.m22 * vec.z);
          
-         return vec3(self.transformM.m00 * vec.X + self.transformM.m01 * vec.Y + self.transformM.m02 * vec.Z + self.transformM.m03,
-                     self.transformM.m10 * vec.X + self.transformM.m11 * vec.Y + self.transformM.m12 * vec.Z + self.transformM.m13,
-                     self.transformM.m20 * vec.X + self.transformM.m21 * vec.Y + self.transformM.m22 * vec.Z + self.transformM.m23);
+         return vec3(self.transformM.m00 * vec.x + self.transformM.m01 * vec.y + self.transformM.m02 * vec.z + self.transformM.m03,
+                     self.transformM.m10 * vec.x + self.transformM.m11 * vec.y + self.transformM.m12 * vec.z + self.transformM.m13,
+                     self.transformM.m20 * vec.x + self.transformM.m21 * vec.y + self.transformM.m22 * vec.z + self.transformM.m23);
      # не переводит вектор в собственное пространство координат =)
      def invTransformVect(self, vec:vec3, w)->vec3:
          if w == 0:
-             return vec3(self.transformM.m00 * vec.X + self.transformM.m10 * vec.Y + self.transformM.m20 * vec.Z,
-                         self.transformM.m01 * vec.X + self.transformM.m11 * vec.Y + self.transformM.m21 * vec.Z,
-                         self.transformM.m02 * vec.X + self.transformM.m12 * vec.Y + self.transformM.m22 * vec.Z);
+             return vec3(self.transformM.m00 * vec.x + self.transformM.m10 * vec.y + self.transformM.m20 * vec.z,
+                         self.transformM.m01 * vec.x + self.transformM.m11 * vec.y + self.transformM.m21 * vec.z,
+                         self.transformM.m02 * vec.x + self.transformM.m12 * vec.y + self.transformM.m22 * vec.z);
         
-         vec_ = vec3(vec.X - self.getX(),vec.Y - self.getY(),vec.Z -self.getZ());
-         return vec3(self.transformM.m00 * vec_.X + self.transformM.m10 * vec_.Y + self.transformM.m20 * vec_.Z,
-                     self.transformM.m01 * vec_.X + self.transformM.m11 * vec_.Y + self.transformM.m21 * vec_.Z,
-                     self.transformM.m02 * vec_.X + self.transformM.m12 * vec_.Y + self.transformM.m22 * vec_.Z) 
+         vec_ = vec3(vec.x - self.x, vec.y - self.y, vec.z -self.z);
+         return vec3(self.transformM.m00 * vec_.x + self.transformM.m10 * vec_.y + self.transformM.m20 * vec_.z,
+                     self.transformM.m01 * vec_.x + self.transformM.m11 * vec_.y + self.transformM.m21 * vec_.z,
+                     self.transformM.m02 * vec_.x + self.transformM.m12 * vec_.y + self.transformM.m22 * vec_.z) 
 
+     @property
      def front(self)->vec3:return vec3(self.transformM.m02,
                                        self.transformM.m12,
                                        self.transformM.m22);
      
+     @property
      def up(self)->vec3:return vec3(self.transformM.m01,
                                     self.transformM.m11,
                                     self.transformM.m21);
 
+     @property
      def right(self)->vec3:return vec3(self.transformM.m00,
                                        self.transformM.m10,
                                        self.transformM.m20);
+
      #масштаб по Х
-     def getSx(self)->float:
+     @property
+     def sx(self)->float:
         x =  self.transformM.m00;
         y =  self.transformM.m10;
         z =  self.transformM.m20;
         return np.sqrt(x * x+ y * y + z * z);
      #масштаб по Y
-     def getSy(self)->float:
+     @property
+     def sy(self)->float:
         x =  self.transformM.m01;
         y =  self.transformM.m11;
         z =  self.transformM.m21;
         return np.sqrt(x * x+ y * y + z * z); 
      #масштаб по Z
-     def getSz(self)->float:
+     @property
+     def sz(self)->float:
         x =  self.transformM.m02;
         y =  self.transformM.m12;
         z =  self.transformM.m22;
         return np.sqrt(x * x+ y * y + z * z); 
      #установить масштаб по Х
-     def setSx(self,s_x:float):
+     @sx.setter 
+     def sx(self,s_x:float):
         if s_x == 0:return;
-        scl =  self.getSx();
+        scl =  self.sx;
         self.transformM.m00/=scl/s_x;
         self.transformM.m10/=scl/s_x;
         self.transformM.m20/=scl/s_x;
      #установить масштаб по Y
-     def setSy(self,s_y:float):
+     @sy.setter 
+     def sy(self,s_y:float):
         if s_y == 0:return;
-        scl =  self.getSy();
+        scl =  self.sy;
         self.transformM.m01/=scl/s_y;
         self.transformM.m11/=scl/s_y;
         self.transformM.m21/=scl/s_y;
      #установить масштаб по Z
-     def setSz(self,s_z:float):
+     @sz.setter 
+     def sz(self,s_z:float):
         if s_z == 0:return;
-        scl =  self.getSz();
+        scl =  self.sz;
         self.transformM.m02/=scl/s_z;
         self.transformM.m12/=scl/s_z;
         self.transformM.m22/=scl/s_z;
 
-     def setScale(self, sx:float, sy:float, sz:float):
-         self.setSx(sx);
-         self.setSy(sy);
-         self.setSz(sz);
-
-     def getScale(self)->vec3:return vec3(self.getSx(),self.getSy(),self.getSz());
- 
-     def setX(self,x:float):self.transformM.m03=x;
+     @property
+     def scale(self)->vec3:return vec3(self.sx,self.sy,self.sz);
     
-     def setY(self,y:float):self.transformM.m13=y;
-
-     def setZ(self,z:float):self.transformM.m23=z;
-
-     def getX(self)->float:return self.transformM.m03;
+     @scale.setter 
+     def scale(self,xyz:vec3):
+         self.sx = xyz.x;
+         self.sy = xyz.y;
+         self.sz = xyz.z;
+     
+     @property
+     def x(self)->float:return self.transformM.m03;
     
-     def getY(self)->float:return self.transformM.m13;
+     @property
+     def y(self)->float:return self.transformM.m13;
+     
+     @property
+     def z(self)->float:return self.transformM.m23;
 
-     def getZ(self)->float:return self.transformM.m23;
+     @x.setter 
+     def x(self,x:float):self.transformM.m03=x;
+    
+     @y.setter 
+     def y(self,y:float):self.transformM.m13=y;
+
+     @z.setter 
+     def z(self,z:float):self.transformM.m23=z;
+
+     @property
+     def origin(self)->vec3:return vec3(self.x, self.y, self.z);
          
-     def setOrigin(self,x:float,y:float,z:float):
-         self.setX(x);
-         self.setY(y);
-         self.setZ(z);
+     @origin.setter 
+     def origin(self,xyz:vec3):self.x = xyz.x; self.y = xyz.y; self.z = xyz.z;
+     
+     @property
+     def angles(self)->vec3:return self.eulerAngles;
 
-     def getOrigin(self)->vec3:return vec3(self.getX(), self.getY(), self.getZ());
-
-     def rotate(self, x:float, y:float, z:float):
-         if(self.eulerAngles.X==x and self.eulerAngles.Y==y and self.eulerAngles.Z==z):
+     @angles.setter 
+     def angles(self, xyz:vec3):
+         if(self.eulerAngles.x==xyz.x and self.eulerAngles.y==xyz.y and self.eulerAngles.z==xyz.z):
              return;
-         
-         self.eulerAngles.X = x;
-         self.eulerAngles.Y = y;
-         self.eulerAngles.Z = z;
+         self.eulerAngles.x = xyz.x;
+         self.eulerAngles.y = xyz.y;
+         self.eulerAngles.z = xyz.z;
 
-         i = MathUtils.rotX(x);
-         i = MathUtils.mul(i, MathUtils.rotY(y));
-         i = MathUtils.mul(i, MathUtils.rotZ(z));
+         i = MathUtils.rotX(xyz.x);
+         i = MathUtils.mul(i, MathUtils.rotY(xyz.y));
+         i = MathUtils.mul(i, MathUtils.rotZ(xyz.z));
 
-         scl  = self.getScale();
-         orig = self.getOrigin();
+         scl  = self.Scale;
+         orig = self.Origin;
          self.transformM = i;
-         self.setScale(scl.X,scl.Y,scl.Z);
-         self.setOrigin(orig.X,orig.Y,orig.Z);
+         self.Scale = scl;
+         self.Origin = orig;
 
-     def rotateX(self, x:float):self.rotate(MathUtils.degToRad(x), self.eulerAngles.Y, self.eulerAngles.Z);
+     @property
+     def ax(self)->float:return self.eulerAngles.x;
 
-     def rotateY(self, y:float):self.rotate(self.eulerAngles.X, MathUtils.degToRad(y), self.eulerAngles.Z);
-
-     def rotateZ(self, z:float):self.rotate(self.eulerAngles.X, self.eulerAngles.Y, MathUtils.degToRad(z));
+     @property
+     def ay(self)->float:return self.eulerAngles.y;
+     
+     @property
+     def az(self)->float:return self.eulerAngles.z;
+    
+     @ax.setter 
+     def ax(self, x:float):self.angles = vec3(MathUtils.degToRad(x), self.eulerAngles.y, self.eulerAngles.z);
+     
+     @ay.setter 
+     def ay(self, y:float):self.angles = vec3(self.eulerAngles.x, MathUtils.degToRad(y), self.eulerAngles.z);
+     
+     @az.setter 
+     def az(self, z:float):self.angles = vec3(self.eulerAngles.x, self.eulerAngles.y, MathUtils.degToRad(z));
 
      def rotM(self)->mat4:
-        scl = self.getScale();
-        return mat4(self.transformM.m00/scl.X, self.transformM.m01/scl.Y, self.transformM.m02/scl.Z, 0,
-                    self.transformM.m10/scl.X, self.transformM.m11/scl.Y, self.transformM.m12/scl.Z, 0,
-                    self.transformM.m20/scl.X, self.transformM.m21/scl.Y, self.transformM.m22/scl.Z, 0,
+        scl = self.scale;
+        return mat4(self.transformM.m00/scl.x, self.transformM.m01/scl.y, self.transformM.m02/scl.z, 0,
+                    self.transformM.m10/scl.x, self.transformM.m11/scl.y, self.transformM.m12/scl.z, 0,
+                    self.transformM.m20/scl.x, self.transformM.m21/scl.y, self.transformM.m22/scl.z, 0,
                     0, 0, 0, 1);
 
      def lookAt(self, target:vec3, eye:vec3, up:vec3 = vec3(0,1,0)):
@@ -153,66 +185,82 @@ class transform2(object):
      # переводит вектор в собственное пространство координат
      def transformVect(self, vec:vec2, w)->vec2:
          if w == 0:
-             return vec2(self.transformM.m00 * vec.X + self.transformM.m01 * vec.Y,
-                         self.transformM.m10 * vec.X + self.transformM.m11 * vec.Y);
+             return vec2(self.transformM.m00 * vec.x + self.transformM.m01 * vec.y,
+                         self.transformM.m10 * vec.x + self.transformM.m11 * vec.y);
          
-         return vec2(self.transformM.m00 * vec.X + self.transformM.m01 * vec.Y + self.transformM.m02,
-                     self.transformM.m10 * vec.X + self.transformM.m11 * vec.Y + self.transformM.m12);
+         return vec2(self.transformM.m00 * vec.x + self.transformM.m01 * vec.y + self.transformM.m02,
+                     self.transformM.m10 * vec.x + self.transformM.m11 * vec.y + self.transformM.m12);
      # не переводит вектор в собственное пространство координат =)
      def invTransformVect(self, vec:vec3, w)->vec3:
          if w == 0:
-             return vec2(self.transformM.m00 * vec.X + self.transformM.m10 * vec.Y,
-                         self.transformM.m01 * vec.X + self.transformM.m11 * vec.Y);
+             return vec2(self.transformM.m00 * vec.x + self.transformM.m10 * vec.y,
+                         self.transformM.m01 * vec.x + self.transformM.m11 * vec.y);
         
-         vec_ = vec2(vec.X - self.getX(),vec.Y - self.getY());
-         return vec2(self.transformM.m00 * vec.X + self.transformM.m10 * vec.Y,
-                     self.transformM.m01 * vec.X + self.transformM.m11 * vec.Y);
+         vec_ = vec2(vec.x - self.getX(),vec.y - self.getY());
+         return vec2(self.transformM.m00 * vec.x + self.transformM.m10 * vec.y,
+                     self.transformM.m01 * vec.x + self.transformM.m11 * vec.y);
 
+     @property
      def front(self)->vec2:return vec2(self.transformM.m00,self.transformM.m10);
      
+     @property
      def up(self)->vec2:return vec2(self.transformM.m01,self.transformM.m11);
+
+     @property
+     def scale(self)->vec2:return vec2(self.sx, self.sy);
      #масштаб по Х
-     def getSx(self)->float:
+     @property
+     def sx(self)->float:
         x =  self.transformM.m00;
         y =  self.transformM.m10;
-        return np.sqrt(x * x+ y * y);
+        return np.sqrt(x * x + y * y);
      #масштаб по Y
-     def getSy(self)->float:
+     @property
+     def sy(self)->float:
         x =  self.transformM.m01;
         y =  self.transformM.m11;
         return np.sqrt(x * x + y * y); 
      #установить масштаб по Х
-     def setSx(self,s_x:float):
+     @sx.setter 
+     def sx(self,s_x:float):
         if s_x == 0:return;
-        scl =  self.getSx();
+        scl =  self.sx;
         self.transformM.m00/=scl/s_x;
         self.transformM.m10/=scl/s_x;
      #установить масштаб по Y
-     def setSy(self,s_y:float):
+     @sy.setter 
+     def sy(self,s_y:float):
         if s_y == 0:return;
-        scl =  self.getSy();
+        scl =  self.sy;
         self.transformM.m01/=scl/s_y;
         self.transformM.m11/=scl/s_y;
+     
+     @scale.setter 
+     def scale(self, sxy:vec2): self.sx = sxy.x; self.sy = sxy.y; 
 
-     def setScale(self, sx:float, sy:float):
-         self.setSx(sx);
-         self.setSy(sy);
-
-     def getScale(self)->vec2:return vec2(self.getSx(),self.getSy());
- 
-     def setX(self,x:float):self.transformM.m02=x;
+     @property
+     def x(self)->float:return self.transformM.m02;
     
-     def setY(self,y:float):self.transformM.m12=y;
+     @property
+     def y(self)->float:return self.transformM.m12;
 
-     def getX(self)->float:return self.transformM.m02;
+     @property
+     def origin(self)->vec2:return vec2(self.x, self.y);
+     
+     @x.setter 
+     def x(self,x:float):self.transformM.m02=x;
     
-     def getY(self)->float:return self.transformM.m12;
+     @y.setter 
+     def y(self,y:float):self.transformM.m12=y;
          
-     def setOrigin(self,x:float,y:float):self.setX(x);self.setY(y);
-
-     def getOrigin(self)->vec2:return vec2(self.getX(), self.getY());
-
-     def rotate(self, angle:float):
+     @origin.setter 
+     def origin(self,xy:vec2):self.x = xy.x; self.y = xy.y;
+   
+     @property
+     def az(self)->float: return self.zAngle;
+     
+     @az.setter 
+     def az(self, angle:float):
          if(self.zAngle==angle):return;
          self.zAngle = angle;
          cos_a = np.cos(angle);
@@ -223,5 +271,5 @@ class transform2(object):
          scl  = self.getScale();
          orig = self.getOrigin();
          self.transformM = rz;
-         self.setScale(scl.X,scl.Y);
-         self.setOrigin(orig.X,orig.Y);
+         self.setScale(scl.x,scl.y);
+         self.setOrigin(orig.x,orig.y);

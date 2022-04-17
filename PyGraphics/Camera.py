@@ -25,11 +25,14 @@ class camera(object):
          self.projection.m23 = -1; # set w = -z 
          self.projection.m33 = 0; 
      #ось Z системы координат камеры 
-     def front(self)->vec3:return self.lookAtTransform.front();
+     @property
+     def front(self)->vec3:return self.lookAtTransform.front;
      #ось Y системы координат камеры 
-     def up(self)->vec3:return self.lookAtTransform.up();
+     @property
+     def up(self)->vec3:return self.lookAtTransform.up;
      #ось Z системы координат камеры 
-     def right(self)->vec3:return self.lookAtTransform.right();
+     @property
+     def right(self)->vec3:return self.lookAtTransform.right;
      #Cтроит матрицу вида
      def lookAt(self, target:vec3, eye:vec3, up:vec3 = vec3(0,1,0)):self.lookAtTransform.lookAt(target, eye, up);
      #Переводит точку в пространстве в собственную систему координат камеры 
@@ -38,11 +41,11 @@ class camera(object):
      #а после в пространство перспективной проекции
      def toClipSpace(self, vect:vec3)->vec3:
              v = self.toCameraSpace(vect);
-             out = vec3(v.X * self.projection.m00 + v.Y * self.projection.m10 + v.Z * self.projection.m20 + self.projection.m30, 
-                        v.X * self.projection.m01 + v.Y * self.projection.m11 + v.Z * self.projection.m21 + self.projection.m31, 
-                        v.X * self.projection.m02 + v.Y * self.projection.m12 + v.Z * self.projection.m22 + self.projection.m32); 
-             w =        v.X * self.projection.m03 + v.Y * self.projection.m13 + v.Z * self.projection.m23 + self.projection.m33; 
+             out = vec3(v.x * self.projection.m00 + v.y * self.projection.m10 + v.z * self.projection.m20 + self.projection.m30, 
+                        v.x * self.projection.m01 + v.y * self.projection.m11 + v.z * self.projection.m21 + self.projection.m31, 
+                        v.x * self.projection.m02 + v.y * self.projection.m12 + v.z * self.projection.m22 + self.projection.m32); 
+             w =        v.x * self.projection.m03 + v.y * self.projection.m13 + v.z * self.projection.m23 + self.projection.m33; 
              if w != 1: # normalize if w is different than 1 (convert from homogeneous to Cartesian coordinates)
-                out.X /= w; out.Y /= w; out.Z /= w;
+                out.x /= w; out.y /= w; out.z /= w;
              return out;
 

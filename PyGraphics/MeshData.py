@@ -115,13 +115,13 @@ class meshData(object):
             if tmp[0] == ("v"):
                 v = vec3(float(tmp[1]),float(tmp[2]),float(tmp[3]));
                 #update max bound
-                if v.X > self.max_.X:self.max_.X = v.X;
-                if v.Y > self.max_.Y:self.max_.Y = v.Y;
-                if v.Z > self.max_.Z:self.max_.Z = v.Z;
+                if v.x > self.max_.x:self.max_.x = v.x;
+                if v.y > self.max_.y:self.max_.y = v.y;
+                if v.z > self.max_.z:self.max_.z = v.z;
                 #update min bound
-                if v.X < self.min_.X:self.min_.X = v.X;
-                if v.Y < self.min_.Y:self.min_.Y = v.Y;
-                if v.Z < self.min_.Z:self.min_.Z = v.Z;  
+                if v.x < self.min_.x:self.min_.x = v.x;
+                if v.y < self.min_.y:self.min_.y = v.y;
+                if v.z < self.min_.z:self.min_.z = v.z;  
 
                 self.vertices.append(v);
             if tmp[0] == ("vt"):

@@ -119,23 +119,23 @@ def drawPoint(buffer:frameBuffer, x:int, y:int, color:RGB = RGB(255, 255, 255), 
        buffer.setDepth(x + 1, y + 1, depth);
 
 def pointToScrSpace(buffer:frameBuffer,pt:vec3)->vec3:
-    return vec3( round(MathUtils.clamp(0, buffer.width -1, round(buffer.width  * ( pt.X * 0.5 + 0.5)))),
-                 round(MathUtils.clamp(0, buffer.height-1, round(buffer.height * (-pt.Y * 0.5 + 0.5)))),
-                pt.Z);
+    return vec3( round(MathUtils.clamp(0, buffer.width -1, round(buffer.width  * ( pt.x * 0.5 + 0.5)))),
+                 round(MathUtils.clamp(0, buffer.height-1, round(buffer.height * (-pt.y * 0.5 + 0.5)))),
+                pt.z);
 
 # отрисовка вершин
 def drawVertices(buffer:frameBuffer, mesh:meshData, cam:camera = None, color:RGB = RGB(0, 0, 255)):
         if cam == None:cam = camera();cam.lookAt(mesh.minWorldSpace, mesh.maxWorldSpace * 1.5);
         for point in mesh.vertices:
             v1 = pointToScrSpace(buffer, cam.toClipSpace(mesh.transformation.transformVect(point,1)));
-            if buffer.zBuffer[v1.X,v1.Y] > v1.Z:return;
-            drawPoint(buffer, v1.X,v1.Y, color, v1.Z);
+            if buffer.zBuffer[v1.x,v1.y] > v1.z:return;
+            drawPoint(buffer, v1.x,v1.y, color, v1.z);
 
 # отрисовка ребер
 def drawEdges(buffer:frameBuffer, mesh:meshData, cam:camera = None, color:RGB = RGB(0, 0, 0)):
         if cam == None:cam = camera();cam.lookAt(mesh.minWorldSpace, mesh.maxWorldSpace * 1.5);
         # направление освещения совпадает с направлением взгляда камеры
-        forward = cam.front();
+        forward = cam.front;
         for f in mesh.faces:
             v1 =pointToScrSpace(buffer, cam.toClipSpace(mesh.getVertWorldSpace(f.p_1)));
             v2 =pointToScrSpace(buffer, cam.toClipSpace(mesh.getVertWorldSpace(f.p_2)));
@@ -149,26 +149,26 @@ def drawEdges(buffer:frameBuffer, mesh:meshData, cam:camera = None, color:RGB = 
             b =  -MathUtils.dot(n2, forward);
             c =  -MathUtils.dot(n3, forward);
 
-            if a > 0 or b > 0:drawLineV4(buffer, v1.X, v1.Y, v2.X, v2.Y, color);
-            if a > 0 or c > 0:drawLineV4(buffer, v1.X, v1.Y, v3.X, v3.Y, color);
-            if b > 0 or c > 0:drawLineV4(buffer, v2.X, v2.Y, v3.X, v3.Y, color);
+            if a > 0 or b > 0:drawLineV4(buffer, v1.x, v1.y, v2.x, v2.y, color);
+            if a > 0 or c > 0:drawLineV4(buffer, v1.x, v1.y, v3.x, v3.y, color);
+            if b > 0 or c > 0:drawLineV4(buffer, v2.x, v2.y, v3.x, v3.y, color);
 
 #отрисовка одноцветного треугольника(интерполируется только глубина) 
 def drawTriangleSolid(buffer:frameBuffer, p0:vec3, p1:vec3, p2:vec3, color:RGB = RGB(0, 255, 0)):
-    if p0.Y == p1.Y and p0.Y == p2.Y:return; #i dont care about degenerate triangles
+    if p0.y == p1.y and p0.y == p2.y:return; #i dont care about degenerate triangles
     # sort the vertices, p0, p1, p2 lower-to-upper (bubblesort yay!)
-    if (p0.Y > p1.Y): p0, p1 = p1, p0;
-    if (p0.Y > p2.Y): p0, p2 = p2, p0;
-    if (p1.Y > p2.Y): p1, p2 = p2, p1;
+    if (p0.y > p1.y): p0, p1 = p1, p0;
+    if (p0.y > p2.y): p0, p2 = p2, p0;
+    if (p1.y > p2.y): p1, p2 = p2, p1;
     
-    total_height:int = round(p2.Y - p0.Y);
+    total_height:int = round(p2.y - p0.y);
     
     for i in xrange( 0, total_height):
-         second_half:bool = i > p1.Y-p0.Y or p1.Y == p0.Y;
+         second_half:bool = i > p1.y-p0.y or p1.y == p0.y;
          
-         segment_height:int = p1.Y-p0.Y;
+         segment_height:int = p1.y-p0.y;
          
-         if second_half:segment_height:int = p2.Y-p1.Y;
+         if second_half:segment_height:int = p2.y-p1.y;
         
          if segment_height==0:continue;
 
@@ -176,7 +176,7 @@ def drawTriangleSolid(buffer:frameBuffer, p0:vec3, p1:vec3, p2:vec3, color:RGB =
 
          beta:float   = 0;
 
-         if second_half: beta = float(i - (p1.Y - p0.Y))/segment_height;
+         if second_half: beta = float(i - (p1.y - p0.y))/segment_height;
          else:beta = float(i / segment_height)# be careful: with above conditions no division by zero her
 
          A = p0 + (p2 - p0) * alpha;
@@ -184,35 +184,35 @@ def drawTriangleSolid(buffer:frameBuffer, p0:vec3, p1:vec3, p2:vec3, color:RGB =
          if second_half: B = p1 + (p2 - p1)*beta;
          else:B =  p0 + (p1 - p0)*beta;
          
-         if (A.X > B.X): A, B = B, A;
-         for j in xrange(round(A.X),round(B.X)):
+         if (A.x > B.x): A, B = B, A;
+         for j in xrange(round(A.x),round(B.x)):
              phi:float = 0.0;
-             if B.X==A.X: phi = 1.0
-             else: phi = float(j-A.X)/float(B.X-A.X);
+             if B.x==A.x: phi = 1.0
+             else: phi = float(j-A.x)/float(B.x-A.x);
              P:vec3  = A + (B - A) * phi;
-             zx,xy = round(P.X), round(P.Y);
-             if buffer.zBuffer[zx, xy] < P.Z:
-                buffer.zBuffer[zx, xy] = P.Z;
+             zx,xy = round(P.x), round(P.y);
+             if buffer.zBuffer[zx, xy] < P.z:
+                buffer.zBuffer[zx, xy] = P.z;
                 buffer.setPixel(zx, xy, color);
 
 #отрисовка треугольника(интерполируется только глубина, нормали, барицентрические координаты) 
 def drawTriangleShaded(buffer:frameBuffer, p0:vertex,  p1:vertex,  p2:vertex, mat:material): #позиции(в прострастве экрана) вершин треугольника
-    if p0.v.Y == p1.v.Y and p0.v.Y == p2.v.Y:return; #i dont care about degenerate triangles
+    if p0.v.y == p1.v.y and p0.v.y == p2.v.y:return; #i dont care about degenerate triangles
     # sort the vertices, p0, p1, p2 lower-to-upper (bubblesort yay!)
-    if (p0.v.Y > p1.v.Y): p0, p1   = p1, p0;
+    if (p0.v.y > p1.v.y): p0, p1   = p1, p0;
 
-    if (p0.v.Y > p2.v.Y): p0, p2   = p2, p0;
+    if (p0.v.y > p2.v.y): p0, p2   = p2, p0;
 
-    if (p1.v.Y > p2.v.Y): p1, p2   = p2, p1;
+    if (p1.v.y > p2.v.y): p1, p2   = p2, p1;
     
-    total_height:int = round(p2.v.Y - p0.v.Y);
+    total_height:int = round(p2.v.y - p0.v.y);
     
     for i in xrange( 0, total_height):
-         second_half:bool = i > p1.v.Y-p0.v.Y or p1.v.Y == p0.v.Y;
+         second_half:bool = i > p1.v.y-p0.v.y or p1.v.y == p0.v.y;
          
-         segment_height:int = p1.v.Y-p0.v.Y;
+         segment_height:int = p1.v.y-p0.v.y;
          
-         if second_half:segment_height:int = p2.v.Y-p1.v.Y;
+         if second_half:segment_height:int = p2.v.y-p1.v.y;
         
          if segment_height==0:continue;
 
@@ -220,21 +220,21 @@ def drawTriangleShaded(buffer:frameBuffer, p0:vertex,  p1:vertex,  p2:vertex, ma
 
          beta:float   = 0;
 
-         if second_half: beta = float(i - (p1.v.Y - p0.v.Y))/segment_height;
+         if second_half: beta = float(i - (p1.v.y - p0.v.y))/segment_height;
          else:beta = float(i / segment_height)# be careful: with above conditions no division by zero her
          A   = lerpVertex(p0, p2, alpha);
          if second_half: B = lerpVertex(p1, p2, beta);
          else: B = lerpVertex(p0, p1,beta);
-         if (A.v.X > B.v.X): A, B = B, A;
+         if (A.v.x > B.v.x): A, B = B, A;
 
-         for j in xrange(round(A.v.X),round(B.v.X)):
+         for j in xrange(round(A.v.x),round(B.v.x)):
              phi:float = 0.0;
-             if B.v.X==A.v.X: phi = 1.0
-             else: phi = float(j-A.v.X)/float(B.v.X-A.v.X);
+             if B.v.x==A.v.x: phi = 1.0
+             else: phi = float(j-A.v.x)/float(B.v.x-A.v.x);
              P   = lerpVertex(A,B,phi);
-             zx,xy = round(P.v.X), round(P.v.Y);
-             if buffer.zBuffer[zx, xy] < P.v.Z:
-                buffer.zBuffer[zx, xy] = P.v.Z;
+             zx,xy = round(P.v.x), round(P.v.y);
+             if buffer.zBuffer[zx, xy] < P.v.z:
+                buffer.zBuffer[zx, xy] = P.v.z;
                 col:RGB = mat.diffColor(P.uv);
                 colShading:float = MathUtils.clamp(0.0, 1.0, MathUtils.dot(P.n, vec3(0.333,0.333,0.333)));
                 buffer.setPixel(zx, xy, RGB(col.R * colShading, col.G * colShading, col.B * colShading));
@@ -243,7 +243,7 @@ def drawTriangleShaded(buffer:frameBuffer, p0:vertex,  p1:vertex,  p2:vertex, ma
 def drawMeshSolidColor(buffer:frameBuffer, mesh:meshData, cam:camera = None, color:RGB = RGB(255, 255, 255)):
     # направление освещения совпадает с направлением взгляда камеры
     if cam == None: cam = camera(); cam.lookAt(mesh.minWorldSpace, mesh.maxWorldSpace * 1.5);
-    forward = cam.front();
+    forward = cam.front;
     for f in mesh.faces:
         # переводим нормали вершин в мировое пространство
         n1 = (mesh.getNormalWorldSpace(f.n_1));
@@ -271,7 +271,7 @@ def drawMeshShaded(buffer:frameBuffer, mesh:meshData, mat:material, cam:camera =
     # направление освещения совпадает с направлением взгляда камеры
     if cam == None: cam = camera(); cam.lookAt(mesh.minWorldSpace, mesh.maxWorldSpace * 1.5);
 
-    forward = cam.front();
+    forward = cam.front;
     
     for f in mesh.faces:
         # переводим нормали вершин в мировое пространство

@@ -12,18 +12,24 @@ class texture(object):
         self.width_  = -1;
         self.height_ = -1;
         self.bpp_    =  0;
-
-    def setTile(self, tileX:float,tileY:float): self.transform.setScale(tileX, tileY);
-
-    def setOffset(self,x:float,y:float):self.transform.setOrigin(x,y);
     
-    def setRotation(self,angle:float):self.transform.rotate(MathUtils.degToRad(angle));
-    
-    def getTile(self,tileX:float,tileY:float)->vec2:return self.transform.getScale();
+    @property
+    def tile(self,tileX:float,tileY:float)->vec2: return self.transform.scale;
 
-    def getOffset(self,x:float,y:float)->vec2:return self.transform.getOrigin();
+    @property
+    def offset(self,x:float,y:float)->vec2: return self.transform.origin;
+
+    @property
+    def rotation(self)->float: return self.transform.az;
     
-    def getRotation(self,angle:float):self.transform.zAngle;
+    @tile.setter 
+    def tile(self, xy:vec2): self.transform.scale = xy;
+
+    @offset.setter 
+    def offset(self,xy:vec2):self.transform.origin = xy;
+    
+    @rotation.setter 
+    def rotation(self,angle:float):self.transform.az = MathUtils.degToRad(angle);
 
     def load(self,origin:str):
         if not(len(self.colors) == 0):del(self.colors); self.width_ =-1; self.height_ = -1; self.bpp_ = 0;
@@ -34,8 +40,8 @@ class texture(object):
 
     def getColor(self,uv:vec2)->RGB:
         uv_ = self.transform.transformVect(uv, 1);
-        uv_x = abs(round(uv_.X * self.width_)  % self.width_);
-        uv_y = abs(round(uv_.Y * self.height_) % self.height_);
+        uv_x = abs(round(uv_.x * self.width_)  % self.width_);
+        uv_y = abs(round(uv_.y * self.height_) % self.height_);
         pix = (uv_x + uv_y * self.width_ ) * self.bpp_;
         return RGB(self.colors[pix],self.colors[pix + 1],self.colors[pix + 2]);
 
