@@ -22,11 +22,11 @@ class RGB(object):
     def B(self,b:np.uint8):self.rgb[2] = b;
 
 class frameBuffer(object):
-    def __init__(self):
-        self.width:int = 1000;
-        self.height:int = 1000;
+    def __init__(self, w:int, h:int):
+        self.width:int = w;
+        self.height:int = h;
         self.channels:int = 3;
-        self.pixelsN:int = self.width*self.height;
+        self.pixelsN:int = self.width * self.height;
         self.clearColor();
         self.clearDepth();
 

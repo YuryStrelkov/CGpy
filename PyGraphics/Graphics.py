@@ -123,38 +123,8 @@ def pointToScrSpace(buffer:frameBuffer,pt:vec3)->vec3:
                  round(MathUtils.clamp(0, buffer.height-1, round(buffer.height * (-pt.y * 0.5 + 0.5)))),
                 pt.z);
 
-# отрисовка вершин
-def drawVertices(buffer:frameBuffer, mesh:meshData, cam:camera = None, color:RGB = RGB(0, 0, 255)):
-        if cam == None:cam = camera();cam.lookAt(mesh.minWorldSpace, mesh.maxWorldSpace * 1.5);
-        for point in mesh.vertices:
-            v1 = pointToScrSpace(buffer, cam.toClipSpace(mesh.transformation.transformVect(point,1)));
-            # if buffer.zBuffer[v1.x,v1.y] > v1.z:return;
-            drawPoint(buffer, v1.x,v1.y, color, v1.z);
-
-# отрисовка ребер
-def drawEdges(buffer:frameBuffer, mesh:meshData, cam:camera = None, color:RGB = RGB(0, 0, 0)):
-        if cam == None:cam = camera();cam.lookAt(mesh.minWorldSpace, mesh.maxWorldSpace * 1.5);
-        # направление освещения совпадает с направлением взгляда камеры
-        forward = cam.front;
-        for f in mesh.faces:
-            v1 =pointToScrSpace(buffer, cam.toClipSpace(mesh.getVertWorldSpace(f.p_1)));
-            v2 =pointToScrSpace(buffer, cam.toClipSpace(mesh.getVertWorldSpace(f.p_2)));
-            v3 =pointToScrSpace(buffer, cam.toClipSpace(mesh.getVertWorldSpace(f.p_3)));
-            
-            n1 = (mesh.getNormalWorldSpace(f.n_1));
-            n2 = (mesh.getNormalWorldSpace(f.n_2));
-            n3 = (mesh.getNormalWorldSpace(f.n_3));
-
-            a =  -MathUtils.dot(n1, forward);
-            b =  -MathUtils.dot(n2, forward);
-            c =  -MathUtils.dot(n3, forward);
-
-            if a > 0 or b > 0:drawLineV4(buffer, v1.x, v1.y, v2.x, v2.y, color);
-            if a > 0 or c > 0:drawLineV4(buffer, v1.x, v1.y, v3.x, v3.y, color);
-            if b > 0 or c > 0:drawLineV4(buffer, v2.x, v2.y, v3.x, v3.y, color);
-
 #отрисовка одноцветного треугольника(интерполируется только глубина) 
-def drawTriangleSolid(buffer:frameBuffer, p0:vertex, p1:vertex, p2:vertex, color:RGB = RGB(0, 255, 0)):
+def drawTriangleSolid(buffer:frameBuffer, p0:vertex, p1:vertex, p2:vertex, color:RGB = RGB(255, 0, 0)):
     if p0.v.y == p1.v.y and p0.v.y == p2.v.y:return; #i dont care about degenerate triangles
     # sort the vertices, p0, p1, p2 lower-to-upper (bubblesort yay!)
     if (p0.v.y > p1.v.y): p0, p1 = p1, p0;
@@ -193,7 +163,7 @@ def drawTriangleSolid(buffer:frameBuffer, p0:vertex, p1:vertex, p2:vertex, color
              zx,xy = round(P.v.x), round(P.v.y);
              if buffer.zBuffer[zx, xy] < P.v.z:
                 buffer.zBuffer[zx, xy] = P.v.z;
-                colShading:float = MathUtils.clamp(0.0, 1.0, MathUtils.dot(P.n, vec3(0.333,0.333,0.333)));
+                colShading:float = MathUtils.clamp(0.0, 1.0, MathUtils.dot(P.n, vec3(0.333, 0.333, 0.333)));
                 buffer.setPixel(zx, xy, RGB(color.R * colShading, color.G * colShading, color.B * colShading));
 
 #отрисовка треугольника(интерполируется только глубина, нормали, барицентрические координаты) 
@@ -240,33 +210,57 @@ def drawTriangleShaded(buffer:frameBuffer, p0:vertex,  p1:vertex,  p2:vertex, ma
                 colShading:float = MathUtils.clamp(0.0, 1.0, MathUtils.dot(P.n, vec3(0.333,0.333,0.333)));
                 buffer.setPixel(zx, xy, RGB(col.R * colShading, col.G * colShading, col.B * colShading));
 
+# отрисовка вершин
+def drawVertices(buffer:frameBuffer, mesh:meshData, cam:camera = None, color:RGB = RGB(0, 0, 255)):
+        if cam == None:cam = camera();cam.lookAt(mesh.minWorldSpace, mesh.maxWorldSpace * 1.5);
+        for point in mesh.vertices:
+            v1 = pointToScrSpace(buffer, cam.toClipSpace(mesh.transformation.transformVect(point,1)));
+            # if buffer.zBuffer[v1.x,v1.y] > v1.z:return;
+            drawPoint(buffer, v1.x,v1.y, color, v1.z);
+
+# отрисовка ребер
+def drawEdges(buffer:frameBuffer, mesh:meshData, cam:camera = None, color:RGB = RGB(0, 0, 0)):
+        if cam == None:cam = camera();cam.lookAt(mesh.minWorldSpace, mesh.maxWorldSpace * 1.5);
+        # направление освещения совпадает с направлением взгляда камеры
+        forward = cam.front;
+        for f in mesh.faces:
+            v1 =pointToScrSpace(buffer, cam.toClipSpace(mesh.getVertWorldSpace(f.p_1)));
+            v2 =pointToScrSpace(buffer, cam.toClipSpace(mesh.getVertWorldSpace(f.p_2)));
+            v3 =pointToScrSpace(buffer, cam.toClipSpace(mesh.getVertWorldSpace(f.p_3)));
+            
+            n1 = (mesh.getNormalWorldSpace(f.n_1));
+            n2 = (mesh.getNormalWorldSpace(f.n_2));
+            n3 = (mesh.getNormalWorldSpace(f.n_3));
+
+            a =  -MathUtils.dot(n1, forward);
+            b =  -MathUtils.dot(n2, forward);
+            c =  -MathUtils.dot(n3, forward);
+
+            if a > 0 or b > 0:drawLineV4(buffer, v1.x, v1.y, v2.x, v2.y, color);
+            if a > 0 or c > 0:drawLineV4(buffer, v1.x, v1.y, v3.x, v3.y, color);
+            if b > 0 or c > 0:drawLineV4(buffer, v2.x, v2.y, v3.x, v3.y, color);
+
 # рисует полигональную сетку интерполируя только по глубине и заливает одним цветом
-def drawMeshSolidColor(buffer:frameBuffer, mesh:meshData, cam:camera = None, color:RGB = RGB(255, 255, 255)):
+def drawMeshSolidColor(buffer:frameBuffer, mesh:meshData, cam:camera = None, color:RGB = RGB(125, 125, 125)):
     # направление освещения совпадает с направлением взгляда камеры
     if cam == None: cam = camera(); cam.lookAt(mesh.minWorldSpace, mesh.maxWorldSpace * 1.5);
     forward = cam.front;
     uv = vec2(0,0);
     for f in mesh.faces:
         # переводим нормали вершин в мировое пространство
-        n1 = (mesh.getNormalWorldSpace(f.n_1));
-        n2 = (mesh.getNormalWorldSpace(f.n_2));
-        n3 = (mesh.getNormalWorldSpace(f.n_3));
-
-        a =  -MathUtils.dot(n1, forward);
-        b =  -MathUtils.dot(n2, forward);
-        c =  -MathUtils.dot(n3, forward);
-        col = (MathUtils.clamp(0.0, 1.0, a) + MathUtils.clamp(0.0, 1.0, b) + MathUtils.clamp(0.0, 1.0, c)) * 0.333333333;
-        # если скалярное произведение для всех нормалей на направление взгляда < 0, то не рисуем, тк
+        n1 = mesh.getNormalWorldSpace(f.n_1);
+        n2 = mesh.getNormalWorldSpace(f.n_2);
+        n3 = mesh.getNormalWorldSpace(f.n_3);
         # треугольник к нам задом(back-face culling)
-        if col < 0: return;
-      # перевоим точки в простраснтво отсечений камеры
+        if MathUtils.dot(n1, forward) > 0 and MathUtils.dot(n2, forward) > 0 and MathUtils.dot(n3, forward) > 0 : continue;
+        # перевоим точки в простраснтво отсечений камеры
         v1 = cam.toClipSpace(mesh.getVertWorldSpace(f.p_1));
         v2 = cam.toClipSpace(mesh.getVertWorldSpace(f.p_2));
         v3 = cam.toClipSpace(mesh.getVertWorldSpace(f.p_3));
         drawTriangleSolid(buffer,vertex(pointToScrSpace(buffer, v1), n1, uv),
                                  vertex(pointToScrSpace(buffer, v2), n2, uv),
                                  vertex(pointToScrSpace(buffer, v3), n3, uv),
-                                 RGB(color.R * col, color.G * col, color.B * col));
+                                 color);
 
 # рисует полигональную сетку интерполируя только по глубине и заливает одним цветом
 def drawMeshShaded(buffer:frameBuffer, mesh:meshData, mat:material, cam:camera = None):
@@ -280,15 +274,9 @@ def drawMeshShaded(buffer:frameBuffer, mesh:meshData, mat:material, cam:camera =
         n1 = (mesh.getNormalWorldSpace(f.n_1));
         n2 = (mesh.getNormalWorldSpace(f.n_2));
         n3 = (mesh.getNormalWorldSpace(f.n_3));
-
-        a =  -MathUtils.dot(n1, forward);
-        b =  -MathUtils.dot(n2, forward);
-        c =  -MathUtils.dot(n3, forward);
-        col = (MathUtils.clamp(0.0, 1.0, a) + MathUtils.clamp(0.0, 1.0, b) + MathUtils.clamp(0.0, 1.0, c)) * 0.333333333;
-        # если скалярное произведение для всех нормалей на направление взгляда < 0, то не рисуем, тк
         # треугольник к нам задом(back-face culling)
-        if col < 0: return;
-         # перевоим точки в простраснтво отсечений камеры
+        if MathUtils.dot(n1, forward) > 0 and MathUtils.dot(n2, forward) > 0 and MathUtils.dot(n3, forward) > 0 : continue;
+        # перевоим точки в простраснтво отсечений камеры
         v1 = cam.toClipSpace(mesh.getVertWorldSpace(f.p_1));
         v2 = cam.toClipSpace(mesh.getVertWorldSpace(f.p_2));
         v3 = cam.toClipSpace(mesh.getVertWorldSpace(f.p_3));

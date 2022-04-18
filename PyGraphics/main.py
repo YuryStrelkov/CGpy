@@ -6,20 +6,19 @@ from   MathUtils   import mat4,vec3,vec2;
 from   FrameBuffer import RGB,frameBuffer;
 import Graphics    as gr
 from   Material    import  material;
+import time
 import lab_4;
 if __name__ == '__main__':
-	frameBuffer = frameBuffer();
-	frameBuffer.clearColor(RGB(255,255,255))
-	mesh = meshData();
-	mesh.read("rabbit.obj");
+	fb = frameBuffer(1024,1024);
+	fb.clearColor(RGB(255,255,255))
+	mesh = meshData(); mesh.read("rabbit.obj");
 	#mesh.read("fox_unify_normals.obj");
 	mmat = material();
 	mmat.setDiff("checkerboard-rainbow_.jpg");
 	mmat.diffuse.tile = vec2(10,10);
 
-	gr.drawMeshSolidColor(frameBuffer, mesh); 
-	#gr.drawMeshShaded(frameBuffer, mesh, mmat); 
-	#gr.drawVertices  (frameBuffer,mesh);
-	#gr.drawEdges     (frameBuffer,mesh);
-	
-	frameBuffer.imshow();
+	#gr.drawMeshSolidColor(fb, mesh); 
+	gr.drawMeshShaded    (fb, mesh, mmat); 
+	#gr.drawVertices      (fb,mesh);
+	#gr.drawEdges         (fb,mesh);
+	fb.imshow();
