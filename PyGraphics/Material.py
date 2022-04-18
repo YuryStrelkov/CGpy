@@ -1,9 +1,9 @@
-import numpy as np;
-from   PIL import Image;
+import numpy       as np;
+from   PIL         import Image;
 from   FrameBuffer import RGB;
 import MathUtils 
-from   MathUtils import vec2, vec3;
-from   Transform import transform2;
+from   MathUtils   import vec2, vec3;
+from   Transform   import transform2;
 
 class texture(object):
     def __init__(self):

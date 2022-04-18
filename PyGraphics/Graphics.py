@@ -1,4 +1,4 @@
-import numpy as np
+import numpy       as np
 import MathUtils;
 from   MathUtils   import vec2,vec3,mat4
 from   Material    import material;
@@ -128,7 +128,7 @@ def drawVertices(buffer:frameBuffer, mesh:meshData, cam:camera = None, color:RGB
         if cam == None:cam = camera();cam.lookAt(mesh.minWorldSpace, mesh.maxWorldSpace * 1.5);
         for point in mesh.vertices:
             v1 = pointToScrSpace(buffer, cam.toClipSpace(mesh.transformation.transformVect(point,1)));
-            if buffer.zBuffer[v1.x,v1.y] > v1.z:return;
+            # if buffer.zBuffer[v1.x,v1.y] > v1.z:return;
             drawPoint(buffer, v1.x,v1.y, color, v1.z);
 
 # отрисовка ребер
@@ -154,21 +154,21 @@ def drawEdges(buffer:frameBuffer, mesh:meshData, cam:camera = None, color:RGB = 
             if b > 0 or c > 0:drawLineV4(buffer, v2.x, v2.y, v3.x, v3.y, color);
 
 #отрисовка одноцветного треугольника(интерполируется только глубина) 
-def drawTriangleSolid(buffer:frameBuffer, p0:vec3, p1:vec3, p2:vec3, color:RGB = RGB(0, 255, 0)):
-    if p0.y == p1.y and p0.y == p2.y:return; #i dont care about degenerate triangles
+def drawTriangleSolid(buffer:frameBuffer, p0:vertex, p1:vertex, p2:vertex, color:RGB = RGB(0, 255, 0)):
+    if p0.v.y == p1.v.y and p0.v.y == p2.v.y:return; #i dont care about degenerate triangles
     # sort the vertices, p0, p1, p2 lower-to-upper (bubblesort yay!)
-    if (p0.y > p1.y): p0, p1 = p1, p0;
-    if (p0.y > p2.y): p0, p2 = p2, p0;
-    if (p1.y > p2.y): p1, p2 = p2, p1;
+    if (p0.v.y > p1.v.y): p0, p1 = p1, p0;
+    if (p0.v.y > p2.v.y): p0, p2 = p2, p0;
+    if (p1.v.y > p2.v.y): p1, p2 = p2, p1;
     
-    total_height:int = round(p2.y - p0.y);
+    total_height:int = round(p2.v.y - p0.v.y);
     
     for i in xrange( 0, total_height):
-         second_half:bool = i > p1.y-p0.y or p1.y == p0.y;
+         second_half:bool = i > p1.v.y-p0.v.y or p1.v.y == p0.v.y;
          
-         segment_height:int = p1.y-p0.y;
+         segment_height:int = p1.v.y-p0.v.y;
          
-         if second_half:segment_height:int = p2.y-p1.y;
+         if second_half:segment_height:int = p2.v.y-p1.v.y;
         
          if segment_height==0:continue;
 
@@ -176,24 +176,25 @@ def drawTriangleSolid(buffer:frameBuffer, p0:vec3, p1:vec3, p2:vec3, color:RGB =
 
          beta:float   = 0;
 
-         if second_half: beta = float(i - (p1.y - p0.y))/segment_height;
+         if second_half: beta = float(i - (p1.v.y - p0.v.y))/segment_height;
          else:beta = float(i / segment_height)# be careful: with above conditions no division by zero her
 
-         A = p0 + (p2 - p0) * alpha;
+         A = lerpVertex(p0,p2,alpha);
          
-         if second_half: B = p1 + (p2 - p1)*beta;
-         else:B =  p0 + (p1 - p0)*beta;
+         if second_half: B = lerpVertex(p1,p2,beta);
+         else:B = lerpVertex(p0, p1, beta);
          
-         if (A.x > B.x): A, B = B, A;
-         for j in xrange(round(A.x),round(B.x)):
+         if (A.v.x > B.v.x): A, B = B, A;
+         for j in xrange(round(A.v.x),round(B.v.x)):
              phi:float = 0.0;
-             if B.x==A.x: phi = 1.0
-             else: phi = float(j-A.x)/float(B.x-A.x);
-             P:vec3  = A + (B - A) * phi;
-             zx,xy = round(P.x), round(P.y);
-             if buffer.zBuffer[zx, xy] < P.z:
-                buffer.zBuffer[zx, xy] = P.z;
-                buffer.setPixel(zx, xy, color);
+             if B.v.x==A.v.x: phi = 1.0
+             else: phi = float(j-A.v.x)/float(B.v.x-A.v.x);
+             P:vec3 = lerpVertex(A, B, phi);
+             zx,xy = round(P.v.x), round(P.v.y);
+             if buffer.zBuffer[zx, xy] < P.v.z:
+                buffer.zBuffer[zx, xy] = P.v.z;
+                colShading:float = MathUtils.clamp(0.0, 1.0, MathUtils.dot(P.n, vec3(0.333,0.333,0.333)));
+                buffer.setPixel(zx, xy, RGB(color.R * colShading, color.G * colShading, color.B * colShading));
 
 #отрисовка треугольника(интерполируется только глубина, нормали, барицентрические координаты) 
 def drawTriangleShaded(buffer:frameBuffer, p0:vertex,  p1:vertex,  p2:vertex, mat:material): #позиции(в прострастве экрана) вершин треугольника
@@ -244,6 +245,7 @@ def drawMeshSolidColor(buffer:frameBuffer, mesh:meshData, cam:camera = None, col
     # направление освещения совпадает с направлением взгляда камеры
     if cam == None: cam = camera(); cam.lookAt(mesh.minWorldSpace, mesh.maxWorldSpace * 1.5);
     forward = cam.front;
+    uv = vec2(0,0);
     for f in mesh.faces:
         # переводим нормали вершин в мировое пространство
         n1 = (mesh.getNormalWorldSpace(f.n_1));
@@ -261,9 +263,9 @@ def drawMeshSolidColor(buffer:frameBuffer, mesh:meshData, cam:camera = None, col
         v1 = cam.toClipSpace(mesh.getVertWorldSpace(f.p_1));
         v2 = cam.toClipSpace(mesh.getVertWorldSpace(f.p_2));
         v3 = cam.toClipSpace(mesh.getVertWorldSpace(f.p_3));
-        drawTriangleSolid(buffer,pointToScrSpace(buffer, v1),
-                                 pointToScrSpace(buffer, v2),
-                                 pointToScrSpace(buffer, v3),
+        drawTriangleSolid(buffer,vertex(pointToScrSpace(buffer, v1), n1, uv),
+                                 vertex(pointToScrSpace(buffer, v2), n2, uv),
+                                 vertex(pointToScrSpace(buffer, v3), n3, uv),
                                  RGB(color.R * col, color.G * col, color.B * col));
 
 # рисует полигональную сетку интерполируя только по глубине и заливает одним цветом

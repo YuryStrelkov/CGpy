@@ -17,8 +17,9 @@ if __name__ == '__main__':
 	mmat.setDiff("checkerboard-rainbow_.jpg");
 	mmat.diffuse.tile = vec2(10,10);
 
-	#gr.drawMeshSolidColor(frameBuffer, mesh); 
-	gr.drawMeshShaded(frameBuffer, mesh, mmat); 
-	#gr.drawVertices(frameBuffer,mesh);
-	#gr.drawEdges   (frameBuffer,mesh);
+	gr.drawMeshSolidColor(frameBuffer, mesh); 
+	#gr.drawMeshShaded(frameBuffer, mesh, mmat); 
+	#gr.drawVertices  (frameBuffer,mesh);
+	#gr.drawEdges     (frameBuffer,mesh);
+	
 	frameBuffer.imshow();

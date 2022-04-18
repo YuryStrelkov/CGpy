@@ -1,5 +1,5 @@
-import numpy as np
-from PIL import Image
+import numpy as     np
+from   PIL   import Image
 
 class RGB(object):
     def __init__(self):self.rgb:np.uint8 = [255, 255, 255];

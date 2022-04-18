@@ -1,6 +1,6 @@
-import numpy as np
-from PIL import Image
-from typing import Optional, Tuple, Union
+import numpy  as     np
+from   PIL    import Image
+from   typing import Optional, Tuple, Union
 
 
 def workWithImage(width, height):
