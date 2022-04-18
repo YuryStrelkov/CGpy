@@ -10,27 +10,6 @@ class transform(object):
                                  0.0, 0.0, 1.0, 0.0,
                                  0.0, 0.0, 0.0, 1.0);  
          self.eulerAngles = vec3(0.0,0.0,0.0);
-     # переводит вектор в собственное пространство координат
-     def transformVect(self, vec:vec3, w)->vec3:
-         if w == 0:
-             return vec3(self.transformM.m00 * vec.x + self.transformM.m01 * vec.y + self.transformM.m02 * vec.z,
-                         self.transformM.m10 * vec.x + self.transformM.m11 * vec.y + self.transformM.m12 * vec.z,
-                         self.transformM.m20 * vec.x + self.transformM.m21 * vec.y + self.transformM.m22 * vec.z);
-         
-         return vec3(self.transformM.m00 * vec.x + self.transformM.m01 * vec.y + self.transformM.m02 * vec.z + self.transformM.m03,
-                     self.transformM.m10 * vec.x + self.transformM.m11 * vec.y + self.transformM.m12 * vec.z + self.transformM.m13,
-                     self.transformM.m20 * vec.x + self.transformM.m21 * vec.y + self.transformM.m22 * vec.z + self.transformM.m23);
-     # не переводит вектор в собственное пространство координат =)
-     def invTransformVect(self, vec:vec3, w)->vec3:
-         if w == 0:
-             return vec3(self.transformM.m00 * vec.x + self.transformM.m10 * vec.y + self.transformM.m20 * vec.z,
-                         self.transformM.m01 * vec.x + self.transformM.m11 * vec.y + self.transformM.m21 * vec.z,
-                         self.transformM.m02 * vec.x + self.transformM.m12 * vec.y + self.transformM.m22 * vec.z);
-        
-         vec_ = vec3(vec.x - self.x, vec.y - self.y, vec.z -self.z);
-         return vec3(self.transformM.m00 * vec_.x + self.transformM.m10 * vec_.y + self.transformM.m20 * vec_.z,
-                     self.transformM.m01 * vec_.x + self.transformM.m11 * vec_.y + self.transformM.m21 * vec_.z,
-                     self.transformM.m02 * vec_.x + self.transformM.m12 * vec_.y + self.transformM.m22 * vec_.z) 
 
      @property
      def front(self)->vec3:return vec3(self.transformM.m02,
@@ -53,7 +32,7 @@ class transform(object):
         x =  self.transformM.m00;
         y =  self.transformM.m10;
         z =  self.transformM.m20;
-        return np.sqrt(x * x+ y * y + z * z);
+        return np.sqrt(x * x + y * y + z * z);
      #масштаб по Y
      @property
      def sy(self)->float:
@@ -141,11 +120,11 @@ class transform(object):
          i = MathUtils.mul(i, MathUtils.rotY(xyz.y));
          i = MathUtils.mul(i, MathUtils.rotZ(xyz.z));
 
-         scl  = self.Scale;
-         orig = self.Origin;
+         scl  = self.scale;
+         orig = self.origin;
          self.transformM = i;
-         self.Scale = scl;
-         self.Origin = orig;
+         self.scale = scl;
+         self.origin = orig;
 
      @property
      def ax(self)->float:return self.eulerAngles.x;
@@ -175,6 +154,30 @@ class transform(object):
      def lookAt(self, target:vec3, eye:vec3, up:vec3 = vec3(0,1,0)):
          self.transformM  = MathUtils.lookAt(target,eye,up);
          self.eulerAngles = MathUtils.rotMtoEulerAngles(self.rotM());
+
+     # переводит вектор в собственное пространство координат
+     def transformVect(self, vec:vec3, w)->vec3:
+         if w == 0:
+             return vec3(self.transformM.m00 * vec.x + self.transformM.m01 * vec.y + self.transformM.m02 * vec.z,
+                         self.transformM.m10 * vec.x + self.transformM.m11 * vec.y + self.transformM.m12 * vec.z,
+                         self.transformM.m20 * vec.x + self.transformM.m21 * vec.y + self.transformM.m22 * vec.z);
+         
+         return vec3(self.transformM.m00 * vec.x + self.transformM.m01 * vec.y + self.transformM.m02 * vec.z + self.transformM.m03,
+                     self.transformM.m10 * vec.x + self.transformM.m11 * vec.y + self.transformM.m12 * vec.z + self.transformM.m13,
+                     self.transformM.m20 * vec.x + self.transformM.m21 * vec.y + self.transformM.m22 * vec.z + self.transformM.m23);
+     # не переводит вектор в собственное пространство координат =)
+     def invTransformVect(self, vec:vec3, w)->vec3:
+         if w == 0:
+             return vec3(self.transformM.m00 * vec.x + self.transformM.m10 * vec.y + self.transformM.m20 * vec.z,
+                         self.transformM.m01 * vec.x + self.transformM.m11 * vec.y + self.transformM.m21 * vec.z,
+                         self.transformM.m02 * vec.x + self.transformM.m12 * vec.y + self.transformM.m22 * vec.z);
+        
+         vec_ = vec3(vec.x - self.x, vec.y - self.y, vec.z -self.z);
+         return vec3(self.transformM.m00 * vec_.x + self.transformM.m10 * vec_.y + self.transformM.m20 * vec_.z,
+                     self.transformM.m01 * vec_.x + self.transformM.m11 * vec_.y + self.transformM.m21 * vec_.z,
+                     self.transformM.m02 * vec_.x + self.transformM.m12 * vec_.y + self.transformM.m22 * vec_.z) 
+
+
 #row major 2D transform
 class transform2(object):
      def __init__(self):
@@ -182,23 +185,6 @@ class transform2(object):
                                  0.0, 1.0, 0.0,
                                  0.0, 0.0, 1.0);  
          self.zAngle = 0.0;
-     # переводит вектор в собственное пространство координат
-     def transformVect(self, vec:vec2, w)->vec2:
-         if w == 0:
-             return vec2(self.transformM.m00 * vec.x + self.transformM.m01 * vec.y,
-                         self.transformM.m10 * vec.x + self.transformM.m11 * vec.y);
-         
-         return vec2(self.transformM.m00 * vec.x + self.transformM.m01 * vec.y + self.transformM.m02,
-                     self.transformM.m10 * vec.x + self.transformM.m11 * vec.y + self.transformM.m12);
-     # не переводит вектор в собственное пространство координат =)
-     def invTransformVect(self, vec:vec3, w)->vec3:
-         if w == 0:
-             return vec2(self.transformM.m00 * vec.x + self.transformM.m10 * vec.y,
-                         self.transformM.m01 * vec.x + self.transformM.m11 * vec.y);
-        
-         vec_ = vec2(vec.x - self.getX(),vec.y - self.getY());
-         return vec2(self.transformM.m00 * vec.x + self.transformM.m10 * vec.y,
-                     self.transformM.m01 * vec.x + self.transformM.m11 * vec.y);
 
      @property
      def front(self)->vec2:return vec2(self.transformM.m00,self.transformM.m10);
@@ -268,8 +254,27 @@ class transform2(object):
          rz = mat3(cos_a,-sin_a, 0,
                    sin_a, cos_a, 0,
                    0,     0,     1);
-         scl  = self.getScale();
-         orig = self.getOrigin();
+         scl  = self.scale();
+         orig = self.origin();
          self.transformM = rz;
-         self.setScale(scl.x,scl.y);
-         self.setOrigin(orig.x,orig.y);
+         self.scale = scl;
+         self.origin = orig;
+     
+     # переводит вектор в собственное пространство координат
+     def transformVect(self, vec:vec2, w)->vec2:
+         if w == 0:
+             return vec2(self.transformM.m00 * vec.x + self.transformM.m01 * vec.y,
+                         self.transformM.m10 * vec.x + self.transformM.m11 * vec.y);
+         
+         return vec2(self.transformM.m00 * vec.x + self.transformM.m01 * vec.y + self.transformM.m02,
+                     self.transformM.m10 * vec.x + self.transformM.m11 * vec.y + self.transformM.m12);
+   
+     # не переводит вектор в собственное пространство координат =)
+     def invTransformVect(self, vec:vec3, w)->vec3:
+         if w == 0:
+             return vec2(self.transformM.m00 * vec.x + self.transformM.m10 * vec.y,
+                         self.transformM.m01 * vec.x + self.transformM.m11 * vec.y);
+        
+         vec_ = vec2(vec.x - self.x,vec.y - self.y);
+         return vec2(self.transformM.m00 * vec.x + self.transformM.m10 * vec.y,
+                     self.transformM.m01 * vec.x + self.transformM.m11 * vec.y);

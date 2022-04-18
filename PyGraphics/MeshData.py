@@ -1,4 +1,3 @@
-import numpy;
 from   Transform import transform;
 from   MathUtils import vec3, vec2;
 class face:
