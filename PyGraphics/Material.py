@@ -76,9 +76,11 @@ class material(object):
     def diffColor(self, uv:vec2)->RGB:
         if self.diffuse == None: return RGB(255,255,255);
         return self.diffuse.getColor (uv);
+
     def normColor(self, uv:vec2)->RGB:
         if self.normals == None: return RGB(255,255,255);
         return self.normals.getColor (uv);
+
     def specColor(self, uv:vec2)->RGB:
         if self.specular == None: return RGB(255,255,255);
         return self.specular.getColor(uv);

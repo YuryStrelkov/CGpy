@@ -23,10 +23,10 @@ class RGB(object):
 
 class frameBuffer(object):
     def __init__(self, w:int, h:int):
-        self.width:int = w;
-        self.height:int = h;
+        self.width:int    = w;
+        self.height:int   = h;
         self.channels:int = 3;
-        self.pixelsN:int = self.width * self.height;
+        self.pixelsN:int  = self.width * self.height;
         self.clearColor();
         self.clearDepth();
 
@@ -35,8 +35,7 @@ class frameBuffer(object):
          self.img_arr = np.full((self.height, self.width, self.channels),(color.R,color.G,color.B), dtype = np.uint8)
 
     # инициализация z буфера
-    def clearDepth(self):
-          self.zBuffer = np.full((self.height, self.width), -np.inf)
+    def clearDepth(self):self.zBuffer = np.full((self.height, self.width), -np.inf)
 
     # установка значения цвета пиксела кортежем (tuple) из трех значений R, G, B или одним значением,
     # если изображение одноканальное (полутоновое)
@@ -48,6 +47,7 @@ class frameBuffer(object):
         self.img_arr[y,x,0] = color.R;
         self.img_arr[y,x,1] = color.G;
         self.img_arr[y,x,2] = color.B;
+   
     def setDepth(self, x: int, y: int, depth:float):
         if x < 0:return;
         if x >= self.width:return;

@@ -32,11 +32,13 @@ class vec2(object):
 
     @property 
     def x(self)->float:return self.xy[0];
+ 
     @property 
     def y(self)->float:return self.xy[1];
 
     @x.setter 
     def x(self,x_:float):self.xy[0] = x_;
+
     @y.setter 
     def y(self,y_:float):self.xy[1] = y_;
 
@@ -44,19 +46,25 @@ def dot(a:vec2, b:vec2)-> float:return a.x * b.x + a.y * b.y;
 
 class vec3(object):
     def __init__(self):self.xyz:float = [0, 0, 0];
+
     def __init__(self, x:float, y:float, z:float):self.xyz:float = [x, y, z];
+
     def norm(self)->float:return np.sqrt(self.xyz[0] * self.xyz[0] + self.xyz[1] * self.xyz[1] + self.xyz[2] * self.xyz[2]);
     
     def __repr__(self):return "<vec3 x:%s y:%s z:%s>" % (self.xyz[0], self.xyz[1], self.xyz[2]);
+
     def __str__(self):return "[%s, %s, %s]" % (self.xyz[0], self.xyz[1], self.xyz[2]);
 
     def __add__(self, other):return vec3(self.x + other.x, self.y + other.y, self.z + other.z);
+
     def __sub__(self, other):return vec3(self.x - other.x, self.y - other.y, self.z - other.z);
 
     def __mul__(self, other):return vec3(self.x * other.x,self.y * other.y, self.z / other.z);
+
     def __truediv__(self, other):return vec3(self.x / other.x,self.y / other.y, self.z / other.z);
     
     def __mul__(self, other:float):return vec3(self.x * other, self.y * other, self.z * other);
+
     def __truediv__(self, other:float):return vec3(self.x / other,self.y / other,self.z / other);
 
     def normalize(self):
@@ -68,15 +76,19 @@ class vec3(object):
 
     @property 
     def x(self)->float:return self.xyz[0];
+
     @property 
     def y(self)->float:return self.xyz[1];
+
     @property 
     def z(self)->float:return self.xyz[2];
 
     @x.setter 
     def x(self,x:float):self.xyz[0] = x;
+
     @y.setter 
     def y(self,y:float):self.xyz[1] = y;
+
     @z.setter 
     def z(self,z:float):self.xyz[2] = z;
 
@@ -89,8 +101,7 @@ class mat3(object):
 
     def __init__(self,m0, m1, m2,
                       m3, m4, m5,
-                      m6, m7, m8):
-        self.data:float = [m0, m1, m2, m3, m4, m5, m6, m7, m8];
+                      m6, m7, m8):self.data:float = [m0, m1, m2, m3, m4, m5, m6, m7, m8];
     
     def __getitem__(self, key:int)->float:return self.data[key];
 
@@ -112,22 +123,26 @@ class mat3(object):
     # row 1 set/get
     @property 
     def m00(self)->float:return self.data[0];
+
     @m00.setter 
     def m00(self,val:float):self.data[0] = val;
 
     @property 
     def m01(self)->float:return self.data[1];
+
     @m01.setter 
     def m01(self,val:float):self.data[1] = val;
 
     @property 
     def m02(self)->float:return self.data[2];
+
     @m02.setter 
     def m02(self,val:float):self.data[2] = val;
     
     # row 2 set/get
     @property 
     def m10(self)->float:return self.data[3];
+
     @m10.setter 
     def m10(self,val:float):self.data[3] = val;
    
@@ -138,21 +153,25 @@ class mat3(object):
 
     @property 
     def m12(self)->float:return self.data[5];
+
     @m12.setter 
     def m12(self,val:float):self.data[5] = val;
     # row 3 set/get
     @property 
     def m20(self)->float:return self.data[6];
+
     @m20.setter 
     def m20(self,val:float):self.data[6] = val;
 
     @property 
     def m21(self)->float:return self.data[7];
+
     @m21.setter 
     def m21(self,val:float):self.data[7] = val;
     
     @property 
     def m22(self)->float:return self.data[8];
+
     @m22.setter 
     def m22(self,val:float):self.data[8] = val;
 
@@ -209,82 +228,98 @@ class mat4(object):
     # row 1 set/get
     @property 
     def m00(self)->float:return self.data[0];
+
     @m00.setter 
     def m00(self,val:float):self.data[0] = val;
 
     @property 
     def m01(self)->float:return self.data[1];
+
     @m01.setter 
     def m01(self,val:float):self.data[1] = val;
 
     @property 
     def m02(self)->float:return self.data[2];
+
     @m02.setter 
     def m02(self,val:float):self.data[2] = val;
 
     @property 
     def m03(self)->float:return self.data[3];
+
     @m03.setter 
     def m03(self,val:float):self.data[3] = val;
     # row 2 set/get
     @property 
     def m10(self)->float:return self.data[4];
+
     @m10.setter 
     def m10(self,val:float):self.data[4] = val;
 
     @property 
     def m11(self)->float:return self.data[5];
+
     @m11.setter 
     def m11(self,val:float):self.data[5] = val;
 
     @property 
     def m12(self)->float:return self.data[6];
+
     @m12.setter 
     def m12(self,val:float):self.data[6] = val;
 
     @property 
     def m13(self)->float:return self.data[7];
+
     @m13.setter 
     def m13(self,val:float):self.data[7] = val;
 
     # row 3 set/get
     @property 
     def m20(self)->float:return self.data[8];
+
     @m20.setter 
     def m20(self,val:float):self.data[8] = val;
 
     @property 
     def m21(self)->float:return self.data[9];
+
     @m21.setter 
     def m21(self,val:float):self.data[9] = val;
 
     @property 
     def m22(self)->float:return self.data[10];
+
     @m22.setter 
     def m22(self,val:float):self.data[10] = val;
 
     @property 
     def m23(self)->float:return self.data[11];
+
     @m23.setter 
     def m23(self,val:float):self.data[11] = val;
     # row 4 set/get
     @property 
     def m30(self)->float:return self.data[12];
+
     @m30.setter 
     def m30(self,val:float):self.data[12] = val;
 
     @property 
     def m31(self)->float:return self.data[13];
+
     @m31.setter 
     def m31(self,val:float):self.data[13] = val;
 
     @property 
     def m32(self)->float:return self.data[14];
+
     @m32.setter 
     def m32(self,val:float):self.data[14] = val;
 
     @property 
     def m33(self)->float:return self.data[15];
+
     @m33.setter 
     def m33(self,val:float):self.data[15] = val;
 
@@ -333,17 +368,17 @@ def rotZ(angle:float)-> mat4:
                 0,     0,     1, 0,
                 0,     0,     0, 1);
 
-def degToRad(deg:float)->float:return deg / 180.0 * 3.141592653589793238462;
+def degToRad(deg:float)->float:return deg / 180.0 * np.pi;
 
-def radToGeg(deg:float)->float:return deg / 3.141592653589793238462 * 180.0;
+def radToGeg(deg:float)->float:return deg / np.pi * 180.0;
 
 def rotMtoEulerAngles(rot:mat4)-> vec3:
-         if rot.m02 + 1 < 1e-6:return vec3(0,3.141592653589793238462 * 0.5, math.atan2(rot.m10, rot.m20))
+         if rot.m02 + 1 < 1e-6:return vec3(0,np.pi * 0.5, math.atan2(rot.m10, rot.m20))
 
-         if rot.m02 - 1 < 1e-6:return vec3(0, -3.141592653589793238462 * 0.5, math.atan2(-rot.m10, -rot.m20))
+         if rot.m02 - 1 < 1e-6:return vec3(0, -np.pi2 * 0.5, math.atan2(-rot.m10, -rot.m20))
 
          x1 = -asin(rot.z);
-         x2 = 3.141592653589793238462 - x1;
+         x2 = np.pi - x1;
          y1 = math.atan2(rot.m12 / cos(x1), rot.m22 / cos(x1));
          y2 = math.atan2(rot.m12 / cos(x2), rot.m22 / cos(x2));
          z1 = math.atan2(rot.m01 / cos(x1), rot.m00 / cos(x1));

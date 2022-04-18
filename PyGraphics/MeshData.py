@@ -11,6 +11,7 @@ class face:
         self.p_3: int = -1;
         self.uv3: int = -1;
         self.n_3: int = -1;
+
     def __repr__(self):
         res:str = "<face ";
         res+="%s/%s/%s "%(self.p_1,self.uv1,self.n_1);
@@ -18,6 +19,7 @@ class face:
         res+="%s/%s/%s"%(self.p_3,self.uv3,self.n_3);
         res+=">"
         return res;
+
     def __str__(self):
         res:str = "f [";
         res+="%s/%s/%s "%(self.p_1,self.uv1,self.n_1);

@@ -11,6 +11,7 @@ class camera(object):
          self.fov = 60;
          self.aspect = 1;
          self.buildPjojection();
+
      #Строит матрицу перспективного искажения
      def buildPjojection(self):
          self.projection = mat4(1, 0, 0, 0,
@@ -24,19 +25,25 @@ class camera(object):
          self.projection.m32 = -self.zfar * self.znear / (self.zfar - self.znear); # used to remap z [0,1] 
          self.projection.m23 = -1; # set w = -z 
          self.projection.m33 = 0; 
+
      #ось Z системы координат камеры 
      @property
      def front(self)->vec3:return self.lookAtTransform.front;
+
      #ось Y системы координат камеры 
      @property
      def up(self)->vec3:return self.lookAtTransform.up;
+
      #ось Z системы координат камеры 
      @property
      def right(self)->vec3:return self.lookAtTransform.right;
+
      #Cтроит матрицу вида
      def lookAt(self, target:vec3, eye:vec3, up:vec3 = vec3(0,1,0)):self.lookAtTransform.lookAt(target, eye, up);
+
      #Переводит точку в пространстве в собственную систему координат камеры 
      def toCameraSpace(self, v:vec3)->vec3:return self.lookAtTransform.invTransformVect(v,1);
+
      #Переводит точку в пространстве сперва в собственную систему координат камеры,
      #а после в пространство перспективной проекции
      def toClipSpace(self, vect:vec3)->vec3:

@@ -33,11 +33,6 @@ def xrange(start, stop=None, step=1):
         start += step
 
 def lerpVertex(a:vertex ,b:vertex ,val:float)->vertex:return a + (b - a) * val;
-# барицентрические координаты
-def baricentric(self, x, y, x0, x1, x2, y0, y1, y2):
-    return np.array([((x1 - x2) * (y - y2) - (y1 - y2) * (x - x2)) / ((x1 - x2) * (y0 - y2) - (y1 - y2) * (x0 - x2)),
-                     ((x2 - x0) * (y - y0) - (y2 - y0) * (x - x0)) / ((x2 - x0) * (y1 - y0) - (y2 - y0) * (x1 - x0)),
-                     ((x0 - x1) * (y - y1) - (y0 - y1) * (x - x1)) / ((x0 - x1) * (y2 - y1) - (y0 - y1) * (x2 - x1))])
 
 # рисование линии, первый вариант алгоритма
 def drawLineV1(buffer:frameBuffer, x0: int, y0: int, x1: int, y1: int, color:RGB = RGB(255, 255, 255), dt:float = 0.01):
