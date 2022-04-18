@@ -9,16 +9,18 @@ from   Material    import  material;
 import time
 import lab_4;
 if __name__ == '__main__':
-	fb = frameBuffer(1024,1024);
-	fb.clearColor(RGB(255,255,255))
-	mesh = meshData(); mesh.read("rabbit.obj");
+	lab_4.lab4();
+
+	#fb = frameBuffer(1024,1024);
+	#fb.clearColor(RGB(255,255,255))
+	#mesh = meshData(); mesh.read("rabbit.obj");
 	#mesh.read("fox_unify_normals.obj");
-	mmat = material();
-	mmat.setDiff("checkerboard-rainbow_.jpg");
-	mmat.diffuse.tile = vec2(10,10);
+	#mmat = material();
+	#mmat.setDiff("checkerboard-rainbow_.jpg");
+	#mmat.diffuse.tile = vec2(10,10);
 
 	#gr.drawMeshSolidColor(fb, mesh); 
-	gr.drawMeshShaded    (fb, mesh, mmat); 
+	#gr.drawMeshShaded    (fb, mesh, mmat); 
 	#gr.drawVertices      (fb,mesh);
 	#gr.drawEdges         (fb,mesh);
-	fb.imshow();
+	#fb.imshow();

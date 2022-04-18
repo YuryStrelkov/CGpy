@@ -143,7 +143,7 @@ class MyImage:
         self.r: Optional[np.ndarray] = None
 
     # инициализация массива методом библиотеки numpy
-    def arr_init(self):self.img_arr = np.zeros((self.height, self.width, self.channels), dtype=np.uint8)
+    def arr_init(self):self.img_arr =  np.full((self.height, self.width,self.channels), 200, dtype = np.uint8);#np.zeros((self.height, self.width, self.channels), dtype=np.uint8)
 
         # инициализация z буфера
 
@@ -371,11 +371,9 @@ class MyImage:
         v1_p = self.projective(v1)
         v2_p = self.projective(v2)
         v3_p = self.projective(v3)
-
         #v1n = self.projective(v1n)
         #v2n = self.projective(v2n)
         #v3n = self.projective(v3n)
-
         x0 = v1_p[0] / v1_p[2]
         y0 = v1_p[1] / v1_p[2]
         x1 = v2_p[0] / v2_p[2]
@@ -388,15 +386,24 @@ class MyImage:
         xmax = self.clamp(0,self.width  - 1, max(x0, x1, x2))
         ymax = self.clamp(0,self.height - 1, max(y0, y1, y2))
 
-        for i in range(int(xmin), int(xmax) ):
-            for j in range(int(ymin), int(ymax) ):
-                bar0, bar1, bar2 = self.baricentr(i, j, x0, x1, x2, y0, y1, y2)
+        l1 = (self.lights(v1n))
+        l2 = (self.lights(v2n))
+        l3 = (self.lights(v3n))
+        
+        #if l1 < 0 and l2 < 0 and l3 < 0: return;
+        bar_div_1 = (x1 - x2) * (y0 - y2) - (y1 - y2) * (x0 - x2);
+        bar_div_2 = (x2 - x0) * (y1 - y0) - (y2 - y0) * (x1 - x0);
+        bar_div_2 = (x0 - x1) * (y2 - y1) - (y0 - y1) * (x2 - x1);
+
+        for i in range(round(xmin), round(xmax)):
+            for j in range(round(ymin), round(ymax) ):
+                #bar0, bar1, bar2 = self.baricentr(i, j, x0, x1, x2, y0, y1, y2)
+                bar0 = ((x1 - x2) * (j - y2) - (y1 - y2) * (i - x2)) / bar_div_1;
+                bar1 = ((x2 - x0) * (j - y0) - (y2 - y0) * (i - x0)) / bar_div_2;
+                bar2 = ((x0 - x1) * (j - y1) - (y0 - y1) * (i - x1)) / bar_div_2;
                 if bar0 > 0 and bar1 > 0 and bar2 > 0:
                     z = bar0 * v1[2] + bar1 * v2[2] + bar2 * v3[2]
-                    l1 = abs(self.lights(v1n))
-                    l2 = abs(self.lights(v2n))
-                    l3 = abs(self.lights(v3n))
-                    color = int(255 * (bar0 * l1 + bar1 * l2 + bar2 * l3))
+                    color = int(255 * (self.clamp(0.0, 1.0, bar0 * l1 + bar1 * l2 + bar2 * l3)))
                     if z > self.zBuffer[i][j]:
                         self.set_pixel(i, j, color)
                         self.zBuffer[i][j] = z
@@ -404,16 +411,16 @@ class MyImage:
 
 def lab4():
     model = OBJ3DModel()
-    model.read("fox.obj")
+    model.read("rabbit.obj")
     model.wrirte(); 
     result = MyImage(model)
     result.arr_init()
     result.zBuffer_init()
     result.init_R(0, 0, 0)
-    result.draw_trim_polygons()
     # лиса
-    # self.t = np.array([0.005, -0.045, 1000])
-    # self.k = np.array([[5000, 0, 500], [0, 5000, 500], [0, 0, 1]])
+    #result.t = np.array([0.005, -0.045, 1000])
+    #result.k = np.array([[5000, 0, 500], [0, 5000, 500], [0, 0, 1]])
+    result.draw_trim_polygons()
 
     result.imshow()
 
