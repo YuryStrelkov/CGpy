@@ -375,7 +375,7 @@ def radToGeg(deg:float)->float:return deg / np.pi * 180.0;
 def rotMtoEulerAngles(rot:mat4)-> vec3:
          if rot.m02 + 1 < 1e-6:return vec3(0,np.pi * 0.5, math.atan2(rot.m10, rot.m20))
 
-         if rot.m02 - 1 < 1e-6:return vec3(0, -np.pi2 * 0.5, math.atan2(-rot.m10, -rot.m20))
+         if rot.m02 - 1 < 1e-6:return vec3(0, -np.pi * 0.5, math.atan2(-rot.m10, -rot.m20))
 
          x1 = -asin(rot.z);
          x2 = np.pi - x1;

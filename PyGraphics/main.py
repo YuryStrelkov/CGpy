@@ -8,6 +8,8 @@ import Graphics    as gr
 from   Material    import  material;
 import time
 import lab_4;
+from   PIL         import Image;
+
 if __name__ == '__main__':
 	
 	fb = frameBuffer(1024,1024);
@@ -17,9 +19,12 @@ if __name__ == '__main__':
 	mmat = material();
 	mmat.setDiff("checkerboard-rainbow_.jpg");
 	mmat.diffuse.tile = vec2(10,10);
-
+	start = time.time()
 	#gr.drawMeshSolidColor(fb, mesh); 
-	gr.drawMeshShaded    (fb, mesh, mmat); 
-	#gr.drawVertices      (fb,mesh);
-	#gr.drawEdges         (fb,mesh);
+	gr.drawMeshShaded     (fb, mesh, mmat); 
+	end = time.time()
+	print(end - start)
+	#gr.drawVertices       (fb,mesh);
+	#gr.drawEdges          (fb,mesh);
 	fb.imshow();
+	#mmat.diffuse.show();

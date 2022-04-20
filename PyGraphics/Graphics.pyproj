@@ -33,6 +33,9 @@
     <Compile Include="lab_4.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Light.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="main.py" />
     <Compile Include="Material.py">
       <SubType>Code</SubType>

@@ -1,6 +1,7 @@
-import numpy as np;
-from   Transform import transform;
-from   MathUtils import vec3, vec2, mat4;
+import numpy       as np;
+from   Transform   import transform;
+from   MathUtils   import vec3, vec2, mat4;
+from   FrameBuffer import frameBuffer;
 # определяет направление и положение с которого мы смотрим на 3D сцену
 # определяет так же перспективное искажение
 class camera(object):
@@ -55,4 +56,9 @@ class camera(object):
              if w != 1: # normalize if w is different than 1 (convert from homogeneous to Cartesian coordinates)
                 out.x /= w; out.y /= w; out.z /= w;
              return out;
-
+def renderCamera(fb:frameBuffer, lookAt:vec3, eye:vec3)->camera:
+    cam = camera();
+    cam.aspect =  float(fb.height) / fb.width;
+    cam.lookAt(lookAt, eye);
+    cam.buildPjojection();
+    return cam;
