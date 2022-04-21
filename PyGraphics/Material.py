@@ -66,6 +66,11 @@ class texture(object):
     @rotation.setter 
     def rotation(self, angle:float):self.transform.az = MathUtils.degToRad(angle);
 
+    @property
+    def imageData(self)->Image:
+        if self.bpp == 3:return Image.frombytes('RGB', (self.width, self.height), self.colors);
+        if self.bpp == 4:return Image.frombytes('RGBA',(self.width, self.height), self.colors);
+
     def load(self, origin:str):
         if not(len(self.colors) == 0):del(self.colors); self.width_ =-1; self.height_ = -1; self.bpp_ = 0;
         im = Image.open(origin);
@@ -108,8 +113,7 @@ class texture(object):
         return RGB(self.colors[pix],self.colors[pix + 1],self.colors[pix + 2]);
 
     def show(self):
-        if self.bpp == 3:img = Image.frombytes('RGB', (self.width, self.height), self.colors);img.show();return;
-        if self.bpp == 4:img = Image.frombytes('RGBA',(self.width, self.height), self.colors);img.show();return;
+        self.imageData.show();
 
     def clearColor(self, color: RGB = RGB(125,125,125)):
         if self.textureByteSize == 0:return;

@@ -46,6 +46,9 @@
     <Compile Include="MeshData.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="RenderGui.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Transform.py">
       <SubType>Code</SubType>
     </Compile>

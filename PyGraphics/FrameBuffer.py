@@ -33,7 +33,6 @@ class frameBuffer(object):
             return False;
         if self.zBuffer[pix] > depth:
             return False;
-
         self.zBuffer[pix] = depth;
         return True;
 
@@ -42,6 +41,9 @@ class frameBuffer(object):
     def save(self, path: str):
         im = Image.fromarray(self.img_arr, mode="RGB")
         im.save(path, mode="RGB")
+    @property
+    def frameBufferImage(self)->Image:
+        return self.colorTexture.imageData;
     # конвертация массива в объект класса Image библиотеки Pillow и вывод на экран
     # см. https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.show
     def imshow(self):

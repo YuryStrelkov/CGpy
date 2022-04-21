@@ -7,6 +7,12 @@ from   Camera      import camera
 from   FrameBuffer import frameBuffer
 from   FrameBuffer import RGB
 from   MeshData    import meshData;
+import tkinter as tk
+from   PIL import ImageTk, Image
+
+
+
+
 class vertex(object):
     def __init__(self,v_:vec3,n_:vec3,uv_:vec2):
         self.v: vec3 = v_;
@@ -84,9 +90,42 @@ def drawLineV4(buffer:frameBuffer, x0: int, y0: int, x1: int, y1: int, color: RG
             if error > 0.5:
                 y += 1 if y1 > y0 else -1
                 error -= 1
+# рисование линии, четвертый вариант алгоритма (алгоримтм Брезенхема)
+def drawLineV5(buffer:frameBuffer, x0: int, y0: int, depth0: float,
+                                   x1: int, y1: int, depth1: float,
+                                   color: RGB = RGB(255, 255, 255)):
+        steep = False
+        if abs(x0 - x1) < abs(y0 - y1):
+            x0, y0 = y0, x0
+            x1, y1 = y1, x1
+            steep = True
+        if x0 > x1:
+            depth0, depth1 = depth1,depth0;
+            x0, x1 = x1, x0;
+            y0, y1 = y1, y0;
+        dx = x1 - x0
+        dy = y1 - y0
+        if dx == 0:return;
+        derror = abs(dy / float(dx))
+        error = 0.0
+        y = y0
+        ddepth = (depth1 - depth0) / (x1 - x0);
+        cdepth = depth0 - ddepth;
+        for x in range(int(x0), int(x1)):
+            cdepth += ddepth
+            if steep:
+               if buffer.setDepth(y,x,cdepth):buffer.setPixel(y, x, color);
+            else:
+               if buffer.setDepth(x,y,cdepth):buffer.setPixel(x, y, color)
+            error = error + derror
+            if error > 0.5:
+                y += 1 if y1 > y0 else -1
+                error -= 1
 
 def drawPoint(buffer:frameBuffer, x:int, y:int, color:RGB = RGB(255, 255, 255), depth:float = 0):
-       buffer.setPixel(x - 1, y-1,   color);
+       if not buffer.setDepth(x,y,depth):
+           return;
+       buffer.setPixel(x - 1, y - 1, color);
        buffer.setPixel(x - 1, y,     color);
        buffer.setPixel(x - 1, y + 1, color);
        buffer.setPixel(x,     y - 1, color);
@@ -95,16 +134,6 @@ def drawPoint(buffer:frameBuffer, x:int, y:int, color:RGB = RGB(255, 255, 255), 
        buffer.setPixel(x + 1, y - 1, color);
        buffer.setPixel(x + 1, y,     color);
        buffer.setPixel(x + 1, y + 1, color);
-       
-       buffer.setDepth(x - 1, y-1,   depth);
-       buffer.setDepth(x - 1, y,     depth);
-       buffer.setDepth(x - 1, y + 1, depth);
-       buffer.setDepth(x,     y - 1, depth);
-       buffer.setDepth(x,     y,     depth);
-       buffer.setDepth(x,     y + 1, depth);
-       buffer.setDepth(x + 1, y - 1, depth);
-       buffer.setDepth(x + 1, y,     depth);
-       buffer.setDepth(x + 1, y + 1, depth);
 
 def pointToScrSpace(buffer:frameBuffer,pt:vec3)->vec3:
     return vec3(round(MathUtils.clamp(0, buffer.width -1, round(buffer.width  * ( pt.x * 0.5 + 0.5)))),
@@ -226,6 +255,44 @@ def drawEdges(buffer:frameBuffer, mesh:meshData, cam:camera = None, color:RGB = 
             if a > 0 or c > 0:drawLineV4(buffer, v1.x, v1.y, v3.x, v3.y, color);
             if b > 0 or c > 0:drawLineV4(buffer, v2.x, v2.y, v3.x, v3.y, color);
 
+
+import threading
+# потоки для инетрактивной визуализации
+guiThread = None;
+updaterThread = None;
+rendererThread = None;
+
+#ГУЙ
+debugWindow = None;
+debugWindowlabel = None;
+
+def createImageWinodow(fb:frameBuffer):
+    global debugWindow;
+    global debugWindowlabel;
+    if debugWindow != None: return;
+    debugWindow = tk.Tk()
+    debugWindow.title("Image Viewer");
+    img =  ImageTk.PhotoImage(fb.frameBufferImage);
+    debugWindow.geometry(str(img.height() + 3)+ "x" + str(img.width() + 3))
+    debugWindowlabel = tk.Label(image = img)
+    debugWindowlabel.pack(side="bottom", fill="both", expand="yes")
+    debugWindow.mainloop()
+    debugWindow.destroy();
+
+def updateImageWindow(fb:frameBuffer):
+    global debugWindow;
+    global debugWindowlabel;
+    global rendererThread;
+    while rendererThread.is_alive():
+        if debugWindow == None:continue;
+        img =  ImageTk.PhotoImage(fb.frameBufferImage);
+        debugWindowlabel.configure(image = img);
+        debugWindowlabel.image = img;
+
+    img =  ImageTk.PhotoImage(fb.frameBufferImage);
+    debugWindowlabel.configure(image = img);
+    debugWindowlabel.image = img;
+
 # рисует полигональную сетку интерполируя только по глубине и заливает одним цветом
 def drawMeshSolidColor(buffer:frameBuffer, mesh:meshData, cam:camera = None, color:RGB = RGB(255, 200, 125)):
     # направление освещения совпадает с направлением взгляда камеры
@@ -247,6 +314,24 @@ def drawMeshSolidColor(buffer:frameBuffer, mesh:meshData, cam:camera = None, col
                                  vertex(pointToScrSpace(buffer, v2), n2, uv),
                                  vertex(pointToScrSpace(buffer, v3), n3, uv),
                                  color);
+
+def drawMeshSolidInteractive(buffer:frameBuffer, mesh:meshData, cam:camera = None, color:RGB = RGB(255, 200, 125)):
+    
+    global guiThread;
+    
+    global updaterThread;
+    
+    global rendererThread;
+
+    if guiThread == None: guiThread = threading.Thread(target = createImageWinodow, args=(buffer,));
+
+    if updaterThread == None: updaterThread = threading.Thread(target = updateImageWindow, args=(buffer,))
+
+    if rendererThread == None: rendererThread = threading.Thread(target = drawMeshSolidColor, args=(buffer,mesh,cam, color,))
+    
+    guiThread.start();
+    rendererThread.start();
+    updaterThread.start();
 
 # рисует полигональную сетку интерполируя только по глубине и заливает одним цветом
 def drawMeshShaded(buffer:frameBuffer, mesh:meshData, mat:material, cam:camera = None):
@@ -275,3 +360,21 @@ def drawMeshShaded(buffer:frameBuffer, mesh:meshData, mat:material, cam:camera =
                                    vertex(pointToScrSpace(buffer, v2), n2, uv2),
                                    vertex(pointToScrSpace(buffer, v3), n3, uv3),
                                    mat);
+
+def drawMeshShadedInteractive(buffer:frameBuffer, mesh:meshData, mat:material, cam:camera = None):
+    
+    global guiThread;
+    
+    global updaterThread;
+    
+    global rendererThread;
+
+    if guiThread == None: guiThread = threading.Thread(target = createImageWinodow, args=(buffer,));
+
+    if updaterThread == None: updaterThread = threading.Thread(target = updateImageWindow, args=(buffer,))
+
+    if rendererThread == None: rendererThread = threading.Thread(target = drawMeshShaded, args=(buffer, mesh, mat, cam, ))
+    
+    guiThread.start();
+    rendererThread.start();
+    updaterThread.start();
