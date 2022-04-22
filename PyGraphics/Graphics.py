@@ -277,7 +277,7 @@ def createImageWinodow(fb:frameBuffer):
     debugWindowlabel = tk.Label(image = img)
     debugWindowlabel.pack(side="bottom", fill="both", expand="yes")
     debugWindow.mainloop()
-    debugWindow.destroy();
+    #debugWindow.destroy();
 
 def updateImageWindow(fb:frameBuffer):
     global debugWindow;
