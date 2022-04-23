@@ -271,7 +271,7 @@ class transform2(object):
                      self.transformM.m10 * vec.x + self.transformM.m11 * vec.y + self.transformM.m12);
    
      # не переводит вектор в собственное пространство координат =)
-     def invTransformVect(self, vec:vec3, w)->vec3:
+     def invTransformVect(self, vec:vec2, w)->vec2:
          scl:vec2 = self.scale;
          if w == 0:
              return vec2((self.transformM.m00 * vec.x + self.transformM.m10 * vec.y) / scl.x / scl.x,
