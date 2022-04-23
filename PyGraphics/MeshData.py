@@ -1,6 +1,19 @@
 from   Transform import transform;
 from   MathUtils import vec3, vec2;
 class face:
+    def index1(self, index):
+        self.p_1: int = index;
+        self.uv1: int = index;
+        self.n_1: int = index;
+    def index2(self, index):
+        self.p_2: int = index;
+        self.uv2: int = index;
+        self.n_2: int = index;
+    def index3(self, index):
+        self.p_3: int = index;
+        self.uv3: int = index;
+        self.n_3: int = index;
+
     def __init__(self):
         self.p_1: int = -1;
         self.uv1: int = -1;
@@ -156,4 +169,35 @@ class meshData(object):
        n.normalize();
        return n;
 
-
+def createPlane(height:float = 1.0, width:float = 1.0, rows:int = 10, cols:int = 10)->meshData:
+    if rows < 2: rows = 2;
+    if cols < 2: cols = 2;
+    points_n:int = cols * rows;
+    id:int = 0;
+    col:int = 0;
+    row:int = 0;
+    vertIndex:int = 0; trisIndex:int = 0;
+    x:float; z:float;
+    mesh:meshData = meshData();
+    normal:vec3 = vec3(0,1,0);
+    for index in range(0, points_n):
+        col = index % cols;
+        row = int(index / cols);
+        x = width  * ((cols - 1) / 2.0 - col) / (cols - 1.0);
+        z = height * ((cols - 1) / 2.0 - row) / (cols - 1.0);
+        mesh.vertices.append(vec3(x, 0, z));
+        mesh.uvs.append(vec2(col * 1.0 / cols, row * 1.0 / cols));
+        mesh.normals.append(normal);
+        if (index + 1) % cols == 0: continue;#пропускаем последю
+        if rows - 1 == row: continue;
+        f = face();
+        f.index1(index);
+        f.index2(index + 1);
+        f.index3(index + cols);
+        mesh.faces.append(f);
+        f = face();
+        f.index1(index + cols);
+        f.index2(index + 1);
+        f.index3(index + cols + 1);
+        mesh.faces.append(f);
+    return mesh;

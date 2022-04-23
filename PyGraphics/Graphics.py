@@ -183,7 +183,7 @@ def drawTriangleSolid(buffer:frameBuffer, p0:vertex, p1:vertex, p2:vertex, color
                 buffer.setPixel(zx, xy, RGB(color.R * colShading, color.G * colShading, color.B * colShading));
 
 #отрисовка треугольника(интерполируется только глубина, нормали, барицентрические координаты) 
-def drawTriangleShaded(buffer:frameBuffer, p0:vertex,  p1:vertex, p2:vertex, mat:material): #позиции(в прострастве экрана) вершин треугольника
+def drawTriangleShaded(buffer:frameBuffer, p0:vertex, p1:vertex, p2:vertex, mat:material): #позиции(в прострастве экрана) вершин треугольника
     if p0.v.y == p1.v.y and p0.v.y == p2.v.y:return; #i dont care about degenerate triangles
     # sort the vertices, p0, p1, p2 lower-to-upper (bubblesort yay!)
     if (p0.v.y > p1.v.y): p0, p1   = p1, p0;
@@ -194,7 +194,7 @@ def drawTriangleShaded(buffer:frameBuffer, p0:vertex,  p1:vertex, p2:vertex, mat
     
     total_height:int = round(p2.v.y - p0.v.y);
     
-    for i in range( 0, total_height):
+    for i in range(0, total_height):
          second_half:bool = i > p1.v.y-p0.v.y or p1.v.y == p0.v.y;
          
          segment_height:int = p1.v.y-p0.v.y;
@@ -255,13 +255,8 @@ def drawEdges(buffer:frameBuffer, mesh:meshData, cam:camera = None, color:RGB = 
             if a > 0 or c > 0:drawLineV4(buffer, v1.x, v1.y, v3.x, v3.y, color);
             if b > 0 or c > 0:drawLineV4(buffer, v2.x, v2.y, v3.x, v3.y, color);
 
-
 import threading
-# потоки для инетрактивной визуализации
-guiThread = None;
-updaterThread = None;
-rendererThread = None;
-
+import time
 #ГУЙ
 debugWindow = None;
 debugWindowlabel = None;
@@ -276,19 +271,14 @@ def createImageWinodow(fb:frameBuffer):
     debugWindow.geometry(str(img.height() + 3)+ "x" + str(img.width() + 3))
     debugWindowlabel = tk.Label(image = img)
     debugWindowlabel.pack(side="bottom", fill="both", expand="yes")
-    debugWindow.mainloop()
-    #debugWindow.destroy();
+    while 'normal' == debugWindow.state():
+       try:
+            debugWindow.update();
+            updateImageWindow(fb);
+       except Exception:print("GUI exeqution stops")
 
 def updateImageWindow(fb:frameBuffer):
-    global debugWindow;
-    global debugWindowlabel;
-    global rendererThread;
-    while rendererThread.is_alive():
-        if debugWindow == None:continue;
-        img =  ImageTk.PhotoImage(fb.frameBufferImage);
-        debugWindowlabel.configure(image = img);
-        debugWindowlabel.image = img;
-
+    if debugWindow == None:return;
     img =  ImageTk.PhotoImage(fb.frameBufferImage);
     debugWindowlabel.configure(image = img);
     debugWindowlabel.image = img;
@@ -316,30 +306,16 @@ def drawMeshSolidColor(buffer:frameBuffer, mesh:meshData, cam:camera = None, col
                                  color);
 
 def drawMeshSolidInteractive(buffer:frameBuffer, mesh:meshData, cam:camera = None, color:RGB = RGB(255, 200, 125)):
-    
-    global guiThread;
-    
-    global updaterThread;
-    
-    global rendererThread;
-
-    if guiThread == None: guiThread = threading.Thread(target = createImageWinodow, args=(buffer,));
-
-    if updaterThread == None: updaterThread = threading.Thread(target = updateImageWindow, args=(buffer,))
-
-    if rendererThread == None: rendererThread = threading.Thread(target = drawMeshSolidColor, args=(buffer,mesh,cam, color,))
-    
-    guiThread.start();
+    rendererThread = threading.Thread(target = drawMeshSolidColor, args=(buffer, mesh, cam, ))
     rendererThread.start();
-    updaterThread.start();
+    createImageWinodow(buffer);
 
 # рисует полигональную сетку интерполируя только по глубине и заливает одним цветом
 def drawMeshShaded(buffer:frameBuffer, mesh:meshData, mat:material, cam:camera = None):
     # направление освещения совпадает с направлением взгляда камеры
     if cam == None: cam = Camera.renderCamera(buffer, mesh.minWorldSpace, mesh.maxWorldSpace * 1.5);
-
-    forward = cam.front;
     
+    forward = cam.front;
     for f in mesh.faces:
         # переводим нормали вершин в мировое пространство
         n1 = (mesh.getNormalWorldSpace(f.n_1));
@@ -361,20 +337,8 @@ def drawMeshShaded(buffer:frameBuffer, mesh:meshData, mat:material, cam:camera =
                                    vertex(pointToScrSpace(buffer, v3), n3, uv3),
                                    mat);
 
+
 def drawMeshShadedInteractive(buffer:frameBuffer, mesh:meshData, mat:material, cam:camera = None):
-    
-    global guiThread;
-    
-    global updaterThread;
-    
-    global rendererThread;
-
-    if guiThread == None: guiThread = threading.Thread(target = createImageWinodow, args=(buffer,));
-
-    if updaterThread == None: updaterThread = threading.Thread(target = updateImageWindow, args=(buffer,))
-
-    if rendererThread == None: rendererThread = threading.Thread(target = drawMeshShaded, args=(buffer, mesh, mat, cam, ))
-    
-    guiThread.start();
+    rendererThread = threading.Thread(target = drawMeshShaded, args=(buffer, mesh, mat, cam, ))
     rendererThread.start();
-    updaterThread.start();
+    createImageWinodow(buffer);

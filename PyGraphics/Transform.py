@@ -167,15 +167,16 @@ class transform(object):
                      self.transformM.m20 * vec.x + self.transformM.m21 * vec.y + self.transformM.m22 * vec.z + self.transformM.m23);
      # не переводит вектор в собственное пространство координат =)
      def invTransformVect(self, vec:vec3, w)->vec3:
+         scl:vec3 = self.scale;
          if w == 0:
-             return vec3(self.transformM.m00 * vec.x + self.transformM.m10 * vec.y + self.transformM.m20 * vec.z,
-                         self.transformM.m01 * vec.x + self.transformM.m11 * vec.y + self.transformM.m21 * vec.z,
-                         self.transformM.m02 * vec.x + self.transformM.m12 * vec.y + self.transformM.m22 * vec.z);
+             return vec3((self.transformM.m00 * vec.x + self.transformM.m10 * vec.y + self.transformM.m20 * vec.z) / scl.x / scl.x,
+                         (self.transformM.m01 * vec.x + self.transformM.m11 * vec.y + self.transformM.m21 * vec.z) / scl.y / scl.y,
+                         (self.transformM.m02 * vec.x + self.transformM.m12 * vec.y + self.transformM.m22 * vec.z) / scl.z / scl.z);
         
          vec_ = vec3(vec.x - self.x, vec.y - self.y, vec.z -self.z);
-         return vec3(self.transformM.m00 * vec_.x + self.transformM.m10 * vec_.y + self.transformM.m20 * vec_.z,
-                     self.transformM.m01 * vec_.x + self.transformM.m11 * vec_.y + self.transformM.m21 * vec_.z,
-                     self.transformM.m02 * vec_.x + self.transformM.m12 * vec_.y + self.transformM.m22 * vec_.z) 
+         return vec3((self.transformM.m00 * vec_.x + self.transformM.m10 * vec_.y + self.transformM.m20 * vec_.z) / scl.x / scl.x,
+                     (self.transformM.m01 * vec_.x + self.transformM.m11 * vec_.y + self.transformM.m21 * vec_.z) / scl.y / scl.y,
+                     (self.transformM.m02 * vec_.x + self.transformM.m12 * vec_.y + self.transformM.m22 * vec_.z) / scl.z / scl.z) 
 
 
 #row major 2D transform
@@ -271,10 +272,11 @@ class transform2(object):
    
      # не переводит вектор в собственное пространство координат =)
      def invTransformVect(self, vec:vec3, w)->vec3:
+         scl:vec2 = self.scale;
          if w == 0:
-             return vec2(self.transformM.m00 * vec.x + self.transformM.m10 * vec.y,
-                         self.transformM.m01 * vec.x + self.transformM.m11 * vec.y);
+             return vec2((self.transformM.m00 * vec.x + self.transformM.m10 * vec.y) / scl.x / scl.x,
+                         (self.transformM.m01 * vec.x + self.transformM.m11 * vec.y) / scl.y / scl.y);
         
          vec_ = vec2(vec.x - self.x,vec.y - self.y);
-         return vec2(self.transformM.m00 * vec.x + self.transformM.m10 * vec.y,
-                     self.transformM.m01 * vec.x + self.transformM.m11 * vec.y);
+         return vec2((self.transformM.m00 * vec.x + self.transformM.m10 * vec.y) / scl.x / scl.x,
+                     (self.transformM.m01 * vec.x + self.transformM.m11 * vec.y) / scl.y / scl.y);
