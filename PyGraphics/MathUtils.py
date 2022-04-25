@@ -29,6 +29,7 @@ class vec2(object):
         if abs(nrm) < 1e-12:raise ArithmeticError("vec2::zero length vector");
         self.xy[0]/=nrm;
         self.xy[1]/=nrm;
+        return self;
 
     @property 
     def x(self)->float:return self.xy[0];
@@ -73,6 +74,7 @@ class vec3(object):
         self.xyz[0]/=nrm;
         self.xyz[1]/=nrm;
         self.xyz[2]/=nrm;
+        return self
 
     @property 
     def x(self)->float:return self.xyz[0];

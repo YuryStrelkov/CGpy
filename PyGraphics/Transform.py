@@ -10,21 +10,21 @@ class transform(object):
                                  0.0, 0.0, 1.0, 0.0,
                                  0.0, 0.0, 0.0, 1.0);  
          self.eulerAngles = vec3(0.0,0.0,0.0);
-
+     
      @property
      def front(self)->vec3:return vec3(self.transformM.m02,
                                        self.transformM.m12,
-                                       self.transformM.m22);
+                                       self.transformM.m22).normalize();
      
      @property
      def up(self)->vec3:return vec3(self.transformM.m01,
                                     self.transformM.m11,
-                                    self.transformM.m21);
+                                    self.transformM.m21).normalize();
 
      @property
      def right(self)->vec3:return vec3(self.transformM.m00,
                                        self.transformM.m10,
-                                       self.transformM.m20);
+                                       self.transformM.m20).normalize();
 
      #масштаб по Х
      @property
@@ -188,10 +188,10 @@ class transform2(object):
          self.zAngle = 0.0;
 
      @property
-     def front(self)->vec2:return vec2(self.transformM.m00,self.transformM.m10);
+     def front(self)->vec2:return vec2(self.transformM.m00,self.transformM.m10).normalize();
      
      @property
-     def up(self)->vec2:return vec2(self.transformM.m01,self.transformM.m11);
+     def up(self)->vec2:return vec2(self.transformM.m01,self.transformM.m11).normalize();
 
      @property
      def scale(self)->vec2:return vec2(self.sx, self.sy);
@@ -235,10 +235,10 @@ class transform2(object):
      def origin(self)->vec2:return vec2(self.x, self.y);
      
      @x.setter 
-     def x(self,x:float):self.transformM.m02=x;
+     def x(self,x:float):self.transformM.m02 = x;
     
      @y.setter 
-     def y(self,y:float):self.transformM.m12=y;
+     def y(self,y:float):self.transformM.m12 = y;
          
      @origin.setter 
      def origin(self,xy:vec2):self.x = xy.x; self.y = xy.y;
