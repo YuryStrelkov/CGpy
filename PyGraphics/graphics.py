@@ -1,5 +1,6 @@
 import numpy as np
 import mathUtils
+from bezier import BezierCurve2
 from mathUtils import Vec2, Vec3
 from material import Material
 import camera
@@ -76,6 +77,8 @@ def draw_line_3(buffer: FrameBuffer, x0: int, y0: int, x1: int, y1: int,
             buffer.set_pixel(int(y), int(x), color)
         else:
             buffer.set_pixel(int(x), int(y), color)
+
+
 # рисование линии, третий вариант алгоритма
 
 
@@ -160,9 +163,14 @@ def draw_point(buffer: FrameBuffer, x: int, y: int, color: RGB = RGB(np.uint8(25
 
 
 def point_to_scr_space(buffer: FrameBuffer, pt: Vec3) -> Vec3:
-    return Vec3(round(mathUtils.clamp(0, buffer.width - 1,  round(buffer.width * (pt.x * 0.5 + 0.5)))),
+    return Vec3(round(mathUtils.clamp(0, buffer.width - 1, round(buffer.width * (pt.x * 0.5 + 0.5)))),
                 round(mathUtils.clamp(0, buffer.height - 1, round(buffer.height * (-pt.y * 0.5 + 0.5)))),
                 pt.z)
+
+
+def point_to_scr_space_2(buffer: FrameBuffer, pt: Vec2) -> Vec2:
+    return Vec2(round(mathUtils.clamp(0, buffer.width - 1, round(buffer.width * (pt.x * 0.5 + 0.5)))),
+                round(mathUtils.clamp(0, buffer.height - 1, round(buffer.height * (-pt.y * 0.5 + 0.5)))))
 
 
 # отрисовка одноцветного треугольника(интерполируется только глубина)
@@ -280,6 +288,24 @@ def draw_triangle_shaded(buffer: FrameBuffer, p0: Vertex, p1: Vertex, p2: Vertex
                 col_shading: float = mathUtils.clamp(0.0, 1.0, mathUtils.dot3(p.n, Vec3(0.333, 0.333, 0.333)))
                 buffer.set_pixel(ix, jy, RGB(col.r * col_shading, col.g * col_shading, col.b * col_shading))
 
+
+def draw_bezier(buffer: FrameBuffer, curve: BezierCurve2, color: RGB = RGB(np.uint8(0), np.uint8(0), np.uint8(255))):
+    for point in curve.points:
+        a1 = point_to_scr_space_2(buffer, point.pointAnchor1)
+        a2 = point_to_scr_space_2(buffer, point.pointAnchor2)
+        p  = point_to_scr_space_2(buffer, point.point)
+        draw_line_4(buffer, round(a1.x), round(a1.y), round(a2.x),
+                    round(a2.y), RGB(np.uint8(255), np.uint8(255), np.uint8(255)))
+        draw_point(buffer, round(a1.x), round(a1.y), RGB(np.uint8(0),   np.uint8(0), np.uint8(255)))
+        draw_point(buffer, round(a2.x), round(a2.y), RGB(np.uint8(0),   np.uint8(0), np.uint8(255)))
+        draw_point(buffer, round(p.x),  round(p.y),  RGB(np.uint8(255), np.uint8(0), np.uint8(0)))
+    for segment in curve.curve:
+        p1 = point_to_scr_space_2(buffer, segment[0])
+        for i in range(1, len(segment)):
+            p2 = point_to_scr_space_2(buffer, segment[i])
+            #draw_point(buffer, round(p1.x), round(p1.y), color, -1)
+            draw_line_4(buffer, round(p1.x), round(p1.y), round(p2.x), round(p2.y), color)
+            p1 = p2
 
 # отрисовка вершин
 def draw_vertices(buffer: FrameBuffer, mesh: TrisMeshData, cam: Camera = None,

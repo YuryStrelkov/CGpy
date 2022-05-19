@@ -32,6 +32,9 @@ class Vec2(object):
         return self
 
     @property
+    def magnitude(self) -> float: return np.sqrt(self.xy[0]*self.xy[0] + self.xy[1]*self.xy[1])
+
+    @property
     def x(self) -> float: return self.xy[0]
 
     @property
@@ -77,6 +80,10 @@ class Vec3(object):
         self.xyz[1] /= nrm
         self.xyz[2] /= nrm
         return self
+
+    @property
+    def magnitude(self) -> float:
+        return np.sqrt(self.xyz[0] * self.xyz[0] + self.xyz[1] * self.xyz[1] + self.xyz[2] * self.xyz[2])
 
     @property
     def x(self) -> float: return self.xyz[0]
@@ -433,3 +440,41 @@ def clamp(min_: float, max_: float, val: float) -> float:
     if val > max_:
         return max_
     return val
+
+
+def lerp_vec_2(a: Vec2, b: Vec2, t: float) -> Vec2:
+    return Vec2(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t)
+
+
+def lerp_vec_3(a: Vec3, b: Vec3, t: float) -> Vec3:
+    return Vec3(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t, a.z + (b.z - a.z) * t)
+
+
+def lerp_mat_3(a: Mat3, b: Mat3, t: float) -> Mat3:
+    return Mat3(a.m00 + (b.m00 - a.m00) * t, a.m01 + (b.m01 - a.m01) * t, a.m02 + (b.m02 - a.m02) * t,
+                a.m10 + (b.m10 - a.m10) * t, a.m11 + (b.m11 - a.m11) * t, a.m12 + (b.m12 - a.m12) * t,
+                a.m20 + (b.m20 - a.m20) * t, a.m21 + (b.m21 - a.m21) * t, a.m22 + (b.m22 - a.m22) * t)
+
+
+def lerp_mat_4(a: Mat4, b: Mat4, t: float) -> Mat4:
+    return Mat4(
+        a.m00 + (b.m00 - a.m00) * t, a.m01 + (b.m01 - a.m01) * t, a.m02 + (b.m02 - a.m02) * t,
+        a.m03 + (b.m03 - a.m03) * t,
+        a.m10 + (b.m10 - a.m10) * t, a.m11 + (b.m11 - a.m11) * t, a.m12 + (b.m12 - a.m12) * t,
+        a.m13 + (b.m13 - a.m13) * t,
+        a.m20 + (b.m20 - a.m20) * t, a.m21 + (b.m21 - a.m21) * t, a.m22 + (b.m22 - a.m22) * t,
+        a.m23 + (b.m23 - a.m23) * t,
+        a.m30 + (b.m30 - a.m30) * t, a.m31 + (b.m31 - a.m31) * t, a.m32 + (b.m32 - a.m32) * t,
+        a.m33 + (b.m33 - a.m33) * t)
+
+
+def perpendicular_2(v: Vec2) -> Vec2:
+    if v.x == 0:
+        return Vec2(np.sign(v.y), 0)
+    if v.y == 0:
+        return Vec2(0, -np.sign(v.x))
+    sign: float = np.sign(v.x / v.y)
+    dx: float = 1.0 / v.x
+    dy: float = -1.0 / v.y
+    sign /= np.sqrt(dx * dx + dy * dy)
+    return Vec2(dx * sign, dy * sign)
