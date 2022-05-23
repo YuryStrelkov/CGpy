@@ -9,21 +9,39 @@ import time
 from bezier import BezierCurve2
 
 
+def bezier_intersection_test():
+    frame_buffer = FrameBuffer(1000, 1000)
+    frame_buffer.clear_color(RGB(np.uint8(200), np.uint8(200), np.uint8(200)))
+    curve_1: BezierCurve2 = BezierCurve2()
+    curve_1.add_point(Vec2(-0.333, 0.25))
+    curve_1.add_point(Vec2(0.333, 0.25))
+    curve_1.align_anchors(0, Vec2(0, -1), 10)
+    curve_1.align_anchors(1, Vec2(0, -1), 10)
+
+    curve_2: BezierCurve2 = BezierCurve2()
+    curve_2.add_point(Vec2(-0.333, -0.25))
+    curve_2.add_point(Vec2(0.333, -0.25))
+    curve_2.align_anchors(0, Vec2(0, 1), 10)
+    curve_2.align_anchors(1, Vec2(0, 1), 10)
+    gr.draw_bezier(frame_buffer, curve_1)
+    gr.draw_bezier(frame_buffer, curve_2)
+    frame_buffer.imshow()
+
+
 def bezier_curve_test():
     frame_buffer = FrameBuffer(1000, 1000)
     frame_buffer.clear_color(RGB(np.uint8(200), np.uint8(200), np.uint8(200)))
     curve: BezierCurve2 = BezierCurve2()
 
-    #curve.closed = True
-    for i in range(0, 10):
-        curve.add_point(Vec2(0.666 * np.cos(np.pi / 10 * 2 * i), 0.666 * np.sin(np.pi / 10 * 2 * i)))
+    curve.closed = True
+    n_pnts: int = 8
+    for i in range(0, n_pnts):
+        curve.add_point(Vec2(0.666 * np.cos(np.pi / n_pnts * 2 * i), 0.666 * np.sin(np.pi / n_pnts * 2 * i)))
+
+    curve.set_flow()
 
     gr.draw_bezier(frame_buffer, curve)
-    curve.rem_point(0)
-    curve.rem_point(4)
-    curve.rem_point(0)
-    curve.rem_point(0)
-    curve.rem_point(curve.n_control_points - 1)
+
     for i in range(0, curve.n_control_points):
         curve.move_point(i, curve.get_point(i) + curve.sect_normal(i, 0) * 0.124)
     gr.draw_bezier(frame_buffer, curve)
@@ -89,3 +107,4 @@ if __name__ == '__main__':
     # static_shading()
     #interactive_shading()
     bezier_curve_test()
+    # bezier_intersection_test()

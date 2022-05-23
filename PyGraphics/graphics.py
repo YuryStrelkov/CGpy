@@ -290,6 +290,13 @@ def draw_triangle_shaded(buffer: FrameBuffer, p0: Vertex, p1: Vertex, p2: Vertex
 
 
 def draw_bezier(buffer: FrameBuffer, curve: BezierCurve2, color: RGB = RGB(np.uint8(0), np.uint8(0), np.uint8(255))):
+    p1 = point_to_scr_space_2(buffer, curve.get_point(0))
+    for pt in curve:
+        p2 = point_to_scr_space_2(buffer, pt)
+        # draw_point(buffer, round(p1.x), round(p1.y), RGB(np.uint8(255), np.uint8(0), np.uint8(0)), -1)
+        draw_line_4(buffer, round(p1.x), round(p1.y), round(p2.x), round(p2.y), color)
+        p1 = p2
+
     for point in curve.points:
         a1 = point_to_scr_space_2(buffer, point.anchor_1)
         a2 = point_to_scr_space_2(buffer, point.anchor_2)
@@ -299,13 +306,6 @@ def draw_bezier(buffer: FrameBuffer, curve: BezierCurve2, color: RGB = RGB(np.ui
         draw_point(buffer, round(a1.x), round(a1.y), RGB(np.uint8(0),   np.uint8(0), np.uint8(255)))
         draw_point(buffer, round(a2.x), round(a2.y), RGB(np.uint8(0),   np.uint8(0), np.uint8(255)))
         draw_point(buffer, round(p.x),  round(p.y),  RGB(np.uint8(255), np.uint8(0), np.uint8(0)))
-
-        p1 = point_to_scr_space_2(buffer, curve.get_point(0))
-        for pt in curve:
-            p2 = point_to_scr_space_2(buffer, pt)
-            draw_point(buffer, round(p1.x), round(p1.y), RGB(np.uint8(255), np.uint8(0), np.uint8(0)), -1)
-            draw_line_4(buffer, round(p1.x), round(p1.y), round(p2.x), round(p2.y), color)
-            p1 = p2
 
 # отрисовка вершин
 def draw_vertices(buffer: FrameBuffer, mesh: TrisMeshData, cam: Camera = None,

@@ -57,9 +57,9 @@ class BezierPoint2(object):
         res += " anchor_2: %s\n]" % self.__anchor_2
         return res
 
-    def align_anchors(self, dir_: Vec2) -> None:
-        w_1: float = self.anchor_1_weight
-        w_2: float = self.anchor_2_weight
+    def align_anchors(self, dir_: Vec2, weight: float = 1) -> None:
+        w_1: float = self.anchor_1_weight * weight
+        w_2: float = self.anchor_2_weight * weight
         dir_.normalize()
         self.__anchor_1 = self.__point + dir_ * w_1
         self.__anchor_2 = self.__point - dir_ * w_2
@@ -198,6 +198,7 @@ class BezierPoint3(object):
         _w: float = _dw.magnitude
         _dw.x *= (w / _w)
         _dw.y *= (w / _w)
+        _dw.z *= (w / _w)
         self.__anchor_1 = _dw + self.__point
 
     @anchor_2_weight.setter
@@ -206,6 +207,7 @@ class BezierPoint3(object):
         _w: float = _dw.magnitude
         _dw.x *= (w / _w)
         _dw.y *= (w / _w)
+        _dw.z *= (w / _w)
         self.__anchor_2 = _dw + self.__point
 
     @property
@@ -244,41 +246,35 @@ class BezierPoint3(object):
 
 class BezierCurve2(object):
     def __init__(self):
-        self.__sections_per_seg: int = 12
+        self.__sections_per_seg: int = 32
         self.__points: [BezierPoint2] = []
         self.closed: bool = False
 
     def __iter__(self):
-
-        self.__iter_sect_i: int = self.segments
-
         if len(self.__points) <= 1:
             raise StopIteration
-
-        if self.closed:
-            self.__iter_sect: int = -1
-            self.__iter_p1: BezierPoint2 = self.__points[len(self.__points) - 1]
-            self.__iter_p2: BezierPoint2 = self.__points[0]
-            return self
-
-        self.__iter_sect: int = 0
+        self.__iter_sect_i: int = 0
+        self.__iter_sect:   int = 1
         self.__iter_p1: BezierPoint2 = self.__points[0]
         self.__iter_p2: BezierPoint2 = self.__points[1]
         return self
 
     def __next__(self) -> Vec2:
         if self.__iter_sect_i == self.segments:
-            self.__iter_sect_i = -1
+            if self.closed:
+                if self.__iter_sect == len(self.__points):
+                    raise StopIteration
+            else:
+                if self.__iter_sect == len(self.__points) - 1:
+                    raise StopIteration
+            self.__iter_sect_i = 0
             self.__iter_sect += 1
-            if self.__iter_sect == len(self.__points) - 1:
-                raise StopIteration
-            print(self.__iter_sect)
-            self.__iter_p1: BezierPoint2 = self.__points[self.__iter_sect]
-            self.__iter_p2: BezierPoint2 = self.__points[self.__iter_sect + 1]
+            self.__iter_p1 = self.__iter_p2
+            self.__iter_p2 = self.__points[self.__iter_sect % len(self.__points)]
+
+        t: float = self.__iter_sect_i / (self.segments - 1)
 
         self.__iter_sect_i += 1
-
-        t: float = self.__iter_sect_i / self.segments
 
         return bezier_2_cubic(self.__iter_p1.point, self.__iter_p1.anchor_1,
                               self.__iter_p2.anchor_2, self.__iter_p2.point, t)
@@ -370,8 +366,17 @@ class BezierCurve2(object):
 
         self.__points.insert(pid, pt)
 
-    def rem_point(self, pid: int) -> None:
+    def set_flow(self) -> None:
+        p_prev: BezierPoint2 = self.__points[self.n_control_points - 1]
+        p_curr: BezierPoint2
+        p_next: BezierPoint2
+        for i in range(0,self.n_control_points):
+            p_curr = self.__points[i]
+            p_next = self.__points[(i + 1) % self.n_control_points]
+            p_curr.align_anchors(p_next.point - p_prev.point)
+            p_prev = p_curr
 
+    def rem_point(self, pid: int) -> None:
         if not self.__in_range(pid):
             return
         del self.__points[pid]
@@ -395,6 +400,11 @@ class BezierCurve2(object):
         if not self.__in_range(pid):
             return
         self.__points[pid].anchor_2 = pos
+
+    def align_anchors(self, pid: int, pos: Vec2, weight: float = 1) -> None:
+        if not self.__in_range(pid):
+            return
+        self.__points[pid].align_anchors(pos, weight)
 
     def curve_value(self, pid: int, t: float) -> Vec2:
         if not self.__in_range(pid):
