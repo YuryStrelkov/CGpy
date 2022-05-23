@@ -105,6 +105,6 @@ def interactive_shading(render_camera: Camera = None):
 if __name__ == '__main__':
     # static_solid_color()
     # static_shading()
-    #interactive_shading()
-    bezier_curve_test()
+    interactive_shading()
+    # bezier_curve_test()
     # bezier_intersection_test()
