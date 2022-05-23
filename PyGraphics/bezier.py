@@ -35,172 +35,395 @@ def bezier_mat_4_cubic(p1: Mat4, p2: Mat4, p3: Mat4, p4: Mat4, t: float) -> Mat4
 
 
 class BezierPoint2(object):
-    def __init__(self, v: Vec2):
-        self.point: Vec2 = v
-        perpendicular: Vec2 = mathUtils.perpendicular_2(v) * 0.333
-        self.pointAnchor1: Vec2 = v + perpendicular
-        self.pointAnchor2: Vec2 = v - perpendicular
+    def __init__(self, p: Vec2):
+        self.__point: Vec2 = p
+        self.__anchor_1: Vec2 = p + Vec2(0.125, 0.125)
+        self.__anchor_2: Vec2 = p + Vec2(-0.125, -0.125)
         self.smooth: bool = True
 
-    def set_anchor_1_pos(self, pos: Vec2):
-        self.pointAnchor1 = pos
-        if self.smooth:
-            distance = -(self.point - self.pointAnchor2).norm()
-            self.pointAnchor2 = distance * (self.pointAnchor1 - self.point).normalize()
+    def __repr__(self):
+        res: str = "BezierPoint2:\n"
+        res += "[\n point   : %s,\n" % self.__point
+        res += " smooth  : %s,\n" % self.smooth
+        res += " anchor_1: %s,\n" % self.__anchor_1
+        res += " anchor_2: %s\n]" % self.__anchor_2
+        return res
 
-    def set_anchor_2_pos(self, pos: Vec2):
-        self.pointAnchor2 = pos
-        if self.smooth:
-            distance = -(self.point - self.pointAnchor1).magnitude
-            self.pointAnchor1 = distance * (self.pointAnchor2 - self.point).normalize()
+    def __str__(self):
+        res: str = ""
+        res += "[\n point   : %s,\n" % self.__point
+        res += " smooth  : %s,\n" % self.smooth
+        res += " anchor_1: %s,\n" % self.__anchor_1
+        res += " anchor_2: %s\n]" % self.__anchor_2
+        return res
 
-    def set_point(self, pos: Vec2):
-        self.pointAnchor1 = self.pointAnchor1 - self.point
-        self.pointAnchor2 = self.pointAnchor2 - self.point
-        self.point = pos
-        self.pointAnchor1 = self.pointAnchor1 + self.point
-        self.pointAnchor2 = self.pointAnchor2 + self.point
+    def align_anchors(self, dir_: Vec2) -> None:
+        w_1: float = self.anchor_1_weight
+        w_2: float = self.anchor_2_weight
+        dir_.normalize()
+        self.__anchor_1 = self.__point + dir_ * w_1
+        self.__anchor_2 = self.__point - dir_ * w_2
+
+    @property
+    def anchor_1_weight(self) -> float:
+        return (self.__point - self.__anchor_1).magnitude
+
+    @property
+    def anchor_2_weight(self) -> float:
+        return (self.__point - self.__anchor_2).magnitude
+
+    @anchor_1_weight.setter
+    def anchor_1_weight(self, w: float) -> None:
+        _dw: Vec2 = self.__anchor_1 - self.__point
+        _w: float = _dw.magnitude
+        _dw.x *= (w / _w)
+        _dw.y *= (w / _w)
+        self.__anchor_1 = _dw + self.__point
+
+    @anchor_2_weight.setter
+    def anchor_2_weight(self, w: float) -> None:
+        _dw: Vec2 = self.__anchor_2 - self.__point
+        _w: float = _dw.magnitude
+        _dw.x *= (w / _w)
+        _dw.y *= (w / _w)
+        self.__anchor_2 = _dw + self.__point
+
+    @property
+    def anchor_1(self) -> Vec2:
+        return self.__anchor_1
+
+    @anchor_1.setter
+    def anchor_1(self, anchor: Vec2) -> None:
+        self.__anchor_1 = anchor
+        if self.smooth:
+            distance = (self.point - self.__anchor_2).norm()
+            self.__anchor_2 = self.point + (self.point - self.__anchor_1).normalize() * distance
+
+    @property
+    def anchor_2(self) -> Vec2:
+        return self.__anchor_2
+
+    @anchor_2.setter
+    def anchor_2(self, anchor: Vec2) -> None:
+        self.__anchor_2 = anchor
+        if self.smooth:
+            distance = (self.point - self.__anchor_1).norm()
+            self.__anchor_1 = self.point + (self.point - self.__anchor_2).normalize() * distance
+
+    @property
+    def point(self) -> Vec2:
+        return self.__point
+
+    @point.setter
+    def point(self, p: Vec2) -> None:
+        dp: Vec2 = p - self.__point
+        self.__point = p
+        self.__anchor_1 = self.__anchor_1 + dp
+        self.__anchor_2 = self.__anchor_2 + dp
+
+
+def bezier_pt_max(pt1: BezierPoint2, pt2: BezierPoint2) -> Vec2:
+    pt: Vec2 = mathUtils.max2(pt1.anchor_2, pt1.anchor_2)
+    pt = mathUtils.max2(pt1.point, pt)
+    pt_: Vec2 = mathUtils.max2(pt2.anchor_2, pt2.anchor_2)
+    pt_ = mathUtils.max2(pt2.point, pt_)
+    return mathUtils.max2(pt, pt_)
+
+
+def bezier_pt_min(pt1: BezierPoint2, pt2: BezierPoint2) -> Vec2:
+    pt: Vec2 = mathUtils.min2(pt1.anchor_2, pt1.anchor_2)
+    pt = mathUtils.min2(pt1.point, pt)
+    pt_: Vec2 = mathUtils.min2(pt2.anchor_2, pt2.anchor_2)
+    pt_ = mathUtils.min2(pt2.point, pt_)
+    return mathUtils.min2(pt, pt_)
+
+
+def bezier_overlaps(pt1: BezierPoint2, pt2: BezierPoint2, pt3: BezierPoint2, pt4: BezierPoint2) -> bool:
+    _max1: Vec2 = bezier_pt_max(pt1, pt2)
+    _min1: Vec2 = bezier_pt_min(pt1, pt2)
+
+    _max2: Vec2 = bezier_pt_max(pt3, pt4)
+    _min2: Vec2 = bezier_pt_min(pt3, pt4)
+
+    return False
+
+
+def bezier_intersect(pt1: BezierPoint2, pt2: BezierPoint2, pt3: BezierPoint2, pt4: BezierPoint2) -> [Vec2]:
+    if not bezier_overlaps(pt1, pt2, pt3, pt4):
+        return []
+    return []
+
+
+class BezierPoint3(object):
+    def __init__(self, p: Vec3):
+        self.__point: Vec3 = p
+        self.__anchor_1: Vec3 = p + Vec3(0.125, 0, 0.125)
+        self.__anchor_2: Vec3 = p + Vec3(-0.125, 0, -0.125)
+        self.smooth: bool = True
+
+    def __repr__(self):
+        res: str = "BezierPoint2:\n"
+        res += "[\n point   : %s,\n" % self.__point
+        res += " smooth  : %s,\n" % self.smooth
+        res += " anchor_1: %s,\n" % self.__anchor_1
+        res += " anchor_2: %s\n]" % self.__anchor_2
+        return res
+
+    def __str__(self):
+        res: str = ""
+        res += "[\n point   : %s,\n" % self.__point
+        res += " smooth  : %s,\n" % self.smooth
+        res += " anchor_1: %s,\n" % self.__anchor_1
+        res += " anchor_2: %s\n]" % self.__anchor_2
+        return res
+
+    def align_anchors(self, dir_: Vec3) -> None:
+        w_1: float = self.anchor_1_weight
+        w_2: float = self.anchor_2_weight
+        dir_.normalize()
+        self.__anchor_1 = self.__point + dir_ * w_1
+        self.__anchor_2 = self.__point - dir_ * w_2
+
+    @property
+    def anchor_1_weight(self) -> float:
+        return (self.__point - self.__anchor_1).magnitude
+
+    @property
+    def anchor_2_weight(self) -> float:
+        return (self.__point - self.__anchor_2).magnitude
+
+    @anchor_1_weight.setter
+    def anchor_1_weight(self, w: float) -> None:
+        _dw: Vec3 = self.__anchor_1 - self.__point
+        _w: float = _dw.magnitude
+        _dw.x *= (w / _w)
+        _dw.y *= (w / _w)
+        self.__anchor_1 = _dw + self.__point
+
+    @anchor_2_weight.setter
+    def anchor_2_weight(self, w: float) -> None:
+        _dw: Vec3 = self.__anchor_2 - self.__point
+        _w: float = _dw.magnitude
+        _dw.x *= (w / _w)
+        _dw.y *= (w / _w)
+        self.__anchor_2 = _dw + self.__point
+
+    @property
+    def anchor_1(self) -> Vec3:
+        return self.__anchor_1
+
+    @anchor_1.setter
+    def anchor_1(self, anchor: Vec3) -> None:
+        self.__anchor_1 = anchor
+        if self.smooth:
+            distance = (self.point - self.__anchor_2).norm()
+            self.__anchor_2 = self.point + (self.point - self.__anchor_1).normalize() * distance
+
+    @property
+    def anchor_2(self) -> Vec3:
+        return self.__anchor_2
+
+    @anchor_2.setter
+    def anchor_2(self, anchor: Vec3) -> None:
+        self.__anchor_2 = anchor
+        if self.smooth:
+            distance = (self.point - self.__anchor_1).norm()
+            self.__anchor_1 = self.point + (self.point - self.__anchor_2).normalize() * distance
+
+    @property
+    def point(self) -> Vec3:
+        return self.__point
+
+    @point.setter
+    def point(self, p: Vec3) -> None:
+        dp: Vec3 = p - self.__point
+        self.__point = p
+        self.__anchor_1 = self.__anchor_1 + dp
+        self.__anchor_2 = self.__anchor_2 + dp
 
 
 class BezierCurve2(object):
     def __init__(self):
-        self.sections_per_seg = 32
-        self.curve: [Vec2] = []
-        self.points: [BezierPoint2] = []
+        self.__sections_per_seg: int = 12
+        self.__points: [BezierPoint2] = []
         self.closed: bool = False
 
-    def __update_segment(self, pid: int):
-        if pid < 0:
+    def __iter__(self):
+
+        self.__iter_sect_i: int = self.segments
+
+        if len(self.__points) <= 1:
+            raise StopIteration
+
+        if self.closed:
+            self.__iter_sect: int = -1
+            self.__iter_p1: BezierPoint2 = self.__points[len(self.__points) - 1]
+            self.__iter_p2: BezierPoint2 = self.__points[0]
+            return self
+
+        self.__iter_sect: int = 0
+        self.__iter_p1: BezierPoint2 = self.__points[0]
+        self.__iter_p2: BezierPoint2 = self.__points[1]
+        return self
+
+    def __next__(self) -> Vec2:
+        if self.__iter_sect_i == self.segments:
+            self.__iter_sect_i = -1
+            self.__iter_sect += 1
+            if self.__iter_sect == len(self.__points) - 1:
+                raise StopIteration
+            print(self.__iter_sect)
+            self.__iter_p1: BezierPoint2 = self.__points[self.__iter_sect]
+            self.__iter_p2: BezierPoint2 = self.__points[self.__iter_sect + 1]
+
+        self.__iter_sect_i += 1
+
+        t: float = self.__iter_sect_i / self.segments
+
+        return bezier_2_cubic(self.__iter_p1.point, self.__iter_p1.anchor_1,
+                              self.__iter_p2.anchor_2, self.__iter_p2.point, t)
+
+    def __repr__(self):
+        res: str = "BezierCurve2:\n"
+        res += "[\n closed : %s\n" % self.closed
+        res += " points :\n"
+        for i in range(0, len(self.__points)):
+            res += "%s\n" % self.__points[i]
+        res += "]\n"
+        return res
+
+    def __str__(self):
+        res: str = ""
+        res += "[\n closed : %s\n" % self.closed
+        res += " points :\n"
+        for i in range(0, len(self.__points)):
+            res += "%s\n" % self.__points[i]
+        res += "]\n"
+        return res
+
+    @property
+    def n_control_points(self) -> int:
+        return len(self.__points)
+
+    @property
+    def points(self) -> [BezierPoint2]:
+        return self.__points
+
+    @property
+    def segments(self) -> int:
+        return self.__sections_per_seg
+
+    @segments.setter
+    def segments(self, val: int) -> None:
+        if val < 3:
+            self.__sections_per_seg = 3
             return
+        self.__sections_per_seg = val
 
-        if len(self.points) == 0:
-            return
+    def __in_range(self, point_id: int) -> bool:
+        if point_id < 0:
+            return False
+        if point_id >= len(self.__points):
+            return False
+        return True
 
-        dt: float = 1.0 / self.sections_per_seg
-        p1: BezierPoint2
-        p2: BezierPoint2
-        if not self.closed:
-            if pid == len(self.points) - 1:
-                return
-            p1: BezierPoint2 = self.points[pid]
-            p2: BezierPoint2 = self.points[pid + 1]
-        else:
-            p1: BezierPoint2 = self.points[pid]
-            p2: BezierPoint2 = self.points[(pid + 1) % len(self.points)]
+    def add_point(self, p: Vec2, smooth: bool = True) -> None:
 
-        seg: [Vec2] = []
-        for i in range(0, self.sections_per_seg + 1):
-            seg.append(bezier_2_cubic(p1.point, p1.pointAnchor1, p2.pointAnchor2, p2.point, dt * i))
-        self.curve[pid] = seg
-
-    def add_point(self, p: Vec2, smooth: bool = True):
         point: BezierPoint2 = BezierPoint2(p)
         point.smooth = smooth
-        self.points.append(BezierPoint2(p))
-        if len(self.points) < 2:
-            return
-        seg: [Vec2] = []
-        self.curve.append(seg)
-        self.__update_segment(len(self.points) - 2)
+        self.__points.append(BezierPoint2(p))
 
-    def rem_point(self, pid: int):
+        if len(self.__points) < 2:
+            return
+
+        if len(self.__points) == 2:
+            dir_: Vec2 = self.__points[1].point - self.__points[0].point
+            self.__points[0].align_anchors(dir_)
+            self.__points[1].align_anchors(dir_)
+            return
+
+        pid = len(self.__points) - 1
+        dir_31: Vec2 = self.__points[pid].point - self.__points[pid - 2].point
+        dir_21: Vec2 = self.__points[pid].point - self.__points[pid - 1].point
+        self.__points[pid - 1].align_anchors(dir_31)
+        self.__points[pid].align_anchors(dir_21)
+
+    def insert_point(self, p: Vec2, pid: int) -> None:
         if pid < 0:
             return
-        if pid >= len(self.points):
+        if self.n_control_points == 0 or \
+                self.n_control_points == 1 or \
+                self.n_control_points == pid:
+            self.add_point(p)
             return
-        del self.points[pid]
-        del self.curve[pid]
-        self.__update_segment(pid)
-        self.__update_segment(pid - 1)
 
-    def move_point(self, pid: int, pos: Vec2):
-        if pid < 0:
+        _dir: Vec2
+
+        if pid == 0:
+            _dir = self.__points[pid].point - self.__points[self.n_control_points - 1].point
+        else:
+            _dir = self.__points[pid].point - self.__points[pid - 1].point
+
+        pt: BezierPoint2 = BezierPoint2(p)
+
+        pt.align_anchors(_dir)
+
+        self.__points.insert(pid, pt)
+
+    def rem_point(self, pid: int) -> None:
+
+        if not self.__in_range(pid):
             return
-        if pid >= len(self.points):
+        del self.__points[pid]
+
+    def move_point(self, pid: int, pos: Vec2) -> None:
+        if not self.__in_range(pid):
             return
-        self.points[pid].set_point(pos)
-        self.__update_segment(pid)
-        self.__update_segment(pid - 1)
+        self.__points[pid].point = pos
 
     def get_point(self, pid: int) -> Vec2:
-        if pid < 0:
+        if not self.__in_range(pid):
             return None
-        if pid >= len(self.points):
-            return None
-        return self.points[pid].point
+        return self.__points[pid].point
 
-    # noinspection PyArgumentList
-    def set_anchor_1(self, pid: int, pos: Vec2):
-        if pid < 0:
+    def set_anchor_1(self, pid: int, pos: Vec2) -> None:
+        if not self.__in_range(pid):
             return
-        if pid >= len(self.points):
-            return
-        self.points[pid].set_anchor_1_pos(pos)
-        self.__update_segment(pid)
-        self.__update_segment(pid - 1)
+        self.__points[pid].anchor_1 = pos
 
-    def set_anchor_2(self, pid: int, pos: Vec2):
-        if pid < 0:
+    def set_anchor_2(self, pid: int, pos: Vec2) -> None:
+        if not self.__in_range(pid):
             return
-        if pid >= len(self.points):
-            return
-        self.points[pid].set_anchor_2_pos(pos)
-        self.__update_segment(pid)
-        self.__update_segment(pid - 1)
+        self.__points[pid].anchor_2 = pos
+
+    def curve_value(self, pid: int, t: float) -> Vec2:
+        if not self.__in_range(pid):
+            return Vec2(0, 0)
+        if not self.closed:
+            if pid == len(self.__points) - 1:
+                return self.__points[pid].point
+        t = min(max(t, 0.0), 1.0)
+        p1: BezierPoint2 = self.__points[pid]
+        p2: BezierPoint2 = self.__points[(pid + 1) % len(self.__points)]
+        return bezier_2_cubic(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t)
 
     def sect_normal(self, pid: int, t: float) -> Vec2:
-        if pid < 0:
-            return
-        if len(self.points) == 0:
-            return
-        dt: float = 1.0 / self.sections_per_seg
-        p1: BezierPoint2
-        p2: BezierPoint2
-        if pid == len(self.points) - 1:
-            p1: BezierPoint2 = self.points[pid - 1]
-            p2: BezierPoint2 = self.points[pid]
-        else:
-            p1: BezierPoint2 = self.points[pid]
-            p2: BezierPoint2 = self.points[pid + 1]
+        if not self.__in_range(pid):
+            return Vec2(0, 0)
+        dt: float = 1.0 / self.__sections_per_seg
+
+        p1: BezierPoint2 = self.__points[pid % len(self.__points)]
+        p2: BezierPoint2 = self.__points[(pid + 1) % len(self.__points)]
 
         if t + dt <= 1:
             return mathUtils.perpendicular_2(
-                bezier_2_cubic(p1.point, p1.pointAnchor1, p2.pointAnchor2, p2.point, t + dt) -
-                bezier_2_cubic(p1.point, p1.pointAnchor1, p2.pointAnchor2, p2.point, t))
+                bezier_2_cubic(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t + dt) -
+                bezier_2_cubic(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t))
 
         return mathUtils.perpendicular_2(
-            bezier_2_cubic(p1.point, p1.pointAnchor1, p2.pointAnchor2, p2.point, t) -
-            bezier_2_cubic(p1.point, p1.pointAnchor1, p2.pointAnchor2, p2.point, t - dt))
+            bezier_2_cubic(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t) -
+            bezier_2_cubic(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t - dt))
 
     # def outline(self, value:):
     # def __repr__(self): return "<vec2 x:%s y:%s>" % (self.xy[0], self.xy[1])
     # def __str__(self): return "[%s, %s]" % (self.xy[0], self.xy[1])
-
-
-class BezierPoint3(object):
-    def __init__(self, v: Vec3):
-        self.point: Vec3 = v
-        self.pointAnchor1: Vec3 = Vec3(0, 0, 0)
-        self.pointAnchor2: Vec3 = Vec3(0, 0, 0)
-        self.smooth: bool = True
-
-    def set_anchor_1_pos(self, pos: Vec3):
-        self.pointAnchor1 = pos
-        if self.smooth:
-            distance = -(self.point - self.pointAnchor2).norm()
-            self.pointAnchor2 = distance * (self.pointAnchor1 - self.point).normalize()
-
-    def set_anchor_2_pos(self, pos: Vec3):
-        self.pointAnchor2 = pos
-        if self.smooth:
-            distance = -(self.point - self.pointAnchor1).magnitude
-            self.pointAnchor1 = distance * (self.pointAnchor2 - self.point).normalize()
-
-    def set_point(self, pos: Vec3):
-        self.pointAnchor1 = self.pointAnchor1 - self.point
-        self.pointAnchor2 = self.pointAnchor2 - self.point
-        self.point = pos
-        self.pointAnchor1 = self.pointAnchor1 + self.point
-        self.pointAnchor2 = self.pointAnchor2 + self.point
-
-

@@ -3,7 +3,7 @@ import math
 
 
 class Vec2(object):
-    def __init__(self, x: float, y: float): self.xy: [float] = [x, y]
+    def __init__(self, x: float = 0, y: float = 0): self.xy: [float] = [x, y]
 
     def __repr__(self): return "<vec2 x:%s y:%s>" % (self.xy[0], self.xy[1])
 
@@ -32,7 +32,7 @@ class Vec2(object):
         return self
 
     @property
-    def magnitude(self) -> float: return np.sqrt(self.xy[0]*self.xy[0] + self.xy[1]*self.xy[1])
+    def magnitude(self) -> float: return np.sqrt(self.xy[0] * self.xy[0] + self.xy[1] * self.xy[1])
 
     @property
     def x(self) -> float: return self.xy[0]
@@ -50,8 +50,15 @@ class Vec2(object):
 def dot2(a: Vec2, b: Vec2) -> float: return a.x * b.x + a.y * b.y
 
 
+def max2(a: Vec2, b: Vec2) -> Vec2:
+    return Vec2(max(a.x, b.x), max(a.y, b.y))
+
+
+def min2(a: Vec2, b: Vec2) -> Vec2:
+    return Vec2(min(a.x, b.x), min(a.y, b.y))
+
 class Vec3(object):
-    def __init__(self, x: float, y: float, z: float): self.xyz: [float] = [x, y, z]
+    def __init__(self, x: float = 0, y: float = 0, z: float = 0): self.xyz: [float] = [x, y, z]
 
     def norm(self) -> float: return np.sqrt(
         self.xyz[0] * self.xyz[0] + self.xyz[1] * self.xyz[1] + self.xyz[2] * self.xyz[2])
@@ -112,9 +119,9 @@ def cross(a: Vec3, b: Vec3) -> Vec3: return Vec3(a.z * b.y - a.y * b.z, a.x * b.
 
 class Mat3(object):
     def __init__(self,
-                 m0, m1, m2,
-                 m3, m4, m5,
-                 m6, m7, m8):
+                 m0: float = 0, m1: float = 0, m2: float = 0,
+                 m3: float = 0, m4: float = 0, m5: float = 0,
+                 m6: float = 0, m7: float = 0, m8: float = 0):
         self.data: [float] = [m0, m1, m2, m3, m4, m5, m6, m7, m8]
 
     def __getitem__(self, key: int) -> float: return self.data[key]
@@ -210,17 +217,12 @@ def mat_mul_3(a: Mat3, b: Mat3) -> Mat3:
 
 
 class Mat4(object):
-    def __init__(self):
-        self.data: [float] = [0, 0, 0, 0,
-                              0, 0, 0, 0,
-                              0, 0, 0, 0,
-                              0, 0, 0, 0]
 
     def __init__(self,
-                 m0, m1, m2, m3,
-                 m4, m5, m6, m7,
-                 m8, m9, m10, m11,
-                 m12, m13, m14, m15):
+                 m0: float = 0, m1: float = 0, m2: float = 0, m3: float = 0,
+                 m4: float = 0, m5: float = 0, m6: float = 0, m7: float = 0,
+                 m8: float = 0, m9: float = 0, m10: float = 0, m11: float = 0,
+                 m12: float = 0, m13: float = 0, m14: float = 0, m15: float = 0):
         self.data: [float] = [m0, m1, m2, m3,
                               m4, m5, m6, m7,
                               m8, m9, m10, m11,

@@ -291,19 +291,19 @@ def draw_triangle_shaded(buffer: FrameBuffer, p0: Vertex, p1: Vertex, p2: Vertex
 
 def draw_bezier(buffer: FrameBuffer, curve: BezierCurve2, color: RGB = RGB(np.uint8(0), np.uint8(0), np.uint8(255))):
     for point in curve.points:
-        a1 = point_to_scr_space_2(buffer, point.pointAnchor1)
-        a2 = point_to_scr_space_2(buffer, point.pointAnchor2)
+        a1 = point_to_scr_space_2(buffer, point.anchor_1)
+        a2 = point_to_scr_space_2(buffer, point.anchor_2)
         p  = point_to_scr_space_2(buffer, point.point)
         draw_line_4(buffer, round(a1.x), round(a1.y), round(a2.x),
                     round(a2.y), RGB(np.uint8(255), np.uint8(255), np.uint8(255)))
         draw_point(buffer, round(a1.x), round(a1.y), RGB(np.uint8(0),   np.uint8(0), np.uint8(255)))
         draw_point(buffer, round(a2.x), round(a2.y), RGB(np.uint8(0),   np.uint8(0), np.uint8(255)))
         draw_point(buffer, round(p.x),  round(p.y),  RGB(np.uint8(255), np.uint8(0), np.uint8(0)))
-    for segment in curve.curve:
-        p1 = point_to_scr_space_2(buffer, segment[0])
-        for i in range(1, len(segment)):
-            p2 = point_to_scr_space_2(buffer, segment[i])
-            #draw_point(buffer, round(p1.x), round(p1.y), color, -1)
+
+        p1 = point_to_scr_space_2(buffer, curve.get_point(0))
+        for pt in curve:
+            p2 = point_to_scr_space_2(buffer, pt)
+            draw_point(buffer, round(p1.x), round(p1.y), RGB(np.uint8(255), np.uint8(0), np.uint8(0)), -1)
             draw_line_4(buffer, round(p1.x), round(p1.y), round(p2.x), round(p2.y), color)
             p1 = p2
 
