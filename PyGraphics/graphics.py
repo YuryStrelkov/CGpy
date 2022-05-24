@@ -1,13 +1,15 @@
 import numpy as np
-import mathUtils
-from bezier import BezierCurve2
-from mathUtils import Vec2, Vec3
-from material import Material
+
+from models.model import Model
+from vmath import mathUtils
+from shapes.bezier2 import BezierCurve2
+from vmath.mathUtils import Vec2, Vec3
+from materials.material import Material
 import camera
 from camera import Camera
 from frameBuffer import FrameBuffer
 from frameBuffer import RGB
-from trisMeshData import TrisMeshData
+from models.trisMesh import TrisMesh
 import tkinter as tk
 from PIL import ImageTk
 
@@ -227,7 +229,7 @@ def draw_triangle_solid(buffer: FrameBuffer, p0: Vertex, p1: Vertex, p2: Vertex,
             p: Vertex = lerp_vertex(a, b, phi)
             zx, xy = round(p.v.x), round(p.v.y)
             if buffer.set_depth(zx, xy, p.v.z):
-                col_shading: float = mathUtils.clamp(0.0, 1.0, mathUtils.dot3(p.n, Vec3(0.333, 0.333, 0.333)))
+                col_shading: float = mathUtils.clamp(0.0, 1.0, mathUtils.vectors.dot3(p.n, Vec3(0.333, 0.333, 0.333)))
                 buffer.set_pixel(zx, xy, RGB(color.r * col_shading, color.g * col_shading, color.b * col_shading))
 
 
@@ -285,7 +287,7 @@ def draw_triangle_shaded(buffer: FrameBuffer, p0: Vertex, p1: Vertex, p2: Vertex
             ix, jy = round(p.v.x), round(p.v.y)
             if buffer.set_depth(ix, jy, p.v.z):
                 col: RGB = mat.diff_color(p.uv)
-                col_shading: float = mathUtils.clamp(0.0, 1.0, mathUtils.dot3(p.n, Vec3(0.333, 0.333, 0.333)))
+                col_shading: float = mathUtils.clamp(0.0, 1.0, mathUtils.vectors.dot3(p.n, Vec3(0.333, 0.333, 0.333)))
                 buffer.set_pixel(ix, jy, RGB(col.r * col_shading, col.g * col_shading, col.b * col_shading))
 
 
@@ -308,19 +310,19 @@ def draw_bezier(buffer: FrameBuffer, curve: BezierCurve2, color: RGB = RGB(np.ui
         draw_point(buffer, round(p.x),  round(p.y),  RGB(np.uint8(255), np.uint8(0), np.uint8(0)))
 
 # отрисовка вершин
-def draw_vertices(buffer: FrameBuffer, mesh: TrisMeshData, cam: Camera = None,
+def draw_vertices(buffer: FrameBuffer, mesh: TrisMesh, cam: Camera = None,
                   color: RGB = RGB(np.uint8(0), np.uint8(0), np.uint8(255))):
     if cam is None:
         cam = camera.render_camera(buffer, mesh.min_world_space, mesh.max_world_space * 1.5)
 
     for point in mesh.vertices:
-        v1 = point_to_scr_space(buffer, cam.to_clip_space(mesh.transformation.transform_vect(point, 1)))
+        v1 = point_to_scr_space(buffer, cam.to_clip_space(mesh.transform.transform_vect(point, 1)))
         # if buffer.zBuffer[v1.x,v1.y] > v1.z:return;
         draw_point(buffer, round(v1.x), round(v1.y), color, v1.z)
 
 
 # отрисовка ребер
-def draw_edges(buffer: FrameBuffer, mesh: TrisMeshData, cam: Camera = None,
+def draw_edges(buffer: FrameBuffer, mesh: TrisMesh, cam: Camera = None,
                color: RGB = RGB(np.uint8(0), np.uint8(0), np.uint8(0))):
     if cam is None:
         cam = Camera()
@@ -336,9 +338,9 @@ def draw_edges(buffer: FrameBuffer, mesh: TrisMeshData, cam: Camera = None,
         n2 = (mesh.get_normal_world_space(f.n_2))
         n3 = (mesh.get_normal_world_space(f.n_3))
 
-        a = -mathUtils.dot3(n1, forward)
-        b = -mathUtils.dot3(n2, forward)
-        c = -mathUtils.dot3(n3, forward)
+        a = -mathUtils.vectors.dot3(n1, forward)
+        b = -mathUtils.vectors.dot3(n2, forward)
+        c = -mathUtils.vectors.dot3(n3, forward)
 
         if a > 0 or b > 0:
             draw_line_4(buffer, round(v1.x), round(v1.y), round(v2.x), round(v2.y), color)
@@ -348,8 +350,35 @@ def draw_edges(buffer: FrameBuffer, mesh: TrisMeshData, cam: Camera = None,
             draw_line_4(buffer, round(v2.x), round(v2.y), round(v3.x), round(v3.y), color)
 
 
+def draw_model_edges(buffer: FrameBuffer, model: Model, cam: Camera = None,
+                     color: RGB = RGB(np.uint8(0), np.uint8(0), np.uint8(0))):
+    if cam is None:
+        cam = Camera()
+        cam.look_at(model.min_world_space,  model.max_world_space * 1.5)
+    # направление освещения совпадает с направлением взгляда камеры
+    forward = cam.front
+
+    for mesh in model.meshes:
+        for tris in mesh:
+            tris.transform(model.transform)
+            v1 = point_to_scr_space(buffer, cam.to_clip_space(tris.p1))
+            v2 = point_to_scr_space(buffer, cam.to_clip_space(tris.p2))
+            v3 = point_to_scr_space(buffer, cam.to_clip_space(tris.p3))
+
+            a = -mathUtils.vectors.dot3(tris.n1, forward)
+            b = -mathUtils.vectors.dot3(tris.n2, forward)
+            c = -mathUtils.vectors.dot3(tris.n3, forward)
+
+            if a > 0 or b > 0:
+                draw_line_4(buffer, round(v1.x), round(v1.y), round(v2.x), round(v2.y), color)
+            if a > 0 or c > 0:
+                draw_line_4(buffer, round(v1.x), round(v1.y), round(v3.x), round(v3.y), color)
+            if b > 0 or c > 0:
+                draw_line_4(buffer, round(v2.x), round(v2.y), round(v3.x), round(v3.y), color)
+
+
+
 import threading
-import time
 
 # ГУЙ
 debugWindow = None
@@ -384,7 +413,7 @@ def update_image_window(fb: FrameBuffer):
 
 
 # рисует полигональную сетку интерполируя только по глубине и заливает одним цветом
-def draw_mesh_solid_color(buffer: FrameBuffer, mesh: TrisMeshData, cam: Camera = None,
+def draw_mesh_solid_color(buffer: FrameBuffer, mesh: TrisMesh, cam: Camera = None,
                           color: RGB = RGB(np.uint8(255), np.uint8(200), np.uint8(125))):
     # направление освещения совпадает с направлением взгляда камеры
     if cam is None:
@@ -397,7 +426,8 @@ def draw_mesh_solid_color(buffer: FrameBuffer, mesh: TrisMeshData, cam: Camera =
         n2 = mesh.get_normal_world_space(f.n_2)
         n3 = mesh.get_normal_world_space(f.n_3)
         # треугольник к нам задом(back-face culling)
-        if mathUtils.dot3(n1, forward) > 0 and mathUtils.dot3(n2, forward) > 0 and mathUtils.dot3(n3, forward) > 0:
+        if mathUtils.vectors.dot3(n1, forward) > 0 and mathUtils.vectors.dot3(n2, forward) > 0 and\
+           mathUtils.vectors.dot3(n3, forward) > 0:
             continue
         # перевоим точки в простраснтво отсечений камеры
         v1 = cam.to_clip_space(mesh.get_vert_world_space(f.p_1))
@@ -410,7 +440,7 @@ def draw_mesh_solid_color(buffer: FrameBuffer, mesh: TrisMeshData, cam: Camera =
                             color)
 
 
-def draw_mesh_solid_interactive(buffer: FrameBuffer, mesh: TrisMeshData, cam: Camera = None,
+def draw_mesh_solid_interactive(buffer: FrameBuffer, mesh: TrisMesh, cam: Camera = None,
                                 color: RGB = RGB(np.uint8(255), np.uint8(200), np.uint8(125))):
     renderer_thread = threading.Thread(target=draw_mesh_solid_color, args=(buffer, mesh, cam, color,))
     renderer_thread.start()
@@ -418,7 +448,7 @@ def draw_mesh_solid_interactive(buffer: FrameBuffer, mesh: TrisMeshData, cam: Ca
 
 
 # рисует полигональную сетку интерполируя только по глубине и заливает одним цветом
-def draw_mesh_shaded(buffer: FrameBuffer, mesh: TrisMeshData, mat: Material, cam: Camera = None):
+def draw_mesh_shaded(buffer: FrameBuffer, mesh: TrisMesh, mat: Material, cam: Camera = None):
     # направление освещения совпадает с направлением взгляда камеры
     if cam is None:
         cam = camera.render_camera(buffer, mesh.min_world_space, mesh.max_world_space * 1.5)
@@ -430,7 +460,8 @@ def draw_mesh_shaded(buffer: FrameBuffer, mesh: TrisMeshData, mat: Material, cam
         n2 = (mesh.get_normal_world_space(f.n_2))
         n3 = (mesh.get_normal_world_space(f.n_3))
         # треугольник к нам задом(back-face culling)
-        if mathUtils.dot3(n1, forward) > 0 and mathUtils.dot3(n2, forward) > 0 and mathUtils.dot3(n3, forward) > 0:
+        if mathUtils.vectors.dot3(n1, forward) > 0 and mathUtils.vectors.dot3(n2, forward) > 0 and\
+           mathUtils.vectors.dot3(n3, forward) > 0:
             continue
         # перевоим точки в простраснтво отсечений камеры
         v1 = cam.to_clip_space(mesh.get_vert_world_space(f.p_1))
@@ -448,7 +479,7 @@ def draw_mesh_shaded(buffer: FrameBuffer, mesh: TrisMeshData, mat: Material, cam
                              mat)
 
 
-def draw_mesh_shaded_interactive(buffer: FrameBuffer, mesh: TrisMeshData, mat: Material, cam: Camera = None):
+def draw_mesh_shaded_interactive(buffer: FrameBuffer, mesh: TrisMesh, mat: Material, cam: Camera = None):
     renderer_thread = threading.Thread(target=draw_mesh_shaded, args=(buffer, mesh, mat, cam,))
     renderer_thread.start()
     create_image_window(buffer)

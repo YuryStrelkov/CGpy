@@ -1,12 +1,16 @@
 import numpy as np
+
+import materials.material
+import models.trisMesh
 from camera import Camera
-from trisMeshData import TrisMeshData
-from mathUtils import Vec2
+from models.model import Model
+from models.trisMesh import TrisMesh
+from vmath.mathUtils import Vec2
 from frameBuffer import RGB, FrameBuffer
 import graphics as gr
-from material import Material
+from materials.material import Material
 import time
-from bezier import BezierCurve2
+from shapes.bezier2 import BezierCurve2
 
 
 def bezier_intersection_test():
@@ -52,10 +56,10 @@ def static_solid_color(render_camera: Camera = None, draw_wire: bool = False):
     start_time: float = time.time()
     frame_buffer = FrameBuffer(1000, 1000)
     frame_buffer.clear_color(RGB(np.uint8(200), np.uint8(200), np.uint8(200)))
-    mesh = TrisMeshData()
-    mesh.read("rabbit.obj")
+    mesh = TrisMesh()
+    mesh.read("resources/rabbit.obj")
     mesh_mat = Material()
-    mesh_mat.set_diff("checkerboard-rainbow_.jpg")
+    mesh_mat.set_diff("resources/checkerboard-rainbow_.jpg")
     mesh_mat.diffuse.tile = Vec2(5, 5)
     gr.draw_mesh_solid_color(frame_buffer, mesh, render_camera)
     if draw_wire:
@@ -68,10 +72,10 @@ def static_shading(render_camera: Camera = None, draw_wire: bool = False):
     start_time: float = time.time()
     frame_buffer = FrameBuffer(1000, 1000)
     frame_buffer.clear_color(RGB(np.uint8(200), np.uint8(200), np.uint8(200)))
-    mesh = TrisMeshData()
-    mesh.read("rabbit.obj")
+    mesh = TrisMesh()
+    mesh.read("resources/rabbit.obj")
     mesh_mat = Material()
-    mesh_mat.set_diff("checkerboard-rainbow_.jpg")
+    mesh_mat.set_diff("resources/checkerboard-rainbow_.jpg")
     mesh_mat.diffuse.tile = Vec2(5, 5)
     gr.draw_mesh_shaded(frame_buffer, mesh, mesh_mat, render_camera)
     if draw_wire:
@@ -83,10 +87,10 @@ def static_shading(render_camera: Camera = None, draw_wire: bool = False):
 def interactive_solid_color(render_camera: Camera = None):
     frame_buffer = FrameBuffer(1000, 1000)
     frame_buffer.clear_color(RGB(np.uint8(200), np.uint8(200), np.uint8(200)))
-    mesh = TrisMeshData()
-    mesh.read("rabbit.obj")
+    mesh = TrisMesh()
+    mesh.read("resources/rabbit.obj")
     mesh_mat = Material()
-    mesh_mat.set_diff("checkerboard-rainbow_.jpg")
+    mesh_mat.set_diff("resources/checkerboard-rainbow_.jpg")
     mesh_mat.diffuse.tile = Vec2(5, 5)
     gr.draw_mesh_solid_interactive(frame_buffer, mesh, render_camera)
 
@@ -94,17 +98,28 @@ def interactive_solid_color(render_camera: Camera = None):
 def interactive_shading(render_camera: Camera = None):
     frame_buffer = FrameBuffer(1000, 1000)
     frame_buffer.clear_color(RGB(np.uint8(200), np.uint8(200), np.uint8(200)))
-    mesh = TrisMeshData()
-    mesh.read("rabbit.obj")
+    mesh = TrisMesh()
+    mesh.read("resources/rabbit.obj")
     mesh_mat = Material()
-    mesh_mat.set_diff("checkerboard-rainbow_.jpg")
+    mesh_mat.set_diff("resources/checkerboard-rainbow_.jpg")
     mesh_mat.diffuse.tile = Vec2(5, 5)
     gr.draw_mesh_shaded_interactive(frame_buffer, mesh, mesh_mat, render_camera)
 
 
+start_val: int = 0
+
+
 if __name__ == '__main__':
+
+    model: Model = Model("resources/teapots.obj", "resources/teapots.mtl")
+    #frame_buffer = FrameBuffer(1000, 1000)
+    #frame_buffer.clear_color(RGB(np.uint8(200), np.uint8(200), np.uint8(200)))
+    #gr.draw_model_edges(frame_buffer, model)
+    # meshes: [TrisMesh] = models.trisMesh.read_obj_mesh("resources/teapots.obj")
+    # mats:   [Material] = materials.material.read_material("resources/teapots.mtl")
     # static_solid_color()
     # static_shading()
-    interactive_shading()
-    # bezier_curve_test()
+    # interactive_shading()
+    #frame_buffer.imshow()
+    bezier_curve_test()
     # bezier_intersection_test()

@@ -1,7 +1,5 @@
-from typing import List, Union, Any
-
-from mathUtils import Vec3
-from trisMeshData import TrisMeshData
+from vmath.mathUtils import Vec3
+from models.trisMesh import TrisMesh
 
 
 def quadratic_bezier_surface(p1: Vec3, p2: Vec3, p3: Vec3,
@@ -40,7 +38,7 @@ def cubic_bezier_surface(p1: Vec3, p2: Vec3, p3: Vec3, p4: Vec3,
 
 class CubicPatch(object):
     def __init__(self):
-        self.__mesh: TrisMeshData = []
+        self.__mesh: TrisMesh = []
         self.__controllers: [Vec3] = \
             [Vec3(0, 0, 0), Vec3(0, 0, 0), Vec3(0, 0, 0), Vec3(0, 0, 0),
              Vec3(0, 0, 0), Vec3(0, 0, 0), Vec3(0, 0, 0), Vec3(0, 0, 0),

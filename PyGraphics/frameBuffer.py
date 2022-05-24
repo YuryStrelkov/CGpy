@@ -1,7 +1,7 @@
 import numpy as np
 from PIL import Image
-from material import Texture, RGB
-from mathUtils import Vec2
+from materials.material import Texture, RGB
+from vmath.mathUtils import Vec2
 
 
 class FrameBuffer(object):

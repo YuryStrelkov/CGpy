@@ -1,6 +1,6 @@
 import numpy as np
-from transform import Transform
-from mathUtils import Vec3, Mat4
+from transforms.transform import Transform
+from vmath.mathUtils import Vec3, Mat4
 from frameBuffer import FrameBuffer
 
 # определяет направление и положение с которого мы смотрим на 3D сцену
@@ -39,10 +39,12 @@ class Camera(object):
 
     # ось Z системы координат камеры
     @property
-    def right(self) -> Vec3: return self.lookAtTransform.right
+    def right(self) -> Vec3:
+        return self.lookAtTransform.right
 
     # Cтроит матрицу вида
-    def look_at(self, target: Vec3, eye: Vec3, up: Vec3 = Vec3(0, 1, 0)): self.lookAtTransform.look_at(target, eye, up)
+    def look_at(self, target: Vec3, eye: Vec3, up: Vec3 = Vec3(0, 1, 0)) -> None:
+        self.lookAtTransform.look_at(target, eye, up)
 
     # Переводит точку в пространстве в собственную систему координат камеры
     def to_camera_space(self, v: Vec3) -> Vec3: return self.lookAtTransform.inv_transform_vect(v, 1)
