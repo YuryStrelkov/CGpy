@@ -1,9 +1,9 @@
 import numpy as np
-from vmath import mathUtils
-from vmath.mathUtils import Vec3, Mat4
+from vmath import mathUtils, matrices
+from vmath.matrices import  Mat4
+from vmath.vectors import  Vec3, Vec2
 
 
-# row major 3D transform
 class Transform(object):
     def __init__(self):
         self.transformM = Mat4(1.0, 0.0, 0.0, 0.0,
@@ -141,8 +141,8 @@ class Transform(object):
         self.eulerAngles.z = xyz.z
 
         i = mathUtils.rotate_x(xyz.x)
-        i = mathUtils.mat_mul_4(i, mathUtils.rotate_y(xyz.y))
-        i = mathUtils.mat_mul_4(i, mathUtils.rotate_z(xyz.z))
+        i = matrices.mat_mul_4(i, mathUtils.rotate_y(xyz.y))
+        i = matrices.mat_mul_4(i, mathUtils.rotate_z(xyz.z))
 
         scl = self.scale
         orig = self.origin

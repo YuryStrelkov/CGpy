@@ -1,5 +1,6 @@
 import numpy as np
-from vmath.mathUtils import Vec2, Mat3
+from vmath.matrices import  Mat3
+from vmath.vectors import  Vec2
 
 
 class Transform2(object):

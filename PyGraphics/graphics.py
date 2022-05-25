@@ -309,6 +309,7 @@ def draw_bezier(buffer: FrameBuffer, curve: BezierCurve2, color: RGB = RGB(np.ui
         draw_point(buffer, round(a2.x), round(a2.y), RGB(np.uint8(0),   np.uint8(0), np.uint8(255)))
         draw_point(buffer, round(p.x),  round(p.y),  RGB(np.uint8(255), np.uint8(0), np.uint8(0)))
 
+
 # отрисовка вершин
 def draw_vertices(buffer: FrameBuffer, mesh: TrisMesh, cam: Camera = None,
                   color: RGB = RGB(np.uint8(0), np.uint8(0), np.uint8(255))):
