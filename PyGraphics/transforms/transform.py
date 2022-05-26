@@ -5,12 +5,40 @@ from vmath.vectors import  Vec3, Vec2
 
 
 class Transform(object):
+
     def __init__(self):
         self.transformM = Mat4(1.0, 0.0, 0.0, 0.0,
                                0.0, 1.0, 0.0, 0.0,
                                0.0, 0.0, 1.0, 0.0,
                                0.0, 0.0, 0.0, 1.0)
         self.eulerAngles = Vec3(0.0, 0.0, 0.0)
+
+    def __repr__(self) -> str:
+        res: str = "<Transform \n"
+        res += f"origin   :{self.origin}\n"
+        res += f"scale    :{self.scale}\n"
+        res += f"rotate   :{self.eulerAngles}\n"
+        res += f"t-matrix :\n{self.transformM}\n"
+        res += ">"
+        return res
+
+    def __str__(self) -> str:
+        res: str = "Transform \n"
+        res += f"origin   :{self.origin}\n"
+        res += f"scale    :{self.scale}\n"
+        res += f"rotate   :{self.eulerAngles}\n"
+        res += f"t-matrix :\n{self.transformM}\n"
+        return res
+
+    def __eq__(self, other) -> bool:
+        if not(type(other) is Transform):
+            return False
+        if not(self.transformM == other.transformM):
+            return False
+        return True
+
+    def __hash__(self) -> int:
+        return hash(self.transformM)
 
     @property
     def front(self) -> Vec3:
@@ -141,8 +169,8 @@ class Transform(object):
         self.eulerAngles.z = xyz.z
 
         i = mathUtils.rotate_x(xyz.x)
-        i = matrices.mat_mul_4(i, mathUtils.rotate_y(xyz.y))
-        i = matrices.mat_mul_4(i, mathUtils.rotate_z(xyz.z))
+        i = i * mathUtils.rotate_y(xyz.y)
+        i = i * mathUtils.rotate_z(xyz.y)
 
         scl = self.scale
         orig = self.origin

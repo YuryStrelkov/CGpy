@@ -1,7 +1,7 @@
 from typing import IO
 import re
 
-from transforms.transform import Transform
+from models.triangle import Triangle
 from vmath.mathUtils import Vec3, Vec2
 
 
@@ -85,34 +85,6 @@ class BoundingBox(object):
         return (self.__max + self.__min) * 0.5
 
 
-class Triangle(object):
-    def __init__(self,
-                 _p1: Vec3, _p2: Vec3, _p3: Vec3,
-                 _n1: Vec3, _n2: Vec3, _n3: Vec3,
-                 _uv1: Vec2, _uv2: Vec2, _uv3: Vec2):
-        self.p1: Vec3 = _p1
-        self.p2: Vec3 = _p2
-        self.p3: Vec3 = _p3
-        self.n1: Vec3 = _n1
-        self.n2: Vec3 = _n2
-        self.n3: Vec3 = _n3
-        self.uv1: Vec2 = _uv1
-        self.uv2: Vec2 = _uv2
-        self.uv3: Vec2 = _uv3
-
-    def transform(self, tm: Transform) -> None:
-        self.p1 = tm.transform_vect(self.p1, 1.0)
-        self.p2 = tm.transform_vect(self.p2, 1.0)
-        self.p3 = tm.transform_vect(self.p3, 1.0)
-
-        self.n1 = tm.transform_vect(self.n1, 0.0)
-        self.n2 = tm.transform_vect(self.n2, 0.0)
-        self.n3 = tm.transform_vect(self.n3, 0.0)
-        self.n1.normalize()
-        self.n2.normalize()
-        self.n3.normalize()
-
-
 class TrisMesh(object):
     def __init__(self):
         self.name: str = ""
@@ -192,8 +164,8 @@ class TrisMesh(object):
 
     def get_triangle(self, tris_id: int):
 
-        if len(self.__faces) >= tris_id or tris_id < 0:
-            raise IndexError("no face with index %s in mesh %s " % str(tris_id), self.name)
+        if len(self.__faces) <= tris_id or tris_id < 0:
+            raise IndexError(f"no face with index %s in mesh %s " % (str(tris_id), self.name))
 
         f: Face = self.__faces[tris_id]
 

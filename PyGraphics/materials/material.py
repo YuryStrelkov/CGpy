@@ -9,6 +9,7 @@ from vmath.vectors import Vec3
 
 class Material(object):
     def __init__(self):
+        self.name = ""
         self.diffuse_color: Vec3 = Vec3(1, 1, 1)  # Kd: specifies diffuse color
         self.specular_color: Vec3 = Vec3(1, 1, 1)  # Ks: specifies specular color
         self.ns: float = 10  # defines the focus of specular highlights in the material.
@@ -20,6 +21,60 @@ class Material(object):
         self.__diffuse: Texture = None
         self.__specular: Texture = None
         self.__normals: Texture = None
+
+    def __repr__(self):
+        res: str = f"<Material {self.name}\n"
+        res += f"diff_color : {self.diffuse_color}\n"
+        res += f"spec_color : {self.specular_color}\n"
+        res += f"ns         : {self.ns}\n"
+        res += f"ni         : {self.ni}\n"
+        res += f"dissolve   : {self.dissolve}\n"
+        res += f"illum      : {self.illum}\n"
+        res += f"diff_tex   : None\n"
+
+        if self.__diffuse is None:
+            res += f"diff_tex   : None\n"
+        else:
+            res += f"diff_tex   :\n{self.__diffuse}\n"
+
+        if self.__specular is None:
+            res += f"spec_tex   : None\n"
+        else:
+            res += f"spec_tex   :\n{self.__specular}\n"
+
+        if self.__normals is None:
+            res += f"norm_tex   : None\n"
+        else:
+            res += f"norm_tex   :\n{self.__normals}\n"
+        res += ">\n"
+        return res
+
+    def __str__(self):
+        res: str = f"Material {self.name}\n"
+        res += f"diff_color : {self.diffuse_color}\n"
+        res += f"spec_color : {self.specular_color}\n"
+        res += f"ns         : {self.ns}\n"
+        res += f"ni         : {self.ni}\n"
+        res += f"dissolve   : {self.dissolve}\n"
+        res += f"illum      : {self.illum}\n"
+        res += f"diff_tex   : None\n"
+
+        if self.__diffuse is None:
+            res += f"diff_tex   : None\n"
+        else:
+            res += f"diff_tex   :\n{self.__diffuse}\n"
+
+        if self.__specular is None:
+            res += f"spec_tex   : None\n"
+        else:
+            res += f"spec_tex   :\n{self.__specular}\n"
+
+        if self.__normals is None:
+            res += f"norm_tex   : None\n"
+        else:
+            res += f"norm_tex   :\n{self.__normals}\n"
+        res += "\n"
+        return res
 
     def set_diff(self, orig: str):
         if self.__diffuse is None:

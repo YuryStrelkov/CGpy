@@ -126,3 +126,22 @@ class Model(object):
         tris: Triangle = self.__meshes[mesh_id].get_triangle(tris_id)
         tris.transform(self.__transform)
         return tris
+
+    def triangles_local_space(self, mesh_id: int):
+        if not self.__mesh_id_in_range(mesh_id):
+            raise IndexError("no mesh with index " + str(mesh_id))
+        tris_id: int = 0
+        while tris_id < self.__meshes[mesh_id].faces_count:
+            yield self.__meshes[mesh_id].get_triangle(tris_id)
+            tris_id += 1
+
+    def triangles_world_space(self, mesh_id: int):
+        if not self.__mesh_id_in_range(mesh_id):
+            raise IndexError("no mesh with index " + str(mesh_id))
+        tris_id: int = 0
+        while tris_id < self.__meshes[mesh_id].faces_count:
+            tris: Triangle = self.__meshes[mesh_id].get_triangle(tris_id)
+            tris.transform(self.__transform)
+            yield tris
+            tris_id += 1
+

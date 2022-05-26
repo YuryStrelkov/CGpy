@@ -14,8 +14,36 @@ class Texture(object):
         self.__width = _w
         self.__height = _h
         self.__bpp = _bpp
-        # self.transform.scale = vec2(_w, -_h);
         self.clear_color()
+
+    def __getitem__(self, index):
+        if index < 0:
+            return RGB(np.uint8(0), np.uint8(0), np.uint8(0))
+        if index >= self.__width * self.__height * self.__bpp - 2:
+            return RGB(np.uint8(0), np.uint8(0), np.uint8(0))
+        return RGB(self.colors[index],
+                   self.colors[index + 1],
+                   self.colors[index + 2])
+
+    def __repr__(self) -> str:
+        res: str = "<Texture\n"
+        res += f"source file    : {self.__source_file}\n"
+        res += f"width          : {self.__width}\n"
+        res += f"width          : {self.__height}\n"
+        res += f"width          : {self.__bpp}\n"
+        res += "affine transform:\n"
+        res += f"{self.transform}\n>\n"
+        return res
+
+    def __str__(self) -> str:
+        res: str = ""
+        res += f"source file    : {self.__source_file}\n"
+        res += f"width          : {self.__width}\n"
+        res += f"width          : {self.__height}\n"
+        res += f"width          : {self.__bpp}\n"
+        res += "affine transform:\n"
+        res += f"{self.transform}\n"
+        return res
 
     @property
     def source_file_path(self) -> str:

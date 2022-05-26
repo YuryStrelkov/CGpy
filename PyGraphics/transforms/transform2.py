@@ -1,6 +1,6 @@
 import numpy as np
-from vmath.matrices import  Mat3
-from vmath.vectors import  Vec2
+from vmath.matrices import Mat3
+from vmath.vectors import Vec2
 
 
 class Transform2(object):
@@ -9,6 +9,33 @@ class Transform2(object):
                                0.0, 1.0, 0.0,
                                0.0, 0.0, 1.0)
         self.zAngle = 0.0
+
+    def __repr__(self) -> str:
+        res: str = "<Transform \n"
+        res += f"origin   :{self.origin}\n"
+        res += f"scale    :{self.scale}\n"
+        res += f"rotate   :{self.zAngle}\n"
+        res += f"t-matrix :\n{self.transformM}\n"
+        res += ">"
+        return res
+
+    def __str__(self) -> str:
+        res: str = "Transform \n"
+        res += f"origin   :{self.origin}\n"
+        res += f"scale    :{self.scale}\n"
+        res += f"rotate   :{self.zAngle}\n"
+        res += f"t-matrix :\n{self.transformM}\n"
+        return res
+
+    def __eq__(self, other) -> bool:
+        if not(type(other) is Transform2):
+            return False
+        if not(self.transformM == other.transformM):
+            return False
+        return True
+
+    def __hash__(self) -> int:
+        return hash(self.transformM)
 
     @property
     def front(self) -> Vec2:

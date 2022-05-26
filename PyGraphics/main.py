@@ -1,14 +1,10 @@
 import numpy as np
 
-import materials.material
-import models.trisMesh
 from camera import Camera
 from models.model import Model
-from models.trisMesh import TrisMesh
 from vmath.mathUtils import Vec2
 from frameBuffer import RGB, FrameBuffer
 import graphics as gr
-from materials.material import Material
 import time
 from shapes.bezier2 import BezierCurve2
 
@@ -56,14 +52,10 @@ def static_solid_color(render_camera: Camera = None, draw_wire: bool = False):
     start_time: float = time.time()
     frame_buffer = FrameBuffer(1000, 1000)
     frame_buffer.clear_color(RGB(np.uint8(200), np.uint8(200), np.uint8(200)))
-    mesh = TrisMesh()
-    mesh.read("resources/rabbit.obj")
-    mesh_mat = Material()
-    mesh_mat.set_diff("resources/checkerboard-rainbow_.jpg")
-    mesh_mat.diffuse.tile = Vec2(5, 5)
-    gr.draw_mesh_solid_color(frame_buffer, mesh, render_camera)
+    model: Model = Model("resources/rabbit.obj", "resources/teapots.mtl")
+    gr.draw_model_solid_color(frame_buffer, model, render_camera)
     if draw_wire:
-        gr.draw_edges(frame_buffer, mesh, render_camera)
+        gr.draw_model_edges(frame_buffer, model, render_camera)
     print("static_solid_color :: elapsed render time : ", time.time() - start_time)
     frame_buffer.imshow()
 
@@ -72,54 +64,43 @@ def static_shading(render_camera: Camera = None, draw_wire: bool = False):
     start_time: float = time.time()
     frame_buffer = FrameBuffer(1000, 1000)
     frame_buffer.clear_color(RGB(np.uint8(200), np.uint8(200), np.uint8(200)))
-    mesh = TrisMesh()
-    mesh.read("resources/rabbit.obj")
-    mesh_mat = Material()
-    mesh_mat.set_diff("resources/checkerboard-rainbow_.jpg")
-    mesh_mat.diffuse.tile = Vec2(5, 5)
-    gr.draw_mesh_shaded(frame_buffer, mesh, mesh_mat, render_camera)
+    model: Model = Model("resources/rabbit.obj", "resources/teapots.mtl")
+    gr.draw_model_shaded(frame_buffer, model, render_camera)
     if draw_wire:
-        gr.draw_edges(frame_buffer, mesh, render_camera)
+        gr.draw_model_edges(frame_buffer, model, render_camera)
     print("static_shading :: elapsed render time : ", time.time() - start_time)
     frame_buffer.imshow()
 
 
 def interactive_solid_color(render_camera: Camera = None):
+
     frame_buffer = FrameBuffer(1000, 1000)
+
     frame_buffer.clear_color(RGB(np.uint8(200), np.uint8(200), np.uint8(200)))
-    mesh = TrisMesh()
-    mesh.read("resources/rabbit.obj")
-    mesh_mat = Material()
-    mesh_mat.set_diff("resources/checkerboard-rainbow_.jpg")
-    mesh_mat.diffuse.tile = Vec2(5, 5)
-    gr.draw_mesh_solid_interactive(frame_buffer, mesh, render_camera)
+
+    model: Model = Model("resources/teapots.obj", "resources/teapots.mtl")
+
+    gr.draw_model_solid_interactive(frame_buffer, model, render_camera)
 
 
 def interactive_shading(render_camera: Camera = None):
+
     frame_buffer = FrameBuffer(1000, 1000)
+
     frame_buffer.clear_color(RGB(np.uint8(200), np.uint8(200), np.uint8(200)))
-    mesh = TrisMesh()
-    mesh.read("resources/rabbit.obj")
-    mesh_mat = Material()
-    mesh_mat.set_diff("resources/checkerboard-rainbow_.jpg")
-    mesh_mat.diffuse.tile = Vec2(5, 5)
-    gr.draw_mesh_shaded_interactive(frame_buffer, mesh, mesh_mat, render_camera)
 
+    model: Model = Model("resources/teapots.obj", "resources/teapots.mtl")
 
-start_val: int = 0
+    model.get_material(0).tile = Vec2(5, 5)
+
+    model.get_material(1).tile = Vec2(15, 15)
+
+    model.get_material(2).tile = Vec2(25, 25)
+
+    gr.draw_model_shaded_interactive(frame_buffer, model, render_camera)
+
 
 
 if __name__ == '__main__':
-
-    model: Model = Model("resources/teapots.obj", "resources/teapots.mtl")
-    frame_buffer = FrameBuffer(1000, 1000)
-    frame_buffer.clear_color(RGB(np.uint8(200), np.uint8(200), np.uint8(200)))
-    gr.draw_model_edges(frame_buffer, model)
-    # meshes: [TrisMesh] = models.trisMesh.read_obj_mesh("resources/teapots.obj")
-    # mats:   [Material] = materials.material.read_material("resources/teapots.mtl")
-    # static_solid_color()
-    # static_shading()
-    # interactive_shading()
-    frame_buffer.imshow()
-    #bezier_curve_test()
-    # bezier_intersection_test()
+    static_solid_color()
+    static_shading()
