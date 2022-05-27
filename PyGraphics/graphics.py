@@ -401,16 +401,23 @@ def create_image_window(fb: FrameBuffer):
     debugWindow.geometry(str(img.height() + 3) + "x" + str(img.width() + 3))
     debugWindowLabel = tk.Label(image=img)
     debugWindowLabel.pack(side="bottom", fill="both", expand="yes")
-    while 'normal' == debugWindow.state():
+    while True:
         try:
+            if not('normal' == debugWindow.state()):
+                break
             debugWindow.update()
             update_image_window(fb)
         except Exception:
             print("GUI execution stops")
+            break
 
 
 def update_image_window(fb: FrameBuffer):
+    global debugWindow
+    global debugWindowLabel
     if debugWindow is None:
+        return
+    if debugWindowLabel is None:
         return
     img = ImageTk.PhotoImage(fb.frame_buffer_image)
     debugWindowLabel.configure(image=img)

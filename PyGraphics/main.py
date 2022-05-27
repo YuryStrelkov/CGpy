@@ -73,7 +73,6 @@ def static_shading(render_camera: Camera = None, draw_wire: bool = False):
 
 
 def interactive_solid_color(render_camera: Camera = None):
-
     frame_buffer = FrameBuffer(1000, 1000)
 
     frame_buffer.clear_color(RGB(np.uint8(200), np.uint8(200), np.uint8(200)))
@@ -84,7 +83,6 @@ def interactive_solid_color(render_camera: Camera = None):
 
 
 def interactive_shading(render_camera: Camera = None):
-
     frame_buffer = FrameBuffer(1000, 1000)
 
     frame_buffer.clear_color(RGB(np.uint8(200), np.uint8(200), np.uint8(200)))
@@ -100,7 +98,7 @@ def interactive_shading(render_camera: Camera = None):
     gr.draw_model_shaded_interactive(frame_buffer, model, render_camera)
 
 
-
 if __name__ == '__main__':
-    static_solid_color()
-    static_shading()
+    # static_solid_color()
+    # static_shading()
+    interactive_solid_color()
