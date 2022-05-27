@@ -30,22 +30,21 @@ class Material(object):
         res += f"ni         : {self.ni}\n"
         res += f"dissolve   : {self.dissolve}\n"
         res += f"illum      : {self.illum}\n"
-        res += f"diff_tex   : None\n"
 
         if self.__diffuse is None:
-            res += f"diff_tex   : None\n"
+            res += f"diff_tex       : None\n"
         else:
-            res += f"diff_tex   :\n{self.__diffuse}\n"
+            res += f"diff_tex       : {self.__diffuse.name}\n{self.__diffuse}\n"
 
         if self.__specular is None:
-            res += f"spec_tex   : None\n"
+            res += f"spec_tex       : None\n"
         else:
-            res += f"spec_tex   :\n{self.__specular}\n"
+            res += f"spec_tex       : {self.__specular.name}\n{self.__specular}\n"
 
         if self.__normals is None:
-            res += f"norm_tex   : None\n"
+            res += f"norm_tex       : None\n"
         else:
-            res += f"norm_tex   :\n{self.__normals}\n"
+            res += f"norm_tex       : {self.__normals.name}\n{self.__normals}\n"
         res += ">\n"
         return res
 
@@ -57,22 +56,21 @@ class Material(object):
         res += f"ni         : {self.ni}\n"
         res += f"dissolve   : {self.dissolve}\n"
         res += f"illum      : {self.illum}\n"
-        res += f"diff_tex   : None\n"
 
         if self.__diffuse is None:
-            res += f"diff_tex   : None\n"
+            res += f"diff_tex       : None\n"
         else:
-            res += f"diff_tex   :\n{self.__diffuse}\n"
+            res += f"diff_tex       : {self.__diffuse.name}\n{self.__diffuse}\n"
 
         if self.__specular is None:
-            res += f"spec_tex   : None\n"
+            res += f"spec_tex       : None\n"
         else:
-            res += f"spec_tex   :\n{self.__specular}\n"
+            res += f"spec_tex       : {self.__specular.name}\n{self.__specular}\n"
 
         if self.__normals is None:
-            res += f"norm_tex   : None\n"
+            res += f"norm_tex       : None\n"
         else:
-            res += f"norm_tex   :\n{self.__normals}\n"
+            res += f"norm_tex       : {self.__normals.name}\n{self.__normals}\n"
         res += "\n"
         return res
 

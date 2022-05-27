@@ -1,3 +1,5 @@
+import math
+
 import numpy as np
 from vmath import mathUtils, matrices
 from vmath.matrices import  Mat4
@@ -64,7 +66,7 @@ class Transform(object):
         x = self.transformM.m00
         y = self.transformM.m10
         z = self.transformM.m20
-        return np.sqrt(x * x + y * y + z * z)
+        return math.sqrt(x * x + y * y + z * z)
 
     # масштаб по Y
     @property
@@ -72,7 +74,7 @@ class Transform(object):
         x = self.transformM.m01
         y = self.transformM.m11
         z = self.transformM.m21
-        return np.sqrt(x * x + y * y + z * z)
+        return math.sqrt(x * x + y * y + z * z)
         # масштаб по Z
 
     @property
@@ -80,7 +82,7 @@ class Transform(object):
         x = self.transformM.m02
         y = self.transformM.m12
         z = self.transformM.m22
-        return np.sqrt(x * x + y * y + z * z)
+        return math.sqrt(x * x + y * y + z * z)
         # установить масштаб по Х
 
     @sx.setter

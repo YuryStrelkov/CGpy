@@ -2,6 +2,7 @@ import numpy as np
 
 from models.model import Model
 from models.vertex import Vertex, lerp_vertex
+from surfaces.patch import CubicPatch
 from vmath import mathUtils
 from shapes.bezier2 import BezierCurve2
 from vmath.mathUtils import Vec2, Vec3
@@ -263,7 +264,7 @@ def draw_triangle_shaded(buffer: FrameBuffer, p0: Vertex, p1: Vertex, p2: Vertex
 
 def draw_bezier(buffer: FrameBuffer, curve: BezierCurve2, color: RGB = RGB(np.uint8(0), np.uint8(0), np.uint8(255))):
     p1 = point_to_scr_space_2(buffer, curve.get_point(0))
-    for pt in curve:
+    for pt in curve.curve_values(0.01):
         p2 = point_to_scr_space_2(buffer, pt)
         # draw_point(buffer, round(p1.x), round(p1.y), RGB(np.uint8(255), np.uint8(0), np.uint8(0)), -1)
         draw_line_4(buffer, round(p1.x), round(p1.y), round(p2.x), round(p2.y), color)
@@ -283,6 +284,7 @@ def draw_bezier(buffer: FrameBuffer, curve: BezierCurve2, color: RGB = RGB(np.ui
 ################
 #### MODELS ####
 ################
+
 def draw_model_edges(buffer: FrameBuffer, model: Model, cam: Camera = None,
                      color: RGB = RGB(np.uint8(0), np.uint8(0), np.uint8(0))):
     if cam is None:
@@ -354,6 +356,52 @@ def draw_model_solid_color(buffer: FrameBuffer, model: Model, cam: Camera = None
             draw_triangle_solid(buffer, tris.vertex1, tris.vertex2, tris.vertex3, color)
 
 
+def draw_patch_solid_color(buffer: FrameBuffer, model: CubicPatch, cam: Camera = None,
+                           color: RGB = RGB(np.uint8(255), np.uint8(200), np.uint8(125))):
+    # направление освещения совпадает с направлением взгляда камеры
+    if cam is None:
+        cam = Camera()
+        cam.look_at(model.min_world_space, model.max_world_space * 1.5)
+        # направление освещения совпадает с направлением взгляда камеры
+    forward = cam.front
+
+    for tris in model.triangles_world_space():
+
+        a = mathUtils.vectors.dot3(tris.n1, forward)
+        b = mathUtils.vectors.dot3(tris.n2, forward)
+        c = mathUtils.vectors.dot3(tris.n3, forward)
+        # треугольник к нам задом(back-face culling)
+
+        if a > 0 and b > 0 and c > 0:
+            continue
+
+        tris.camera_screen_transform(cam, buffer)
+        draw_triangle_solid(buffer, tris.vertex1, tris.vertex2, tris.vertex3, color)
+
+
+def draw_patch_edges(buffer: FrameBuffer, model: CubicPatch, cam: Camera = None,
+                     color: RGB = RGB(np.uint8(0), np.uint8(0), np.uint8(0))):
+    if cam is None:
+        cam = Camera()
+        cam.look_at(model.min_world_space, model.max_world_space * 1.5)
+    # направление освещения совпадает с направлением взгляда камеры
+    forward = cam.front
+
+    for tris in model.triangles_world_space():
+        tris.camera_screen_transform(cam, buffer)
+        a = -mathUtils.vectors.dot3(tris.n1, forward)
+        b = -mathUtils.vectors.dot3(tris.n2, forward)
+        c = -mathUtils.vectors.dot3(tris.n3, forward)
+
+        if a > 0 or b > 0:
+            draw_line_4(buffer, round(tris.p1.x), round(tris.p1.y), round(tris.p2.x), round(tris.p2.y), color)
+        if a > 0 or c > 0:
+            draw_line_4(buffer, round(tris.p1.x), round(tris.p1.y), round(tris.p3.x), round(tris.p3.y), color)
+        if b > 0 or c > 0:
+            draw_line_4(buffer, round(tris.p2.x), round(tris.p2.y), round(tris.p3.x), round(tris.p3.y), color)
+
+
+
 def draw_model_shaded(buffer: FrameBuffer, model: Model, cam: Camera = None):
     if model.materials_count == 0:
         draw_model_solid_color(buffer, model)
@@ -401,7 +449,7 @@ def create_image_window(fb: FrameBuffer):
     debugWindowLabel.pack(side="bottom", fill="both", expand="yes")
     while True:
         try:
-            if not('normal' == debugWindow.state()):
+            if not ('normal' == debugWindow.state()):
                 break
             debugWindow.update()
             update_image_window(fb)

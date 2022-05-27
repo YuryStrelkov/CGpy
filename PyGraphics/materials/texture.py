@@ -7,7 +7,8 @@ from materials.rgb import RGB
 
 
 class Texture(object):
-    def __init__(self, _w: int = 0, _h: int = 0, _bpp: int = 0, color: RGB = RGB(125,135,145)):
+    def __init__(self, _w: int = 0, _h: int = 0, _bpp: int = 0,
+                 color: RGB = RGB(np.uint8(125), np.uint8(135), np.uint8(145))):
         self.__source_file: str = ""
         self.__transform: Transform2 = Transform2()
         self.__width = _w
@@ -29,8 +30,8 @@ class Texture(object):
         res: str = "<Texture\n"
         res += f"source file    : {self.__source_file}\n"
         res += f"width          : {self.__width}\n"
-        res += f"width          : {self.__height}\n"
-        res += f"width          : {self.__bpp}\n"
+        res += f"height         : {self.__height}\n"
+        res += f"bpp            : {self.__bpp}\n"
         res += "affine transform:\n"
         res += f"{self.__transform}\n>\n"
         return res
@@ -39,11 +40,29 @@ class Texture(object):
         res: str = ""
         res += f"source file    : {self.__source_file}\n"
         res += f"width          : {self.__width}\n"
-        res += f"width          : {self.__height}\n"
-        res += f"width          : {self.__bpp}\n"
+        res += f"height         : {self.__height}\n"
+        res += f"bpp            : {self.__bpp}\n"
         res += "affine transform:\n"
         res += f"{self.__transform}\n"
         return res
+
+    @property
+    def name(self) -> str:
+        if len(self.__source_file) == 0:
+            return ""
+        name: [str] = self.__source_file.split("\\")
+
+        if len(name) == 0:
+            return ""
+
+        name = name[len(name) - 1].split(".")
+
+        if len(name) == 0:
+            return ""
+
+        if len(name) < 2:
+            return name[0]
+        return name[len(name) - 2]
 
     @property
     def source_file_path(self) -> str:
@@ -165,6 +184,4 @@ class Texture(object):
         if self.texture_byte_size == 0:
             return
         rgb = [color.r, color.g, color.g]
-        #self.__colors: [np.uint8] = [rgb[i % 3] for i in range(0, self.bpp * self.width * self.height)]
-        for i in range(0, len(self.__colors)):
-           self.__colors[i] = rgb[i % 3]
+        self.__colors = np.array([rgb[i % 3] for i in range(0, self.bpp * self.width * self.height)])

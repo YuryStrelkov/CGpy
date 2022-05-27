@@ -5,7 +5,7 @@ from vmath.mathUtils import Vec2
 
 
 class FrameBuffer(object):
-    def __init__(self, w: int, h: int, color: RGB = RGB(125, 135, 145)):
+    def __init__(self, w: int, h: int, color: RGB = RGB(np.uint8(125), np.uint8(135), np.uint8(145))):
         self.__frame_texture = Texture(w, h, 3, color)
         self.__z_buffer = np.full((self.height * self.width), -np.inf)
 

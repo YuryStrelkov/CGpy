@@ -95,45 +95,37 @@ class TrisMesh(object):
         self.__bbox: BoundingBox = BoundingBox()
 
     def __str__(self):
-        res: str = "mesh: %s\n" % self.name
-        res += "max: %s\n" % self.__bbox.max
-        res += "min: %s\n" % self.__bbox.min
+        res: str = f"mesh: {self.name}\n"
+        res += f"max: {self.__bbox.max}\n"
+        res += f"min: {self.__bbox.min}\n"
         res += "vertices: \n"
         for v in self.__vertices:
-            res += v
-            res += "\n"
+            res += f"{v}\n"
         res += "normals: \n"
         for v in self.__normals:
-            res += v
-            res += "\n"
+            res += f"{v}\n"
         res += "uvs: \n"
         for v in self.__uvs:
-            res += v
-            res += "\n"
+            res += f"{v}\n"
         for f in self.__faces:
-            res += f
-            res += "\n"
+            res += f"{f}\n"
         return res
 
     def __repr__(self):
-        res: str = "<\nmesh: %s\n" % self.name
-        res += "max: %s\n" % self.__bbox.max
-        res += "min: %s\n" % self.__bbox.min
+        res: str = f"<\nmesh: {self.name}\n"
+        res += f"max: {self.__bbox.max}\n"
+        res += f"min: {self.__bbox.min}\n"
         res += "vertices: \n"
         for v in self.__vertices:
-            res += v
-            res += "\n"
+            res += f"{v}\n"
         res += "normals: \n"
         for v in self.__normals:
-            res += v
-            res += "\n"
+            res += f"{v}\n"
         res += "uvs: \n"
         for v in self.__uvs:
-            res += v
-            res += "\n"
+            res += f"{v}\n"
         for f in self.__faces:
-            res += f
-            res += "\n"
+            res += f"{f}\n"
         res += "\n>"
         return res
 
@@ -172,6 +164,28 @@ class TrisMesh(object):
         return Triangle(self.__vertices[f.p_1], self.__vertices[f.p_2], self.__vertices[f.p_3],
                         self.__normals[f.n_1],  self.__normals[f.n_2],  self.__normals[f.n_3],
                         self.__uvs[f.uv1],      self.__uvs[f.uv2],      self.__uvs[f.uv3])
+
+    def set_vertex(self, i_id: int, v: Vec3) -> None:
+        if i_id < 0:
+            return
+        if i_id >= self.vertices_count:
+            return
+        self.__bbox.update_bounds(v)
+        self.__vertices[i_id] = v
+
+    def set_normal(self, i_id: int, v: Vec3) -> None:
+        if i_id < 0:
+            return
+        if i_id >= self.normals_count:
+            return
+        self.__normals[i_id] = v
+
+    def set_uv(self, i_id: int, v: Vec2) -> None:
+        if i_id < 0:
+            return
+        if i_id >= self.uvs_count:
+            return
+        self.__uvs[i_id] = v
 
     @property
     def faces_count(self) -> int:

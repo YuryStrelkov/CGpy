@@ -56,14 +56,14 @@ class Mat3(object):
         res: str = "mat4:\n"
         res += "[[%s, %s, %s],\n" % (self.__data[0], self.__data[1], self.__data[2])
         res += " [%s, %s, %s],\n" % (self.__data[3], self.__data[4], self.__data[5])
-        res += " [%s, %s, %s],\n" % (self.__data[6], self.__data[7], self.__data[8])
+        res += " [%s, %s, %s]]\n" % (self.__data[6], self.__data[7], self.__data[8])
         return res
 
     def __str__(self) -> str:
         res: str = ""
         res += "[[%s, %s, %s],\n" % (self.__data[0], self.__data[1], self.__data[2])
         res += " [%s, %s, %s],\n" % (self.__data[3], self.__data[4], self.__data[5])
-        res += " [%s, %s, %s],\n" % (self.__data[6], self.__data[7], self.__data[8])
+        res += " [%s, %s, %s]]\n" % (self.__data[6], self.__data[7], self.__data[8])
         return res
 
     def __add__(self, *args):

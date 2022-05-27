@@ -2,6 +2,7 @@ import numpy as np
 
 from camera import Camera
 from models.model import Model
+from surfaces.patch import CubicPatch
 from vmath.mathUtils import Vec2
 from frameBuffer import RGB, FrameBuffer
 import graphics as gr
@@ -11,7 +12,6 @@ from shapes.bezier2 import BezierCurve2
 
 def bezier_intersection_test():
     frame_buffer = FrameBuffer(1000, 1000)
-    frame_buffer.clear_color(RGB(np.uint8(200), np.uint8(200), np.uint8(200)))
     curve_1: BezierCurve2 = BezierCurve2()
     curve_1.add_point(Vec2(-0.333, 0.25))
     curve_1.add_point(Vec2(0.333, 0.25))
@@ -42,8 +42,16 @@ def bezier_curve_test():
     gr.draw_bezier(frame_buffer, curve)
 
     for i in range(0, curve.n_control_points):
-        curve.move_point(i, curve.get_point(i) + curve.sect_normal(i, 0) * 0.124)
+        curve.move_point(i, curve.get_point(i) + curve.curve_normal(i, 0) * 0.124)
     gr.draw_bezier(frame_buffer, curve)
+    frame_buffer.imshow()
+
+
+def bezier_patch_test():
+    frame_buffer = FrameBuffer(1000, 1000)
+    patch: CubicPatch = CubicPatch()
+    gr.draw_patch_solid_color(frame_buffer, patch)
+    gr.draw_patch_edges(frame_buffer, patch)
     frame_buffer.imshow()
 
 
@@ -98,6 +106,8 @@ def interactive_shading(render_camera: Camera = None):
 
 
 if __name__ == '__main__':
+    # bezier_intersection_test()
+    bezier_patch_test()
     # static_solid_color()
     # static_shading()
-    interactive_solid_color()
+    #  interactive_solid_color()

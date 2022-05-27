@@ -1,3 +1,5 @@
+import math
+
 import numpy as np
 
 
@@ -65,7 +67,7 @@ class Vec2(object):
             raise IndexError(f"vec2 :: trying to access index: {index}")
         return self.__xy[index]
 
-    def norm(self) -> float: return np.sqrt(self.__xy[0] * self.__xy[0] + self.__xy[1] * self.__xy[1])
+    def norm(self) -> float: return math.sqrt(self.__xy[0] * self.__xy[0] + self.__xy[1] * self.__xy[1])
 
     def normalize(self):
         nrm = self.norm()
@@ -76,7 +78,7 @@ class Vec2(object):
         return self
 
     @property
-    def magnitude(self) -> float: return np.sqrt(self.__xy[0] * self.__xy[0] + self.__xy[1] * self.__xy[1])
+    def magnitude(self) -> float: return math.sqrt(self.__xy[0] * self.__xy[0] + self.__xy[1] * self.__xy[1])
 
     @property
     def x(self) -> float: return self.__xy[0]
@@ -168,7 +170,7 @@ class Vec3(object):
             raise IndexError(f"vec3 :: trying to access index: {index}")
         return self.__xyz[index]
 
-    def norm(self) -> float: return np.sqrt(
+    def norm(self) -> float: return math.sqrt(
         self.__xyz[0] * self.__xyz[0] + self.__xyz[1] * self.__xyz[1] + self.__xyz[2] * self.__xyz[2])
 
     def normalize(self):
@@ -182,7 +184,7 @@ class Vec3(object):
 
     @property
     def magnitude(self) -> float:
-        return np.sqrt(self.__xyz[0] * self.__xyz[0] + self.__xyz[1] * self.__xyz[1] + self.__xyz[2] * self.__xyz[2])
+        return math.sqrt(self.__xyz[0] * self.__xyz[0] + self.__xyz[1] * self.__xyz[1] + self.__xyz[2] * self.__xyz[2])
 
     @property
     def x(self) -> float: return self.__xyz[0]

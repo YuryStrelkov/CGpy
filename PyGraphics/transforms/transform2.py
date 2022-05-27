@@ -1,3 +1,5 @@
+import math
+
 import numpy as np
 from vmath.matrices import Mat3
 from vmath.vectors import Vec2
@@ -54,14 +56,14 @@ class Transform2(object):
     def sx(self) -> float:
         x = self.transformM.m00
         y = self.transformM.m10
-        return np.sqrt(x * x + y * y)
+        return math.sqrt(x * x + y * y)
 
     # масштаб по Y
     @property
     def sy(self) -> float:
         x = self.transformM.m01
         y = self.transformM.m11
-        return np.sqrt(x * x + y * y)
+        return math.sqrt(x * x + y * y)
         # установить масштаб по Х
 
     @sx.setter

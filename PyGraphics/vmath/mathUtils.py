@@ -112,12 +112,12 @@ def perpendicular_2(v: Vec2) -> Vec2:
     sign: float = np.sign(v.x / v.y)
     dx: float = 1.0 / v.x
     dy: float = -1.0 / v.y
-    sign /= np.sqrt(dx * dx + dy * dy)
+    sign /= math.sqrt(dx * dx + dy * dy)
     return Vec2(dx * sign, dy * sign)
 
 
 def perpendicular_3(v: Vec3) -> Vec3:
-    s: float = np.sqrt(v.x * v.x + v.y * v.y + v.z * v.z)
-    g: float = np.copysign(s, v.z)  # note s instead of 1
+    s: float = math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z)
+    g: float = math.copysign(s, v.z)  # note s instead of 1
     h: float = v.z + g
     return Vec3(g * h - v.x * v.x, -v.x * v.y, -v.x * h)

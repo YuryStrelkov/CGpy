@@ -26,6 +26,16 @@ def bezier_mat_4_cubic(p1: Mat4, p2: Mat4, p3: Mat4, p4: Mat4, t: float) -> Mat4
     return mathUtils.lerp_mat_4(bezier_mat_4_quadratic(p1, p2, p3, t), bezier_mat_4_quadratic(p2, p3, p4, t), t)
 
 
+def bezier_3_tangent(p1: Vec3, p2: Vec3, p3: Vec3, p4: Vec3, t: float) -> Vec3:
+    d: float = 3 * t * t
+    a: float = -3 + 6 * t - d
+    b: float = 3 - 12 * t + 3 * d
+    c: float = 6 * t - 3 * d
+    return Vec3(p1.x * a + p2.x * b + p3.x * c + p4.x * d,
+                p1.y * a + p2.y * b + p3.y * c + p4.y * d,
+                p1.z * a + p2.z * b + p3.z * c + p4.z * d)
+
+
 class BezierPoint3(object):
     def __init__(self, p: Vec3):
         self.__point: Vec3 = p
@@ -289,7 +299,7 @@ class BezierCurve3(object):
         p2: BezierPoint3 = self.__points[(pid + 1) % len(self.__points)]
         return bezier_3_cubic(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t)
 
-    def sect_normal(self, pid: int, t: float) -> Vec3:
+    def curve_normal(self, pid: int, t: float) -> Vec3:
         if not self.__in_range(pid):
             return Vec3(0, 0, 0)
         dt: float = 1.0 / self.__sections_per_seg
@@ -306,6 +316,101 @@ class BezierCurve3(object):
             bezier_3_cubic(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t) -
             bezier_3_cubic(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t - dt))
 
+    def curve_tangent(self, pid: int, t: float) -> Vec3:
+        if not self.__in_range(pid):
+            return Vec3(0, 0)
+        if not self.closed:
+            if pid == len(self.__points) - 1:
+                return self.__points[pid].point
+        t = min(max(t, 0.0), 1.0)
+        p1: BezierPoint3 = self.__points[pid]
+        p2: BezierPoint3 = self.__points[(pid + 1) % len(self.__points)]
+        return bezier_3_tangent(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t)
+
+    def curve_values(self, step: float = 0.01):
+        if self.n_control_points < 2:
+            raise StopIteration
+
+        point_id: int = 0
+        t: float = 0
+        p1: BezierPoint3 = self.__points[0]
+        p2: BezierPoint3 = self.__points[1]
+        while True:
+            if t >= 1.0:
+                t = 0.0
+                point_id += 1
+                if point_id == self.n_control_points:
+                    break
+                p1 = self.__points[point_id]
+                p2 = self.__points[(point_id + 1) % len(self.__points)]
+            yield bezier_3_tangent(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t)
+            t += step
+
+        if self.closed:
+            t = 0
+            p1: BezierPoint3 = self.__points[self.n_control_points - 1]
+            p2: BezierPoint3 = self.__points[0]
+            while t >= 1.0:
+                yield bezier_3_tangent(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t)
+                t += step
+
+    def curve_normals(self, step: float = 0.01):
+        if self.n_control_points < 2:
+            raise StopIteration
+
+        point_id: int = 0
+        t: float = 0
+        p1: BezierPoint3 = self.__points[0]
+        p2: BezierPoint3 = self.__points[1]
+        while True:
+            if t >= 1.0:
+                t = 0.0
+                point_id += 1
+                if point_id == self.n_control_points:
+                    break
+                p1 = self.__points[point_id]
+                p2 = self.__points[(point_id + 1) % len(self.__points)]
+            yield mathUtils.perpendicular_2(
+                bezier_3_tangent(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t + step) -
+                bezier_3_tangent(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t))
+            t += step
+
+        if self.closed:
+            t = 0
+            p1: BezierPoint3 = self.__points[self.n_control_points - 1]
+            p2: BezierPoint3 = self.__points[0]
+            while t >= 1.0:
+                yield mathUtils.perpendicular_2(
+                    bezier_3_tangent(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t + step) -
+                    bezier_3_tangent(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t))
+                t += step
+
+    def curve_tangents(self, step: float = 0.01):
+        if self.n_control_points < 2:
+            raise StopIteration
+
+        point_id: int = 0
+        t: float = 0
+        p1: BezierPoint3 = self.__points[0]
+        p2: bezier_3_tangent = self.__points[1]
+        while True:
+            if t >= 1.0:
+                t = 0.0
+                point_id += 1
+                if point_id == self.n_control_points:
+                    break
+                p1 = self.__points[point_id]
+                p2 = self.__points[(point_id + 1) % len(self.__points)]
+            yield bezier_3_tangent(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t)
+            t += step
+
+        if self.closed:
+            t = 0
+            p1: BezierPoint3 = self.__points[self.n_control_points - 1]
+            p2: BezierPoint3 = self.__points[0]
+            while t >= 1.0:
+                yield bezier_3_tangent(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t)
+                t += step
     # def outline(self, value:):
     # def __repr__(self): return "<vec2 x:%s y:%s>" % (self.xy[0], self.xy[1])
     # def __str__(self): return "[%s, %s]" % (self.xy[0], self.xy[1])
