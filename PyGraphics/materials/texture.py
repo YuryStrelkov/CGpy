@@ -7,23 +7,23 @@ from materials.rgb import RGB
 
 
 class Texture(object):
-    def __init__(self, _w: int = 0, _h: int = 0, _bpp: int = 0):
+    def __init__(self, _w: int = 0, _h: int = 0, _bpp: int = 0, color: RGB = RGB(125,135,145)):
         self.__source_file: str = ""
-        self.transform: Transform2 = Transform2()
-        self.colors: [np.uint8] = None
+        self.__transform: Transform2 = Transform2()
         self.__width = _w
         self.__height = _h
         self.__bpp = _bpp
-        self.clear_color()
+        self.__colors = np.zeros((self.__height * self.__width * self.__bpp), dtype=np.uint8)
+        self.clear_color(color)
 
     def __getitem__(self, index):
         if index < 0:
             return RGB(np.uint8(0), np.uint8(0), np.uint8(0))
         if index >= self.__width * self.__height * self.__bpp - 2:
             return RGB(np.uint8(0), np.uint8(0), np.uint8(0))
-        return RGB(self.colors[index],
-                   self.colors[index + 1],
-                   self.colors[index + 2])
+        return RGB(self.__colors[index],
+                   self.__colors[index + 1],
+                   self.__colors[index + 2])
 
     def __repr__(self) -> str:
         res: str = "<Texture\n"
@@ -32,7 +32,7 @@ class Texture(object):
         res += f"width          : {self.__height}\n"
         res += f"width          : {self.__bpp}\n"
         res += "affine transform:\n"
-        res += f"{self.transform}\n>\n"
+        res += f"{self.__transform}\n>\n"
         return res
 
     def __str__(self) -> str:
@@ -42,7 +42,7 @@ class Texture(object):
         res += f"width          : {self.__height}\n"
         res += f"width          : {self.__bpp}\n"
         res += "affine transform:\n"
-        res += f"{self.transform}\n"
+        res += f"{self.__transform}\n"
         return res
 
     @property
@@ -73,11 +73,11 @@ class Texture(object):
 
     @property
     def tile(self) -> Vec2:
-        return self.transform.scale
+        return self.__transform.scale
 
     @property
     def offset(self) -> Vec2:
-        return self.transform.origin
+        return self.__transform.origin
 
     @property
     def texture_byte_size(self):
@@ -85,30 +85,30 @@ class Texture(object):
 
     @property
     def rotation(self) -> float:
-        return self.transform.az
+        return self.__transform.az
 
     @tile.setter
     def tile(self, xy: Vec2):
-        self.transform.scale = xy
+        self.__transform.scale = xy
 
     @offset.setter
     def offset(self, xy: Vec2):
-        self.transform.origin = xy
+        self.__transform.origin = xy
 
     @rotation.setter
     def rotation(self, angle: float):
-        self.transform.az = mathUtils.deg_to_rad(angle)
+        self.__transform.az = mathUtils.deg_to_rad(angle)
 
     @property
     def image_data(self) -> Image:
         if self.bpp == 3:
-            return Image.frombytes('RGB', (self.__width, self.__height), self.colors)
+            return Image.frombytes('RGB', (self.__width, self.__height), self.__colors)
         if self.bpp == 4:
-            return Image.frombytes('RGBA', (self.__width, self.__height), self.colors)
+            return Image.frombytes('RGBA', (self.__width, self.__height), self.__colors)
 
     def load(self, origin: str):
-        if not (self.colors is None):
-            del self.colors
+        if not (self.__colors is None):
+            del self.__colors
             self.__width = -1
             self.__height = -1
             self.__bpp = 0
@@ -116,7 +116,7 @@ class Texture(object):
         im = Image.open(self.__source_file)
         self.__width, self.__height = im.size
         self.__bpp = im.layers
-        self.colors: [np.uint8] = (np.asarray(im, dtype=np.uint8)).ravel()
+        self.__colors: [np.uint8] = (np.asarray(im, dtype=np.uint8)).ravel()
 
     def set_color(self, i: int, j: int, color: RGB):
         pix = round((i + j * self.__width) * self.__bpp)
@@ -124,9 +124,9 @@ class Texture(object):
             return
         if pix >= self.__width * self.__height * self.__bpp - 2:
             return
-        self.colors[pix] = color.r
-        self.colors[pix + 1] = color.g
-        self.colors[pix + 2] = color.b
+        self.__colors[pix] = color.r
+        self.__colors[pix + 1] = color.g
+        self.__colors[pix + 2] = color.b
 
     def get_color(self, i: int, j: int) -> RGB:
         pix = round((i + j * self.__width) * self.__bpp)
@@ -134,39 +134,37 @@ class Texture(object):
             return RGB(np.uint8(0), np.uint8(0), np.uint8(0))
         if pix >= self.__width * self.__height * self.__bpp - 2:
             return RGB(np.uint8(0), np.uint8(0), np.uint8(0))
-        return RGB(self.colors[pix],
-                   self.colors[pix + 1],
-                   self.colors[pix + 2])
+        return RGB(self.__colors[pix],
+                   self.__colors[pix + 1],
+                   self.__colors[pix + 2])
 
     # uv:: uv.x in range[0,1], uv.y in range[0,1]
     def set_color_uv(self, uv: Vec2, color: RGB):
-        uv_ = self.transform.inv_transform_vect(uv, 1)
+        uv_ = self.__transform.inv_transform_vect(uv, 1)
         pix = round((uv_.x + uv_.y * self.__width) * self.__bpp)
         if pix < 0:
             return
         if pix >= self.__width * self.__height * self.__bpp - 2:
             return
-        self.colors[pix] = color.r
-        self.colors[pix + 1] = color.g
-        self.colors[pix + 2] = color.b
+        self.__colors[pix] = color.r
+        self.__colors[pix + 1] = color.g
+        self.__colors[pix + 2] = color.b
 
     # uv:: uv.x in range[0,1], uv.y in range[0,1]
     def get_color_uv(self, uv: Vec2) -> RGB:
-        uv_ = self.transform.transform_vect(uv, 1)
+        uv_ = self.__transform.transform_vect(uv, 1)
         uv_x = abs(round(uv_.x * self.__width) % self.__width)
         uv_y = abs(round(uv_.y * self.__height) % self.__height)
         pix = (uv_x + uv_y * self.__width) * self.__bpp
-        return RGB(self.colors[pix], self.colors[pix + 1], self.colors[pix + 2])
+        return RGB(self.__colors[pix], self.__colors[pix + 1], self.__colors[pix + 2])
 
     def show(self):
         self.image_data.show()
 
-    def clear_color(self, color: RGB = RGB(np.uint8(125), np.uint8(125), np.uint8(125))):
+    def clear_color(self, color: RGB = RGB(np.uint8(125), np.uint8(135), np.uint8(145))):
         if self.texture_byte_size == 0:
             return
-        if not(self.colors is None):
-            del self.colors
-        self.colors = np.zeros((self.__height * self.__width * self.__bpp), dtype=np.uint8)
         rgb = [color.r, color.g, color.g]
-        for i in range(0, len(self.colors)):
-            self.colors[i] = rgb[i % 3]
+        #self.__colors: [np.uint8] = [rgb[i % 3] for i in range(0, self.bpp * self.width * self.height)]
+        for i in range(0, len(self.__colors)):
+           self.__colors[i] = rgb[i % 3]

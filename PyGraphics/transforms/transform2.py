@@ -148,5 +148,5 @@ class Transform2(object):
                         (self.transformM.m01 * vec.x + self.transformM.m11 * vec.y) / scl.y / scl.y)
 
         vec_ = Vec2(vec.x - self.x, vec.y - self.y)
-        return Vec2((self.transformM.m00 * vec.x + self.transformM.m10 * vec.y) / scl.x / scl.x,
-                    (self.transformM.m01 * vec.x + self.transformM.m11 * vec.y) / scl.y / scl.y)
+        return Vec2((self.transformM.m00 * vec_.x + self.transformM.m10 * vec_.y) / scl.x / scl.x,
+                    (self.transformM.m01 * vec_.x + self.transformM.m11 * vec_.y) / scl.y / scl.y)

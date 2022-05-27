@@ -351,7 +351,6 @@ def draw_model_solid_color(buffer: FrameBuffer, model: Model, cam: Camera = None
                 continue
 
             tris.camera_screen_transform(cam, buffer)
-
             draw_triangle_solid(buffer, tris.vertex1, tris.vertex2, tris.vertex3, color)
 
 
@@ -379,7 +378,6 @@ def draw_model_shaded(buffer: FrameBuffer, model: Model, cam: Camera = None):
                 continue
 
             tris.camera_screen_transform(cam, buffer)
-
             draw_triangle_shaded(buffer, tris.vertex1, tris.vertex2, tris.vertex3, mat)
 
 

@@ -30,7 +30,6 @@ def bezier_intersection_test():
 
 def bezier_curve_test():
     frame_buffer = FrameBuffer(1000, 1000)
-    frame_buffer.clear_color(RGB(np.uint8(200), np.uint8(200), np.uint8(200)))
     curve: BezierCurve2 = BezierCurve2()
 
     curve.closed = True
@@ -51,31 +50,33 @@ def bezier_curve_test():
 def static_solid_color(render_camera: Camera = None, draw_wire: bool = False):
     start_time: float = time.time()
     frame_buffer = FrameBuffer(1000, 1000)
-    frame_buffer.clear_color(RGB(np.uint8(200), np.uint8(200), np.uint8(200)))
-    model: Model = Model("resources/rabbit.obj", "resources/teapots.mtl")
+    print("static_solid_color :: frame buffer creation time : ", time.time() - start_time)
+    start_time = time.time()
+    model: Model = Model("resources/teapots.obj", "resources/teapots.mtl")
+    print("static_solid_color :: model loading time : ", time.time() - start_time)
+    start_time = time.time()
     gr.draw_model_solid_color(frame_buffer, model, render_camera)
+    print("static_solid_color :: elapsed render time : ", time.time() - start_time)
     if draw_wire:
         gr.draw_model_edges(frame_buffer, model, render_camera)
-    print("static_solid_color :: elapsed render time : ", time.time() - start_time)
     frame_buffer.imshow()
 
 
 def static_shading(render_camera: Camera = None, draw_wire: bool = False):
-    start_time: float = time.time()
     frame_buffer = FrameBuffer(1000, 1000)
-    frame_buffer.clear_color(RGB(np.uint8(200), np.uint8(200), np.uint8(200)))
-    model: Model = Model("resources/rabbit.obj", "resources/teapots.mtl")
+    start_time: float = time.time()
+    model: Model = Model("resources/teapots.obj", "resources/teapots.mtl")
+    print("static_shading :: model loading time : ", time.time() - start_time)
+    start_time = time.time()
     gr.draw_model_shaded(frame_buffer, model, render_camera)
+    print("static_shading :: elapsed render time : ", time.time() - start_time)
     if draw_wire:
         gr.draw_model_edges(frame_buffer, model, render_camera)
-    print("static_shading :: elapsed render time : ", time.time() - start_time)
     frame_buffer.imshow()
 
 
 def interactive_solid_color(render_camera: Camera = None):
     frame_buffer = FrameBuffer(1000, 1000)
-
-    frame_buffer.clear_color(RGB(np.uint8(200), np.uint8(200), np.uint8(200)))
 
     model: Model = Model("resources/teapots.obj", "resources/teapots.mtl")
 
@@ -84,8 +85,6 @@ def interactive_solid_color(render_camera: Camera = None):
 
 def interactive_shading(render_camera: Camera = None):
     frame_buffer = FrameBuffer(1000, 1000)
-
-    frame_buffer.clear_color(RGB(np.uint8(200), np.uint8(200), np.uint8(200)))
 
     model: Model = Model("resources/teapots.obj", "resources/teapots.mtl")
 
