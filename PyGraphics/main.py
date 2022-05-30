@@ -49,7 +49,9 @@ def bezier_curve_test():
 
 def bezier_patch_test():
     frame_buffer = FrameBuffer(1000, 1000)
+    start_time: float = time.time()
     patch: CubicPatch = CubicPatch()
+    print("patch :: patch creation time : ", time.time() - start_time)
     gr.draw_patch_solid_color(frame_buffer, patch)
     gr.draw_patch_edges(frame_buffer, patch)
     frame_buffer.imshow()

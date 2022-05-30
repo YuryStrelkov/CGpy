@@ -13,7 +13,6 @@ from frameBuffer import RGB
 import tkinter as tk
 from PIL import ImageTk
 
-
 # рисование линии, первый вариант алгоритма
 def draw_line_1(buffer: FrameBuffer, x0: int, y0: int, x1: int, y1: int,
                 color: RGB = RGB(np.uint8(255), np.uint8(255), np.uint8(255)),
@@ -386,7 +385,6 @@ def draw_patch_edges(buffer: FrameBuffer, model: CubicPatch, cam: Camera = None,
         cam.look_at(model.min_world_space, model.max_world_space * 1.5)
     # направление освещения совпадает с направлением взгляда камеры
     forward = cam.front
-
     for tris in model.triangles_world_space():
         tris.camera_screen_transform(cam, buffer)
         a = -mathUtils.vectors.dot3(tris.n1, forward)
@@ -399,7 +397,6 @@ def draw_patch_edges(buffer: FrameBuffer, model: CubicPatch, cam: Camera = None,
             draw_line_4(buffer, round(tris.p1.x), round(tris.p1.y), round(tris.p3.x), round(tris.p3.y), color)
         if b > 0 or c > 0:
             draw_line_4(buffer, round(tris.p2.x), round(tris.p2.y), round(tris.p3.x), round(tris.p3.y), color)
-
 
 
 def draw_model_shaded(buffer: FrameBuffer, model: Model, cam: Camera = None):
