@@ -112,4 +112,4 @@ if __name__ == '__main__':
     bezier_patch_test()
     # static_solid_color()
     # static_shading()
-    #  interactive_solid_color()
+    # interactive_solid_color()

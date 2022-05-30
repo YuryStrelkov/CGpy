@@ -1,4 +1,4 @@
-from typing import IO
+from typing import IO, List, Any
 import re
 
 from models.triangle import Triangle
@@ -86,12 +86,13 @@ class BoundingBox(object):
 
 
 class TrisMesh(object):
+
     def __init__(self):
         self.name: str = ""
-        self.__vertices: [Vec3] = []
-        self.__normals: [Vec3] = []
-        self.__uvs: [Vec2] = []
-        self.__faces: [Face] = []
+        self.__vertices: List[Vec3] = []
+        self.__normals: List[Vec3] = []
+        self.__uvs: List[Vec2] = []
+        self.__faces: List[Face] = []
         self.__bbox: BoundingBox = BoundingBox()
 
     def __str__(self):
@@ -234,7 +235,7 @@ class TrisMesh(object):
         self.__faces: [Face] = []
 
 
-def read_obj_mesh(path: str) -> [TrisMesh]:
+def read_obj_mesh(path: str) -> List[TrisMesh]:
 
     file: IO
 
@@ -257,7 +258,7 @@ def read_obj_mesh(path: str) -> [TrisMesh]:
         print("file \"%s\" empty" % path)
         return []
 
-    meshes: [TrisMesh] = []
+    meshes: List[TrisMesh] = []
     uv_shift: int = 0
     v__shift: int = 0
     n__shift: int = 0

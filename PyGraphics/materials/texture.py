@@ -184,4 +184,5 @@ class Texture(object):
         if self.texture_byte_size == 0:
             return
         rgb = [color.r, color.g, color.g]
-        self.__colors = np.array([rgb[i % 3] for i in range(0, self.bpp * self.width * self.height)])
+        for i in range(0, self.texture_byte_size):
+            self.__colors[i] = rgb[i % 3]

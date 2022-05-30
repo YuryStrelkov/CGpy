@@ -5,26 +5,26 @@ class Mat3(object):
 
         number_of_args = len(args)
 
-        if number_of_args == 0:
-            return [0, 0, 0, 0, 0, 0, 0, 0, 0]  # no arguments
-
-        elif number_of_args == 9:
-            return [args[0], args[1], args[2],
-                    args[3], args[4], args[5],
-                    args[6], args[7], args[8]]  # x, y and z passed in
-
-        elif number_of_args == 1:  # one argument
+        if number_of_args == 1:  # one argument
             arg_type = type(args[0])
+
+            if arg_type is Mat3:
+                return [args[0].m00, args[0].m01, args[0].m02,
+                        args[0].m10, args[0].m11, args[0].m12,
+                        args[0].m20, args[0].m21, args[0].m22]
 
             if arg_type is float or arg_type is int:  # single int or float argument
                 return [args[0],     0,      0,
                              0, args[0],     0,
                              0,      0, args[0]]
 
-            if arg_type is Mat3:
-                return [args[0].m00, args[0].m01, args[0].m02,
-                        args[0].m10, args[0].m11, args[0].m12,
-                        args[0].m20, args[0].m21, args[0].m22]
+        if number_of_args == 0:
+            return [0, 0, 0, 0, 0, 0, 0, 0, 0]  # no arguments
+
+        if number_of_args == 9:
+            return [args[0], args[1], args[2],
+                    args[3], args[4], args[5],
+                    args[6], args[7], args[8]]  # x, y and z passed in
 
         raise TypeError(f'Invalid Input: {args}')
 
@@ -35,7 +35,7 @@ class Mat3(object):
         self.__data: [float] = [m0, m1, m2, m3, m4, m5, m6, m7, m8]
 
     def __eq__(self, other) -> bool:
-        if not(type(other) is Mat3):
+        if not isinstance(other, Mat3):
             return False
         for i in range(0, 9):
             if not (self.__data[i] == other.__data[i]):
@@ -169,20 +169,14 @@ class Mat4(object):
 
         number_of_args = len(args)
 
-        if number_of_args == 0:
-            return [0, 0, 0, 0,
-                    0, 0, 0, 0,
-                    0, 0, 0, 0,
-                    0, 0, 0, 0]  # no arguments
-
-        elif number_of_args == 9:
-            return [args[0],  args[1],  args[2],  args[3],
-                    args[4],  args[5],  args[6],  args[7],
-                    args[8],  args[9],  args[10], args[11],
-                    args[12], args[13], args[14], args[15]]  # x, y and z passed in
-
-        elif number_of_args == 1:  # one argument
+        if number_of_args == 1:  # one argument
             arg_type = type(args[0])
+
+            if arg_type is Mat4:
+                return [args[0].m00, args[0].m01, args[0].m02, args[0].m03,
+                        args[0].m10, args[0].m11, args[0].m12, args[0].m13,
+                        args[0].m20, args[0].m21, args[0].m22, args[0].m23,
+                        args[0].m30, args[0].m31, args[0].m32, args[0].m33]
 
             if arg_type is float or arg_type is int:  # single int or float argument
                 return [args[0],     0,      0,      0,
@@ -190,11 +184,17 @@ class Mat4(object):
                              0,      0, args[0],     0,
                              0,      0,      0, args[0]]
 
-            if arg_type is Mat4:
-                return [args[0].m00, args[0].m01, args[0].m02, args[0].m03,
-                        args[0].m10, args[0].m11, args[0].m12, args[0].m13,
-                        args[0].m20, args[0].m21, args[0].m22, args[0].m23,
-                        args[0].m30, args[0].m31, args[0].m32, args[0].m33]
+        if number_of_args == 0:
+            return [0, 0, 0, 0,
+                    0, 0, 0, 0,
+                    0, 0, 0, 0,
+                    0, 0, 0, 0]  # no arguments
+
+        if number_of_args == 9:
+            return [args[0],  args[1],  args[2],  args[3],
+                    args[4],  args[5],  args[6],  args[7],
+                    args[8],  args[9],  args[10], args[11],
+                    args[12], args[13], args[14], args[15]]  # x, y and z passed in
 
         raise TypeError(f'Invalid Input: {args}')
 
@@ -209,7 +209,7 @@ class Mat4(object):
                                 m12, m13, m14, m15]
 
     def __eq__(self, other) -> bool:
-        if not(type(other) is Mat4):
+        if not isinstance(other, Mat4):
             return False
         for i in range(0, 16):
             if not (self.__data[i] == other.__data[i]):

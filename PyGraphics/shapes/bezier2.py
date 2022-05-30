@@ -243,8 +243,8 @@ class BezierCurve2(object):
         if pid < 0:
             return
         if self.n_control_points == 0 or \
-                self.n_control_points == 1 or \
-                self.n_control_points == pid:
+           self.n_control_points == 1 or \
+           self.n_control_points == pid:
             self.add_point(p)
             return
 

@@ -7,23 +7,21 @@ class Vec2(object):
     @staticmethod
     def __unpack_values(*args) -> [float]:
         args = args[0]
-
         number_of_args = len(args)
-
-        if number_of_args == 0:
-            return [0, 0]  # no arguments
-
-        elif number_of_args == 2:
-            return [args[0], args[1]]  # x, y and z passed in
-
-        elif number_of_args == 1:  # one argument
+        if number_of_args == 1:  # one argument
             arg_type = type(args[0])
+
+            if arg_type is Vec2:
+                return [args[0].x, args[0].y]
 
             if arg_type is float or arg_type is int:  # single int or float argument
                 return [args[0], args[0]]
 
-            if arg_type is Vec2:
-                return [args[0].x, args[0].y]
+        if number_of_args == 0:
+            return [0, 0]  # no arguments
+
+        if number_of_args == 2:
+            return [args[0], args[1]]  # x, y and z passed in
 
         raise TypeError(f'Invalid Input: {args}')
 
@@ -31,7 +29,7 @@ class Vec2(object):
         self.__xy: [float] = [x, y]
 
     def __eq__(self, other) -> bool:
-        if not (type(other) is Vec2):
+        if not isinstance(other, Vec2):
             return False
         if not (self.x == other.x):
             return False
@@ -111,20 +109,20 @@ class Vec3(object):
 
         number_of_args = len(args)
 
-        if number_of_args == 0:
-            return [0, 0, 0]  # no arguments
-
-        elif number_of_args == 3:
-            return [args[0], args[1], args[2]]  # x, y and z passed in
-
-        elif number_of_args == 1:  # one argument
+        if number_of_args == 1:  # one argument
             arg_type = type(args[0])
+
+            if arg_type is Vec3:
+                return [args[0].x, args[0].y, args[0].z]
 
             if arg_type is float or arg_type is int:  # single int or float argument
                 return [args[0], args[0], args[0]]
 
-            if arg_type is Vec3:
-                return [args[0].x, args[0].y, args[0].z]
+        if number_of_args == 0:
+            return [0, 0, 0]  # no arguments
+
+        if number_of_args == 3:
+            return [args[0], args[1], args[2]]  # x, y and z passed in
 
         raise TypeError(f'Invalid Input: {args}')
 
@@ -132,7 +130,7 @@ class Vec3(object):
         self.__xyz: [float] = [x, y, z]
 
     def __eq__(self, other):
-        if not (type(other) is Vec3):
+        if not isinstance(other, Vec3):
             return False
         if not (self.x == other.x):
             return False
@@ -156,6 +154,12 @@ class Vec3(object):
     def __sub__(self, *args):
         other = self.__unpack_values(args)
         return Vec3(self.x - other[0], self.y - other[1], self.z - other[2])
+
+    def __rsub__(self, *args):
+       pass
+
+    def __rtruediv__(self,  *args):
+        pass
 
     def __mul__(self, *args):
         other = self.__unpack_values(args)
