@@ -1,9 +1,8 @@
 import math
 
-import numpy as np
-
 
 class Vec2(object):
+
     @staticmethod
     def __unpack_values(*args) -> [float]:
         args = args[0]
@@ -25,58 +24,31 @@ class Vec2(object):
 
         raise TypeError(f'Invalid Input: {args}')
 
-    def __init__(self, x: float = 0, y: float = 0):
-        self.__xy: [float] = [x, y]
+    @staticmethod
+    def dot(a, b) -> float:
+        return a.x * b.x + a.y * b.y
 
-    def __eq__(self, other) -> bool:
-        if not isinstance(other, Vec2):
-            return False
-        if not (self.x == other.x):
-            return False
-        if not (self.y == other.y):
-            return False
-        return True
-
-    def __hash__(self) -> int:
-        return hash((self.x, self.y))
-
-    def __repr__(self) -> str: return "<vec2 x:%s y:%s>" % (self.__xy[0], self.__xy[1])
-
-    def __str__(self) -> str: return "[%s, %s]" % (self.__xy[0], self.__xy[1])
-
-    def __add__(self, *args):
-        other = self.__unpack_values(args)
-        return Vec2(self.x + other[0], self.y + other[1])
-
-    def __sub__(self, *args):
-        other = self.__unpack_values(args)
-        return Vec2(self.x - other[0], self.y - other[1])
-
-    def __mul__(self, *args):
-        other = self.__unpack_values(args)
-        return Vec2(self.x * other[0], self.y * other[1])
-
-    def __truediv__(self, *args):
-        other = self.__unpack_values(args)
-        return Vec2(self.x / other[0], self.y / other[1])
-
-    def __getitem__(self, index):
-        if index < 0 or index >= 2:
-            raise IndexError(f"vec2 :: trying to access index: {index}")
-        return self.__xy[index]
-
-    def norm(self) -> float: return math.sqrt(self.__xy[0] * self.__xy[0] + self.__xy[1] * self.__xy[1])
+    @staticmethod
+    def cross(a, b) -> float:
+        return a.y * b.x - a.x * b.y
 
     def normalize(self):
-        nrm = self.norm()
+        nrm = self.magnitude
         if abs(nrm) < 1e-12:
-            raise ArithmeticError("vec2::zero length vector")
+            raise ArithmeticError("zero length vector")
         self.__xy[0] /= nrm
         self.__xy[1] /= nrm
         return self
 
+    def normalized(self):
+        nrm = self.magnitude
+        if abs(nrm) < 1e-12:
+            raise ArithmeticError("zero length vector")
+        return Vec2(self.__xy[0] / nrm, self.__xy[1] / nrm)
+
     @property
-    def magnitude(self) -> float: return math.sqrt(self.__xy[0] * self.__xy[0] + self.__xy[1] * self.__xy[1])
+    def magnitude(self) -> float:
+        return math.sqrt(self.__xy[0] * self.__xy[0] + self.__xy[1] * self.__xy[1])
 
     @property
     def x(self) -> float: return self.__xy[0]
@@ -85,13 +57,122 @@ class Vec2(object):
     def y(self) -> float: return self.__xy[1]
 
     @x.setter
-    def x(self, x_: float): self.__xy[0] = x_
+    def x(self, x: float): self.__xy[0] = x
 
     @y.setter
-    def y(self, y_: float): self.__xy[1] = y_
+    def y(self, y: float): self.__xy[1] = y
+
+    @property
+    def magnitude_sqr(self) -> float:
+        return self.__xy[0] * self.__xy[0] + self.__xy[1] * self.__xy[1]
+
+    def __init__(self, x: float = 0, y: float = 0):
+        self.__xy: [float] = [x, y]
+
+    def __eq__(self, other):
+        if not isinstance(other, Vec2):
+            return False
+        if not (self.x == other.x):
+            return False
+        if not (self.y == other.y):
+            return False
+        return True
+
+    def __hash__(self):
+        return hash((self.x, self.y))
+
+    def __neg__(self):
+        return Vec2(-self.x, -self.y)
+
+    def __copy__(self):
+        return Vec2(self.x, self.y)
+
+    copy = __copy__
+
+    def __repr__(self):
+        return "<vec3 x:%s y:%s>" % (self.__xy[0], self.__xy[1])
+
+    def __str__(self):
+        return "[%s, %s]" % (self.__xy[0], self.__xy[1])
+
+    ##########################
+    #####  + operetor   ######
+    ##########################
+
+    def __add__(self, *args):
+        other = self.__unpack_values(args)
+        return Vec2(self.x + other[0], self.y + other[1])
+
+    def __iadd__(self, *args):
+        other = self.__unpack_values(args)
+        self.x += other[0]
+        self.y += other[1]
+        return self
+
+    __radd__ = __add__
+    ##########################
+    #####  - operetor   ######
+    ##########################
+
+    def __sub__(self, *args):
+        other = self.__unpack_values(args)
+        return Vec2(self.x - other[0], self.y - other[1])
+
+    def __isub__(self, *args):
+        other = self.__unpack_values(args)
+        self.x -= other[0]
+        self.y -= other[1]
+        return self
+
+    def __rsub__(self, *args):
+        other = self.__unpack_values(args)
+        return Vec2(other[0] - self.x, other[1] - self.y)
+    ##########################
+    #####  * operetor   ######
+    ##########################
+
+    def __mul__(self, *args):
+        other = self.__unpack_values(args)
+        return Vec3(self.x * other[0], self.y * other[1])
+
+    def __imul__(self, *args):
+        other = self.__unpack_values(args)
+        self.x *= other[0]
+        self.y *= other[1]
+        return self
+
+    __rmul__ = __mul__
+    ##########################
+    #####  / operetor   ######
+    ##########################
+
+    def __truediv__(self, *args):
+        other = self.__unpack_values(args)
+        return Vec2(self.x / other[0], self.y / other[1])
+
+    def __rtruediv__(self,  *args):
+        other = self.__unpack_values(args)
+        return Vec2(other[0] / self.x, other[1] / self.y)
+
+    def __itruediv__(self, *args):
+        other = self.__unpack_values(args)
+        self.x /= other[0]
+        self.y /= other[1]
+        return self
+
+    def __getitem__(self, index):
+        if index < 0 or index >= 2:
+            raise IndexError(f"Vec2 :: trying to access index: {index}")
+        return self.__xy[index]
+
+    def __setitem__(self, index: int, value: float):
+        if index < 0 or index >= 2:
+            raise IndexError(f"Vec2 :: trying to access index: {index}")
+        self.__xy[index] = value
 
 
-def dot2(a: Vec2, b: Vec2) -> float: return a.x * b.x + a.y * b.y
+def dot2(a: Vec2, b: Vec2) -> float:
+    return a.x * b.x + a.y * b.y
 
 
 def max2(a: Vec2, b: Vec2) -> Vec2:
@@ -103,6 +184,7 @@ def min2(a: Vec2, b: Vec2) -> Vec2:
 
 
 class Vec3(object):
+
     @staticmethod
     def __unpack_values(*args) -> [float]:
         args = args[0]
@@ -126,65 +208,28 @@ class Vec3(object):
 
         raise TypeError(f'Invalid Input: {args}')
 
-    def __init__(self, x: float = 0, y: float = 0, z: float = 0):
-        self.__xyz: [float] = [x, y, z]
+    @staticmethod
+    def dot(a, b) -> float:
+        return a.x * b.x + a.y * b.y + a.z * b.z
 
-    def __eq__(self, other):
-        if not isinstance(other, Vec3):
-            return False
-        if not (self.x == other.x):
-            return False
-        if not (self.y == other.y):
-            return False
-        if not (self.z == other.z):
-            return False
-        return True
-
-    def __hash__(self):
-        return hash((self.x, self.y, self.z))
-
-    def __repr__(self): return "<vec3 x:%s y:%s z:%s>" % (self.__xyz[0], self.__xyz[1], self.__xyz[2])
-
-    def __str__(self): return "[%s, %s, %s]" % (self.__xyz[0], self.__xyz[1], self.__xyz[2])
-
-    def __add__(self, *args):
-        other = self.__unpack_values(args)
-        return Vec3(self.x + other[0], self.y + other[1], self.z + other[2])
-
-    def __sub__(self, *args):
-        other = self.__unpack_values(args)
-        return Vec3(self.x - other[0], self.y - other[1], self.z - other[2])
-
-    def __rsub__(self, *args):
-       pass
-
-    def __rtruediv__(self,  *args):
-        pass
-
-    def __mul__(self, *args):
-        other = self.__unpack_values(args)
-        return Vec3(self.x * other[0], self.y * other[1], self.z * other[2])
-
-    def __truediv__(self, *args):
-        other = self.__unpack_values(args)
-        return Vec3(self.x / other[0], self.y / other[1], self.z / other[2])
-
-    def __getitem__(self, index):
-        if index < 0 or index >= 3:
-            raise IndexError(f"vec3 :: trying to access index: {index}")
-        return self.__xyz[index]
-
-    def norm(self) -> float: return math.sqrt(
-        self.__xyz[0] * self.__xyz[0] + self.__xyz[1] * self.__xyz[1] + self.__xyz[2] * self.__xyz[2])
+    @staticmethod
+    def cross(a, b) -> float:
+        return Vec3(a.z * b.y - a.y * b.z, a.x * b.z - a.z * b.x, a.y * b.x - a.x * b.y)
 
     def normalize(self):
-        nrm = self.norm()
+        nrm = self.magnitude
         if abs(nrm) < 1e-12:
             raise ArithmeticError("zero length vector")
         self.__xyz[0] /= nrm
         self.__xyz[1] /= nrm
         self.__xyz[2] /= nrm
         return self
+
+    def normalized(self):
+        nrm = self.magnitude
+        if abs(nrm) < 1e-12:
+            raise ArithmeticError("zero length vector")
+        return Vec3(self.__xyz[0] / nrm, self.__xyz[1] / nrm, self.__xyz[2] / nrm)
 
     @property
     def magnitude(self) -> float:
@@ -207,6 +252,120 @@ class Vec3(object):
 
     @z.setter
     def z(self, z: float): self.__xyz[2] = z
+
+    @property
+    def magnitude_sqr(self) -> float:
+        return self.__xyz[0] * self.__xyz[0] + self.__xyz[1] * self.__xyz[1] + self.__xyz[2] * self.__xyz[2]
+
+    def __init__(self, x: float = 0, y: float = 0, z: float = 0):
+        self.__xyz: [float] = [x, y, z]
+
+    def __eq__(self, other):
+        if not isinstance(other, Vec3):
+            return False
+        if not (self.x == other.x):
+            return False
+        if not (self.y == other.y):
+            return False
+        if not (self.z == other.z):
+            return False
+        return True
+
+    def __hash__(self):
+        return hash((self.x, self.y, self.z))
+
+    def __neg__(self):
+        return Vec3(-self.x, -self.y, -self.z)
+
+    def __copy__(self):
+        return Vec3(self.x, self.y, self.z)
+
+    copy = __copy__
+
+    def __repr__(self):
+        return "<vec3 x:%s y:%s z:%s>" % (self.__xyz[0], self.__xyz[1], self.__xyz[2])
+
+    def __str__(self):
+        return "[%s, %s, %s]" % (self.__xyz[0], self.__xyz[1], self.__xyz[2])
+
+    ##########################
+    #####  + operetor   ######
+    ##########################
+
+    def __add__(self, *args):
+        other = self.__unpack_values(args)
+        return Vec3(self.x + other[0], self.y + other[1], self.z + other[2])
+
+    def __iadd__(self, *args):
+        other = self.__unpack_values(args)
+        self.x += other[0]
+        self.y += other[1]
+        self.z += other[2]
+        return self
+
+    __radd__ = __add__
+    ##########################
+    #####  - operetor   ######
+    ##########################
+
+    def __sub__(self, *args):
+        other = self.__unpack_values(args)
+        return Vec3(self.x - other[0], self.y - other[1], self.z - other[2])
+
+    def __isub__(self, *args):
+        other = self.__unpack_values(args)
+        self.x -= other[0]
+        self.y -= other[1]
+        self.z -= other[2]
+        return self
+
+    def __rsub__(self, *args):
+        other = self.__unpack_values(args)
+        return Vec3(other[0] - self.x, other[1] - self.y, other[2] - self.z)
+    ##########################
+    #####  * operetor   ######
+    ##########################
+
+    def __mul__(self, *args):
+        other = self.__unpack_values(args)
+        return Vec3(self.x * other[0], self.y * other[1], self.z * other[2])
+
+    def __imul__(self, *args):
+        other = self.__unpack_values(args)
+        self.x *= other[0]
+        self.y *= other[1]
+        self.z *= other[2]
+        return self
+
+    __rmul__ = __mul__
+    ##########################
+    #####  / operetor   ######
+    ##########################
+
+    def __truediv__(self, *args):
+        other = self.__unpack_values(args)
+        return Vec3(self.x / other[0], self.y / other[1], self.z / other[2])
+
+    def __rtruediv__(self,  *args):
+        other = self.__unpack_values(args)
+        return Vec3(other[0] / self.x, other[1] / self.y, other[2] / self.z)
+
+    def __itruediv__(self, *args):
+        other = self.__unpack_values(args)
+        self.x /= other[0]
+        self.y /= other[1]
+        self.z /= other[2]
+        return self
+
+    def __getitem__(self, index):
+        if index < 0 or index >= 3:
+            raise IndexError(f"Vec3 :: trying to access index: {index}")
+        return self.__xyz[index]
+
+    def __setitem__(self, index: int, value: float):
+        if index < 0 or index >= 3:
+            raise IndexError(f"Vec3 :: trying to access index: {index}")
+        self.__xyz[index] = value
 
 
 def dot3(a: Vec3, b: Vec3) -> float: return a.x * b.x + a.y * b.y + a.z * b.z

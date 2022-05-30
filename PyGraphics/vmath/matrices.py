@@ -27,6 +27,62 @@ class Mat3(object):
                     args[6], args[7], args[8]]  # x, y and z passed in
 
         raise TypeError(f'Invalid Input: {args}')
+    # row 1 set/get
+    @property
+    def m00(self) -> float: return self.__data[0]
+
+    @m00.setter
+    def m00(self, val: float): self.__data[0] = val
+
+    @property
+    def m01(self) -> float: return self.__data[1]
+
+    @m01.setter
+    def m01(self, val: float): self.__data[1] = val
+
+    @property
+    def m02(self) -> float: return self.__data[2]
+
+    @m02.setter
+    def m02(self, val: float): self.__data[2] = val
+
+    # row 2 set/get
+    @property
+    def m10(self) -> float: return self.__data[3]
+
+    @m10.setter
+    def m10(self, val: float): self.__data[3] = val
+
+    @property
+    def m11(self) -> float: return self.__data[4]
+
+    @m11.setter
+    def m11(self, val: float): self.__data[4] = val
+
+    @property
+    def m12(self) -> float: return self.__data[5]
+
+    @m12.setter
+    def m12(self, val: float): self.__data[5] = val
+
+    # row 3 set/get
+    @property
+    def m20(self) -> float: return self.__data[6]
+
+    @m20.setter
+    def m20(self, val: float): self.__data[6] = val
+
+    @property
+    def m21(self) -> float: return self.__data[7]
+
+    @m21.setter
+    def m21(self, val: float): self.__data[7] = val
+
+    @property
+    def m22(self) -> float: return self.__data[8]
+
+    @m22.setter
+    def m22(self, val: float): self.__data[8] = val
 
     def __init__(self,
                  m0: float = 0, m1: float = 0, m2: float = 0,
@@ -104,63 +160,6 @@ class Mat3(object):
                     self.__data[6] * b[1] + self.__data[7] * b[4] + self.__data[8] * b[7],
                     self.__data[6] * b[2] + self.__data[7] * b[5] + self.__data[8] * b[8])
 
-    # row 1 set/get
-    @property
-    def m00(self) -> float: return self.__data[0]
-
-    @m00.setter
-    def m00(self, val: float): self.__data[0] = val
-
-    @property
-    def m01(self) -> float: return self.__data[1]
-
-    @m01.setter
-    def m01(self, val: float): self.__data[1] = val
-
-    @property
-    def m02(self) -> float: return self.__data[2]
-
-    @m02.setter
-    def m02(self, val: float): self.__data[2] = val
-
-    # row 2 set/get
-    @property
-    def m10(self) -> float: return self.__data[3]
-
-    @m10.setter
-    def m10(self, val: float): self.__data[3] = val
-
-    @property
-    def m11(self) -> float: return self.__data[4]
-
-    @m11.setter
-    def m11(self, val: float): self.__data[4] = val
-
-    @property
-    def m12(self) -> float: return self.__data[5]
-
-    @m12.setter
-    def m12(self, val: float): self.__data[5] = val
-
-    # row 3 set/get
-    @property
-    def m20(self) -> float: return self.__data[6]
-
-    @m20.setter
-    def m20(self, val: float): self.__data[6] = val
-
-    @property
-    def m21(self) -> float: return self.__data[7]
-
-    @m21.setter
-    def m21(self, val: float): self.__data[7] = val
-
-    @property
-    def m22(self) -> float: return self.__data[8]
-
-    @m22.setter
-    def m22(self, val: float): self.__data[8] = val
-
 
 class Mat4(object):
     @staticmethod
@@ -207,98 +206,6 @@ class Mat4(object):
                                 m4, m5, m6, m7,
                                 m8, m9, m10, m11,
                                 m12, m13, m14, m15]
-
-    def __eq__(self, other) -> bool:
-        if not isinstance(other, Mat4):
-            return False
-        for i in range(0, 16):
-            if not (self.__data[i] == other.__data[i]):
-                return False
-        return True
-
-    def __hash__(self) -> int:
-        return hash(self.__data)
-
-    def __getitem__(self, key: int) -> float: return self.__data[key]
-
-    def __setitem__(self, key: int, value: float): self.__data[key] = value
-
-    def __repr__(self) -> str:
-        res: str = "mat4:\n"
-        res += "[[%s, %s, %s, %s],\n" % (self.__data[0], self.__data[1], self.__data[2], self.__data[3])
-        res += " [%s, %s, %s, %s],\n" % (self.__data[4], self.__data[5], self.__data[6], self.__data[7])
-        res += " [%s, %s, %s, %s],\n" % (self.__data[8], self.__data[9], self.__data[10], self.__data[11])
-        res += " [%s, %s, %s, %s]]" % (self.__data[12], self.__data[13], self.__data[14], self.__data[15])
-        return res
-
-    def __str__(self) -> str:
-        res: str = ""
-        res += "[[%s, %s, %s, %s],\n" % (self.__data[0], self.__data[1], self.__data[2], self.__data[3])
-        res += " [%s, %s, %s, %s],\n" % (self.__data[4], self.__data[5], self.__data[6], self.__data[7])
-        res += " [%s, %s, %s, %s],\n" % (self.__data[8], self.__data[9], self.__data[10], self.__data[11])
-        res += " [%s, %s, %s, %s]]" % (self.__data[12], self.__data[13], self.__data[14], self.__data[15])
-        return res
-
-    def __add__(self, *args):
-        other = self.__unpack_values(args)
-        return Mat4(self.__data[0] + other[0],
-                    self.__data[1] + other[1],
-                    self.__data[2] + other[2],
-                    self.__data[3] + other[3],
-                    self.__data[4] + other[4],
-                    self.__data[5] + other[5],
-                    self.__data[6] + other[6],
-                    self.__data[7] + other[7],
-                    self.__data[8] + other[8],
-                    self.__data[9] + other[9],
-                    self.__data[10] + other[10],
-                    self.__data[11] + other[11],
-                    self.__data[12] + other[12],
-                    self.__data[13] + other[13],
-                    self.__data[14] + other[14],
-                    self.__data[15] + other[15])
-
-    def __sub__(self, *args):
-        other = self.__unpack_values(args)
-        return Mat4(self.__data[0] - other[0],
-                    self.__data[1] - other[1],
-                    self.__data[2] - other[2],
-                    self.__data[3] - other[3],
-                    self.__data[4] - other[4],
-                    self.__data[5] - other[5],
-                    self.__data[6] - other[6],
-                    self.__data[7] - other[7],
-                    self.__data[8] - other[8],
-                    self.__data[9] - other[9],
-                    self.__data[10] - other[10],
-                    self.__data[11] - other[11],
-                    self.__data[12] - other[12],
-                    self.__data[13] - other[13],
-                    self.__data[14] - other[14],
-                    self.__data[15] - other[15])
-
-    def __mul__(self, *args):
-        b = self.__unpack_values(args)
-        return Mat4(self.__data[0] * b[0] + self.__data[1] * b[4] + self.__data[2] * b[8] + self.__data[3] * b[12],
-                    self.__data[0] * b[1] + self.__data[1] * b[5] + self.__data[2] * b[9] + self.__data[3] * b[13],
-                    self.__data[0] * b[2] + self.__data[1] * b[6] + self.__data[2] * b[10] + self.__data[3] * b[14],
-                    self.__data[0] * b[3] + self.__data[1] * b[7] + self.__data[2] * b[11] + self.__data[3] * b[15],
-
-                    self.__data[4] * b[0] + self.__data[5] * b[4] + self.__data[6] * b[8] + self.__data[7] * b[12],
-                    self.__data[4] * b[1] + self.__data[5] * b[5] + self.__data[6] * b[9] + self.__data[7] * b[13],
-                    self.__data[4] * b[2] + self.__data[5] * b[6] + self.__data[6] * b[10] + self.__data[7] * b[14],
-                    self.__data[4] * b[3] + self.__data[5] * b[7] + self.__data[6] * b[11] + self.__data[7] * b[15],
-
-                    self.__data[8] * b[0] + self.__data[9] * b[4] + self.__data[10] * b[8] + self.__data[11] * b[12],
-                    self.__data[8] * b[1] + self.__data[9] * b[5] + self.__data[10] * b[9] + self.__data[11] * b[13],
-                    self.__data[8] * b[2] + self.__data[9] * b[6] + self.__data[10] * b[10] + self.__data[11] * b[14],
-                    self.__data[8] * b[3] + self.__data[9] * b[7] + self.__data[10] * b[11] + self.__data[11] * b[15],
-
-                    self.__data[12] * b[0] + self.__data[13] * b[4] + self.__data[14] * b[8] + self.__data[15] * b[12],
-                    self.__data[12] * b[1] + self.__data[13] * b[5] + self.__data[14] * b[9] + self.__data[15] * b[13],
-                    self.__data[12] * b[2] + self.__data[13] * b[6] + self.__data[14] * b[10] + self.__data[15] * b[14],
-                    self.__data[12] * b[3] + self.__data[13] * b[7] + self.__data[14] * b[11] + self.__data[15] * b[15])
-
     # row 1 set/get
     @property
     def m00(self) -> float: return self.__data[0]
@@ -398,3 +305,195 @@ class Mat4(object):
 
     @m33.setter
     def m33(self, val: float): self.__data[15] = val
+
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, Mat4):
+            return False
+        for i in range(0, 16):
+            if not (self.__data[i] == other.__data[i]):
+                return False
+        return True
+
+    def __hash__(self) -> int:
+        return hash(self.__data)
+
+    def __getitem__(self, index: int) -> float:
+        if index < 0 or index >= 16:
+            raise IndexError(f"Mat4 :: trying to access index: {index}")
+        return self.__data[index]
+
+    def __setitem__(self, index: int, value: float):
+        if index < 0 or index >= 16:
+            raise IndexError(f"Mat4 :: trying to access index: {index}")
+        self.__data[index] = value
+
+    def __neg__(self):
+        return Mat4(-self.m00, -self.m01, -self.m02, -self.m03,
+                    -self.m10, -self.m11, -self.m12, -self.m13,
+                    -self.m20, -self.m21, -self.m22, -self.m23,
+                    -self.m30, -self.m31, -self.m32, -self.m33)
+
+    def __copy__(self):
+        return Mat4(self.m00, self.m01, self.m02, self.m03,
+                    self.m10, self.m11, self.m12, self.m13,
+                    self.m20, self.m21, self.m22, self.m23,
+                    self.m30, self.m31, self.m32, self.m33)
+
+    copy = __copy__
+
+    def __repr__(self) -> str:
+        res: str = "mat4:\n"
+        res += "[[%s, %s, %s, %s],\n" % (self.__data[0], self.__data[1], self.__data[2], self.__data[3])
+        res += " [%s, %s, %s, %s],\n" % (self.__data[4], self.__data[5], self.__data[6], self.__data[7])
+        res += " [%s, %s, %s, %s],\n" % (self.__data[8], self.__data[9], self.__data[10], self.__data[11])
+        res += " [%s, %s, %s, %s]]" % (self.__data[12], self.__data[13], self.__data[14], self.__data[15])
+        return res
+
+    def __str__(self) -> str:
+        res: str = ""
+        res += "[[%s, %s, %s, %s],\n" % (self.__data[0], self.__data[1], self.__data[2], self.__data[3])
+        res += " [%s, %s, %s, %s],\n" % (self.__data[4], self.__data[5], self.__data[6], self.__data[7])
+        res += " [%s, %s, %s, %s],\n" % (self.__data[8], self.__data[9], self.__data[10], self.__data[11])
+        res += " [%s, %s, %s, %s]]" % (self.__data[12], self.__data[13], self.__data[14], self.__data[15])
+        return res
+
+    def __add__(self, *args):
+        other = self.__unpack_values(args)
+        return Mat4(self.__data[0] + other[0],
+                    self.__data[1] + other[1],
+                    self.__data[2] + other[2],
+                    self.__data[3] + other[3],
+                    self.__data[4] + other[4],
+                    self.__data[5] + other[5],
+                    self.__data[6] + other[6],
+                    self.__data[7] + other[7],
+                    self.__data[8] + other[8],
+                    self.__data[9] + other[9],
+                    self.__data[10] + other[10],
+                    self.__data[11] + other[11],
+                    self.__data[12] + other[12],
+                    self.__data[13] + other[13],
+                    self.__data[14] + other[14],
+                    self.__data[15] + other[15])
+
+    __radd__ = __add__
+
+    def __iadd__(self, *args):
+        other = self.__unpack_values(args)
+        self.__data[0] += other[0]
+        self.__data[1] += other[1]
+        self.__data[2] += other[2]
+        self.__data[3] += other[3]
+        self.__data[4] += other[4]
+        self.__data[5] += other[5]
+        self.__data[6] += other[6]
+        self.__data[7] += other[7]
+        self.__data[8] += other[8]
+        self.__data[9] += other[9]
+        self.__data[10] += other[10]
+        self.__data[11] += other[11]
+        self.__data[12] += other[12]
+        self.__data[13] += other[13]
+        self.__data[14] += other[14]
+        self.__data[15] += other[15]
+
+    def __sub__(self, *args):
+        other = self.__unpack_values(args)
+        return Mat4(self.__data[0] - other[0],
+                    self.__data[1] - other[1],
+                    self.__data[2] - other[2],
+                    self.__data[3] - other[3],
+                    self.__data[4] - other[4],
+                    self.__data[5] - other[5],
+                    self.__data[6] - other[6],
+                    self.__data[7] - other[7],
+                    self.__data[8] - other[8],
+                    self.__data[9] - other[9],
+                    self.__data[10] - other[10],
+                    self.__data[11] - other[11],
+                    self.__data[12] - other[12],
+                    self.__data[13] - other[13],
+                    self.__data[14] - other[14],
+                    self.__data[15] - other[15])
+
+    def __rsub__(self, *args):
+        other = self.__unpack_values(args)
+        return Mat4(other[0] - self.__data[0],
+                    other[1] - self.__data[1],
+                    other[2] - self.__data[2],
+                    other[3] - self.__data[3],
+                    other[4] - self.__data[4],
+                    other[5] - self.__data[5],
+                    other[6] - self.__data[6],
+                    other[7] - self.__data[7],
+                    other[8] - self.__data[8],
+                    other[9] - self.__data[9],
+                    other[10] - self.__data[10],
+                    other[11] - self.__data[11],
+                    other[12] - self.__data[12],
+                    other[13] - self.__data[13],
+                    other[14] - self.__data[14],
+                    other[15] - self.__data[15])
+
+    def __isub__(self, *args):
+        other = self.__unpack_values(args)
+        self.__data[0] -= other[0]
+        self.__data[1] -= other[1]
+        self.__data[2] -= other[2]
+        self.__data[3] -= other[3]
+        self.__data[4] -= other[4]
+        self.__data[5] -= other[5]
+        self.__data[6] -= other[6]
+        self.__data[7] -= other[7]
+        self.__data[8] -= other[8]
+        self.__data[9] -= other[9]
+        self.__data[10] -= other[10]
+        self.__data[11] -= other[11]
+        self.__data[12] -= other[12]
+        self.__data[13] -= other[13]
+        self.__data[14] -= other[14]
+        self.__data[15] -= other[15]
+
+    def __mul__(self, *args):
+        b = self.__unpack_values(args)
+        return Mat4(self.__data[0] * b[0] + self.__data[1] * b[4] + self.__data[2] * b[8] + self.__data[3] * b[12],
+                    self.__data[0] * b[1] + self.__data[1] * b[5] + self.__data[2] * b[9] + self.__data[3] * b[13],
+                    self.__data[0] * b[2] + self.__data[1] * b[6] + self.__data[2] * b[10] + self.__data[3] * b[14],
+                    self.__data[0] * b[3] + self.__data[1] * b[7] + self.__data[2] * b[11] + self.__data[3] * b[15],
+
+                    self.__data[4] * b[0] + self.__data[5] * b[4] + self.__data[6] * b[8] + self.__data[7] * b[12],
+                    self.__data[4] * b[1] + self.__data[5] * b[5] + self.__data[6] * b[9] + self.__data[7] * b[13],
+                    self.__data[4] * b[2] + self.__data[5] * b[6] + self.__data[6] * b[10] + self.__data[7] * b[14],
+                    self.__data[4] * b[3] + self.__data[5] * b[7] + self.__data[6] * b[11] + self.__data[7] * b[15],
+
+                    self.__data[8] * b[0] + self.__data[9] * b[4] + self.__data[10] * b[8] + self.__data[11] * b[12],
+                    self.__data[8] * b[1] + self.__data[9] * b[5] + self.__data[10] * b[9] + self.__data[11] * b[13],
+                    self.__data[8] * b[2] + self.__data[9] * b[6] + self.__data[10] * b[10] + self.__data[11] * b[14],
+                    self.__data[8] * b[3] + self.__data[9] * b[7] + self.__data[10] * b[11] + self.__data[11] * b[15],
+
+                    self.__data[12] * b[0] + self.__data[13] * b[4] + self.__data[14] * b[8] + self.__data[15] * b[12],
+                    self.__data[12] * b[1] + self.__data[13] * b[5] + self.__data[14] * b[9] + self.__data[15] * b[13],
+                    self.__data[12] * b[2] + self.__data[13] * b[6] + self.__data[14] * b[10] + self.__data[15] * b[14],
+                    self.__data[12] * b[3] + self.__data[13] * b[7] + self.__data[14] * b[11] + self.__data[15] * b[15])
+
+    def __rmul__(self, *args):
+        b = self.__unpack_values(args)
+        return Mat4(b[0] * self.__data[0] + b[1] * self.__data[4] + b[2] * self.__data[8] + b[3] * self.__data[12],
+                    b[0] * self.__data[1] + b[1] * self.__data[5] + b[2] * self.__data[9] + b[3] * self.__data[13],
+                    b[0] * self.__data[2] + b[1] * self.__data[6] + b[2] * self.__data[10] + b[3] * self.__data[14],
+                    b[0] * self.__data[3] + b[1] * self.__data[7] + b[2] * self.__data[11] + b[3] * self.__data[15],
+
+                    b[4] * self.__data[0] + b[5] * self.__data[4] + b[6] * self.__data[8] + b[7] * self.__data[12],
+                    b[4] * self.__data[1] + b[5] * self.__data[5] + b[6] * self.__data[9] + b[7] * self.__data[13],
+                    b[4] * self.__data[2] + b[5] * self.__data[6] + b[6] * self.__data[10] + b[7] * self.__data[14],
+                    b[4] * self.__data[3] + b[5] * self.__data[7] + b[6] * self.__data[11] + b[7] * self.__data[15],
+
+                    b[8] * self.__data[0] + b[9] * self.__data[4] + b[10] * self.__data[8] + b[11] * self.__data[12],
+                    b[8] * self.__data[1] + b[9] * self.__data[5] + b[10] * self.__data[9] + b[11] * self.__data[13],
+                    b[8] * self.__data[2] + b[9] * self.__data[6] + b[10] * self.__data[10] + b[11] * self.__data[14],
+                    b[8] * self.__data[3] + b[9] * self.__data[7] + b[10] * self.__data[11] + b[11] * self.__data[15],
+
+                    b[12] * self.__data[0] + b[13] * self.__data[4] + b[14] * self.__data[8] + b[15] * self.__data[12],
+                    b[12] * self.__data[1] + b[13] * self.__data[5] + b[14] * self.__data[9] + b[15] * self.__data[13],
+                    b[12] * self.__data[2] + b[13] * self.__data[6] + b[14] * self.__data[10] + b[15] * self.__data[14],
+                    b[12] * self.__data[3] + b[13] * self.__data[7] + b[14] * self.__data[11] + b[15] * self.__data[15])
