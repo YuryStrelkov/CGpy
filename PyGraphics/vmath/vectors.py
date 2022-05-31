@@ -213,7 +213,7 @@ class Vec3(object):
         return a.x * b.x + a.y * b.y + a.z * b.z
 
     @staticmethod
-    def cross(a, b) -> float:
+    def cross(a, b):
         return Vec3(a.z * b.y - a.y * b.z, a.x * b.z - a.z * b.x, a.y * b.x - a.x * b.y)
 
     def normalize(self):

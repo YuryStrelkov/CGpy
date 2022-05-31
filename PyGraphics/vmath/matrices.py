@@ -14,9 +14,9 @@ class Mat3(object):
                         args[0].m20, args[0].m21, args[0].m22]
 
             if arg_type is float or arg_type is int:  # single int or float argument
-                return [args[0],     0,      0,
-                             0, args[0],     0,
-                             0,      0, args[0]]
+                return [args[0], 0, 0,
+                        0, args[0], 0,
+                        0, 0, args[0]]
 
         if number_of_args == 0:
             return [0, 0, 0, 0, 0, 0, 0, 0, 0]  # no arguments
@@ -27,62 +27,100 @@ class Mat3(object):
                     args[6], args[7], args[8]]  # x, y and z passed in
 
         raise TypeError(f'Invalid Input: {args}')
+
     # row 1 set/get
     @property
-    def m00(self) -> float: return self.__data[0]
+    def m00(self) -> float:
+        return self.__data[0]
 
     @m00.setter
-    def m00(self, val: float): self.__data[0] = val
+    def m00(self, val: float):
+        self.__data[0] = val
 
     @property
-    def m01(self) -> float: return self.__data[1]
+    def m01(self) -> float:
+        return self.__data[1]
 
     @m01.setter
-    def m01(self, val: float): self.__data[1] = val
+    def m01(self, val: float):
+        self.__data[1] = val
 
     @property
-    def m02(self) -> float: return self.__data[2]
+    def m02(self) -> float:
+        return self.__data[2]
 
     @m02.setter
-    def m02(self, val: float): self.__data[2] = val
+    def m02(self, val: float):
+        self.__data[2] = val
 
     # row 2 set/get
     @property
-    def m10(self) -> float: return self.__data[3]
+    def m10(self) -> float:
+        return self.__data[3]
 
     @m10.setter
-    def m10(self, val: float): self.__data[3] = val
+    def m10(self, val: float):
+        self.__data[3] = val
 
     @property
-    def m11(self) -> float: return self.__data[4]
+    def m11(self) -> float:
+        return self.__data[4]
 
     @m11.setter
-    def m11(self, val: float): self.__data[4] = val
+    def m11(self, val: float):
+        self.__data[4] = val
 
     @property
-    def m12(self) -> float: return self.__data[5]
+    def m12(self) -> float:
+        return self.__data[5]
 
     @m12.setter
-    def m12(self, val: float): self.__data[5] = val
+    def m12(self, val: float):
+        self.__data[5] = val
 
     # row 3 set/get
     @property
-    def m20(self) -> float: return self.__data[6]
+    def m20(self) -> float:
+        return self.__data[6]
 
     @m20.setter
-    def m20(self, val: float): self.__data[6] = val
+    def m20(self, val: float):
+        self.__data[6] = val
 
     @property
-    def m21(self) -> float: return self.__data[7]
+    def m21(self) -> float:
+        return self.__data[7]
 
     @m21.setter
-    def m21(self, val: float): self.__data[7] = val
+    def m21(self, val: float):
+        self.__data[7] = val
 
     @property
-    def m22(self) -> float: return self.__data[8]
+    def m22(self) -> float:
+        return self.__data[8]
 
     @m22.setter
-    def m22(self, val: float): self.__data[8] = val
+    def m22(self, val: float):
+        self.__data[8] = val
+
+    def invert(self):
+        det: float = (self.m00 * (self.m11 * self.m22 - self.m21 * self.m12) -
+                      self.m01 * (self.m10 * self.m22 - self.m12 * self.m20) +
+                      self.m02 * (self.m10 * self.m21 - self.m11 * self.m20))
+        if abs(det) < 1e-12:
+            raise ArithmeticError("Mat3 :: singular matrix")
+        det = 1.0 / det
+
+        self.__data = [(self.m11 * self.m22 - self.m21 * self.m12) * det,
+                       (self.m02 * self.m21 - self.m01 * self.m22) * det,
+                       (self.m01 * self.m12 - self.m02 * self.m11) * det,
+                       (self.m12 * self.m20 - self.m10 * self.m22) * det,
+                       (self.m00 * self.m22 - self.m02 * self.m20) * det,
+                       (self.m10 * self.m02 - self.m00 * self.m12) * det,
+                       (self.m10 * self.m21 - self.m20 * self.m11) * det,
+                       (self.m20 * self.m01 - self.m00 * self.m21) * det,
+                       (self.m00 * self.m11 - self.m10 * self.m01) * det]
+        return self
 
     def __init__(self,
                  m0: float = 0, m1: float = 0, m2: float = 0,
@@ -101,12 +139,15 @@ class Mat3(object):
     def __hash__(self) -> int:
         return hash(self.__data)
 
-    def __getitem__(self, key: int) -> float:
-        if key < 0 or key >= 2:
-            raise IndexError(f"Mat3 :: trying to access index: {key}")
-        return self.__data[key]
+    def __getitem__(self, index: int) -> float:
+        if index < 0 or index >= 9:
+            raise IndexError(f"Mat3 :: trying to access index: {index}")
+        return self.__data[index]
 
-    def __setitem__(self, key: int, value: float): self.__data[key] = value
+    def __setitem__(self, index: int, value: float):
+        if index < 0 or index >= 9:
+            raise IndexError(f"Mat3 :: trying to access index: {index}")
+        self.__data[index] = value
 
     def __repr__(self) -> str:
         res: str = "mat4:\n"
@@ -132,7 +173,22 @@ class Mat3(object):
                     self.__data[5] + other[5],
                     self.__data[6] + other[6],
                     self.__data[7] + other[7],
-                    self.__data[7] + other[7])
+                    self.__data[8] + other[8])
+
+    def __iadd__(self, *args):
+        other = self.__unpack_values(args)
+        self.__data[0] += other[0]
+        self.__data[1] += other[1]
+        self.__data[2] += other[2]
+        self.__data[3] += other[3]
+        self.__data[4] += other[4]
+        self.__data[5] += other[5]
+        self.__data[6] += other[6]
+        self.__data[7] += other[7]
+        self.__data[8] += other[8]
+        return self
+
+    __radd__ = __add__
 
     def __sub__(self, *args):
         other = self.__unpack_values(args)
@@ -144,7 +200,32 @@ class Mat3(object):
                     self.__data[5] - other[5],
                     self.__data[6] - other[6],
                     self.__data[7] - other[7],
-                    self.__data[7] - other[7])
+                    self.__data[8] - other[8])
+
+    def __isub__(self, *args):
+        other = self.__unpack_values(args)
+        self.__data[0] -= other[0]
+        self.__data[1] -= other[1]
+        self.__data[2] -= other[2]
+        self.__data[3] -= other[3]
+        self.__data[4] -= other[4]
+        self.__data[5] -= other[5]
+        self.__data[6] -= other[6]
+        self.__data[7] -= other[7]
+        self.__data[8] -= other[8]
+        return self
+
+    def __rsub__(self, *args):
+        other = self.__unpack_values(args)
+        return Mat3(other[0] - self.__data[0],
+                    other[1] - self.__data[1],
+                    other[2] - self.__data[2],
+                    other[3] - self.__data[3],
+                    other[4] - self.__data[4],
+                    other[5] - self.__data[5],
+                    other[6] - self.__data[6],
+                    other[7] - self.__data[7],
+                    other[8] - self.__data[8])
 
     def __mul__(self, *args):
         b = self.__unpack_values(args)
@@ -159,6 +240,37 @@ class Mat3(object):
                     self.__data[6] * b[0] + self.__data[7] * b[3] + self.__data[8] * b[6],
                     self.__data[6] * b[1] + self.__data[7] * b[4] + self.__data[8] * b[7],
                     self.__data[6] * b[2] + self.__data[7] * b[5] + self.__data[8] * b[8])
+
+    def __imul__(self, *args):
+        b = self.__unpack_values(args)
+        res: [float] = \
+            [self.__data[0] * b[0] + self.__data[1] * b[3] + self.__data[2] * b[6],
+             self.__data[0] * b[1] + self.__data[1] * b[4] + self.__data[2] * b[7],
+             self.__data[0] * b[2] + self.__data[1] * b[5] + self.__data[2] * b[8],
+
+             self.__data[3] * b[0] + self.__data[4] * b[3] + self.__data[5] * b[6],
+             self.__data[3] * b[1] + self.__data[4] * b[4] + self.__data[5] * b[7],
+             self.__data[3] * b[2] + self.__data[4] * b[5] + self.__data[5] * b[8],
+
+             self.__data[6] * b[0] + self.__data[7] * b[3] + self.__data[8] * b[6],
+             self.__data[6] * b[1] + self.__data[7] * b[4] + self.__data[8] * b[7],
+             self.__data[6] * b[2] + self.__data[7] * b[5] + self.__data[8] * b[8]]
+        self.__data = res
+        return self
+
+    def __rmul__(self, *args):
+        b = self.__unpack_values(args)
+        return Mat3(b[0] * self.__data[0] + b[1] * self.__data[3] + b[2] * self.__data[6],
+                    b[0] * self.__data[1] + b[1] * self.__data[4] + b[2] * self.__data[7],
+                    b[0] * self.__data[2] + b[1] * self.__data[5] + b[2] * self.__data[8],
+
+                    b[3] * self.__data[0] + b[4] * self.__data[3] + b[5] * self.__data[6],
+                    b[3] * self.__data[1] + b[4] * self.__data[4] + b[5] * self.__data[7],
+                    b[3] * self.__data[2] + b[4] * self.__data[5] + b[5] * self.__data[8],
+
+                    b[6] * self.__data[0] + b[7] * self.__data[3] + b[8] * self.__data[6],
+                    b[6] * self.__data[1] + b[7] * self.__data[4] + b[8] * self.__data[7],
+                    b[6] * self.__data[2] + b[7] * self.__data[5] + b[8] * self.__data[8])
 
 
 class Mat4(object):
@@ -178,10 +290,10 @@ class Mat4(object):
                         args[0].m30, args[0].m31, args[0].m32, args[0].m33]
 
             if arg_type is float or arg_type is int:  # single int or float argument
-                return [args[0],     0,      0,      0,
-                             0, args[0],     0,      0,
-                             0,      0, args[0],     0,
-                             0,      0,      0, args[0]]
+                return [args[0], 0, 0, 0,
+                        0, args[0], 0, 0,
+                        0, 0, args[0], 0,
+                        0, 0, 0, args[0]]
 
         if number_of_args == 0:
             return [0, 0, 0, 0,
@@ -190,9 +302,9 @@ class Mat4(object):
                     0, 0, 0, 0]  # no arguments
 
         if number_of_args == 9:
-            return [args[0],  args[1],  args[2],  args[3],
-                    args[4],  args[5],  args[6],  args[7],
-                    args[8],  args[9],  args[10], args[11],
+            return [args[0], args[1], args[2], args[3],
+                    args[4], args[5], args[6], args[7],
+                    args[8], args[9], args[10], args[11],
                     args[12], args[13], args[14], args[15]]  # x, y and z passed in
 
         raise TypeError(f'Invalid Input: {args}')
@@ -206,105 +318,188 @@ class Mat4(object):
                                 m4, m5, m6, m7,
                                 m8, m9, m10, m11,
                                 m12, m13, m14, m15]
+
     # row 1 set/get
     @property
-    def m00(self) -> float: return self.__data[0]
+    def m00(self) -> float:
+        return self.__data[0]
 
     @m00.setter
-    def m00(self, val: float): self.__data[0] = val
+    def m00(self, val: float):
+        self.__data[0] = val
 
     @property
-    def m01(self) -> float: return self.__data[1]
+    def m01(self) -> float:
+        return self.__data[1]
 
     @m01.setter
-    def m01(self, val: float): self.__data[1] = val
+    def m01(self, val: float):
+        self.__data[1] = val
 
     @property
-    def m02(self) -> float: return self.__data[2]
+    def m02(self) -> float:
+        return self.__data[2]
 
     @m02.setter
-    def m02(self, val: float): self.__data[2] = val
+    def m02(self, val: float):
+        self.__data[2] = val
 
     @property
-    def m03(self) -> float: return self.__data[3]
+    def m03(self) -> float:
+        return self.__data[3]
 
     @m03.setter
-    def m03(self, val: float): self.__data[3] = val
+    def m03(self, val: float):
+        self.__data[3] = val
 
     # row 2 set/get
     @property
-    def m10(self) -> float: return self.__data[4]
+    def m10(self) -> float:
+        return self.__data[4]
 
     @m10.setter
-    def m10(self, val: float): self.__data[4] = val
+    def m10(self, val: float):
+        self.__data[4] = val
 
     @property
-    def m11(self) -> float: return self.__data[5]
+    def m11(self) -> float:
+        return self.__data[5]
 
     @m11.setter
-    def m11(self, val: float): self.__data[5] = val
+    def m11(self, val: float):
+        self.__data[5] = val
 
     @property
-    def m12(self) -> float: return self.__data[6]
+    def m12(self) -> float:
+        return self.__data[6]
 
     @m12.setter
-    def m12(self, val: float): self.__data[6] = val
+    def m12(self, val: float):
+        self.__data[6] = val
 
     @property
-    def m13(self) -> float: return self.__data[7]
+    def m13(self) -> float:
+        return self.__data[7]
 
     @m13.setter
-    def m13(self, val: float): self.__data[7] = val
+    def m13(self, val: float):
+        self.__data[7] = val
 
     # row 3 set/get
     @property
-    def m20(self) -> float: return self.__data[8]
+    def m20(self) -> float:
+        return self.__data[8]
 
     @m20.setter
-    def m20(self, val: float): self.__data[8] = val
+    def m20(self, val: float):
+        self.__data[8] = val
 
     @property
-    def m21(self) -> float: return self.__data[9]
+    def m21(self) -> float:
+        return self.__data[9]
 
     @m21.setter
-    def m21(self, val: float): self.__data[9] = val
+    def m21(self, val: float):
+        self.__data[9] = val
 
     @property
-    def m22(self) -> float: return self.__data[10]
+    def m22(self) -> float:
+        return self.__data[10]
 
     @m22.setter
-    def m22(self, val: float): self.__data[10] = val
+    def m22(self, val: float):
+        self.__data[10] = val
 
     @property
-    def m23(self) -> float: return self.__data[11]
+    def m23(self) -> float:
+        return self.__data[11]
 
     @m23.setter
-    def m23(self, val: float): self.__data[11] = val
+    def m23(self, val: float):
+        self.__data[11] = val
 
     # row 4 set/get
     @property
-    def m30(self) -> float: return self.__data[12]
+    def m30(self) -> float:
+        return self.__data[12]
 
     @m30.setter
-    def m30(self, val: float): self.__data[12] = val
+    def m30(self, val: float):
+        self.__data[12] = val
 
     @property
-    def m31(self) -> float: return self.__data[13]
+    def m31(self) -> float:
+        return self.__data[13]
 
     @m31.setter
-    def m31(self, val: float): self.__data[13] = val
+    def m31(self, val: float):
+        self.__data[13] = val
 
     @property
-    def m32(self) -> float: return self.__data[14]
+    def m32(self) -> float:
+        return self.__data[14]
 
     @m32.setter
-    def m32(self, val: float): self.__data[14] = val
+    def m32(self, val: float):
+        self.__data[14] = val
 
     @property
-    def m33(self) -> float: return self.__data[15]
+    def m33(self) -> float:
+        return self.__data[15]
 
     @m33.setter
-    def m33(self, val: float): self.__data[15] = val
+    def m33(self, val: float):
+        self.__data[15] = val
+
+    def invert(self):
+        A2323: float = self.m22 * self.m33 - self.m23 * self.m32
+        A1323: float = self.m21 * self.m33 - self.m23 * self.m31
+        A1223: float = self.m21 * self.m32 - self.m22 * self.m31
+        A0323: float = self.m20 * self.m33 - self.m23 * self.m30
+        A0223: float = self.m20 * self.m32 - self.m22 * self.m30
+        A0123: float = self.m20 * self.m31 - self.m21 * self.m30
+        A2313: float = self.m12 * self.m33 - self.m13 * self.m32
+        A1313: float = self.m11 * self.m33 - self.m13 * self.m31
+        A1213: float = self.m11 * self.m32 - self.m12 * self.m31
+        A2312: float = self.m12 * self.m23 - self.m13 * self.m22
+        A1312: float = self.m11 * self.m23 - self.m13 * self.m21
+        A1212: float = self.m11 * self.m22 - self.m12 * self.m21
+        A0313: float = self.m10 * self.m33 - self.m13 * self.m30
+        A0213: float = self.m10 * self.m32 - self.m12 * self.m30
+        A0312: float = self.m10 * self.m23 - self.m13 * self.m20
+        A0212: float = self.m10 * self.m22 - self.m12 * self.m20
+        A0113: float = self.m10 * self.m31 - self.m11 * self.m30
+        A0112: float = self.m10 * self.m21 - self.m11 * self.m20
+
+        det: float = self.m00 * (self.m11 * A2323 - self.m12 * A1323 + self.m13 * A1223)\
+                    -self.m01 * (self.m10 * A2323 - self.m12 * A0323 + self.m13 * A0223)\
+                    +self.m02 * (self.m10 * A1323 - self.m11 * A0323 + self.m13 * A0123)\
+                    -self.m03 * (self.m10 * A1223 - self.m11 * A0223 + self.m12 * A0123)
+
+        if abs(det) < 1e-12:
+            raise ArithmeticError("Mat4 :: singular matrix")
+
+        det = 1.0 / det
+
+        # computes the inverse of a matrix m
+
+        self.__data = var = [det * (self.m11 * A2323 - self.m12 * A1323 + self.m13 * A1223),
+                             det * -(self.m01 * A2323 - self.m02 * A1323 + self.m03 * A1223),
+                             det * (self.m01 * A2313 - self.m02 * A1313 + self.m03 * A1213),
+                             det * -(self.m01 * A2312 - self.m02 * A1312 + self.m03 * A1212),
+                             det * -(self.m10 * A2323 - self.m12 * A0323 + self.m13 * A0223),
+                             det * (self.m00 * A2323 - self.m02 * A0323 + self.m03 * A0223),
+                             det * -(self.m00 * A2313 - self.m02 * A0313 + self.m03 * A0213),
+                             det * (self.m00 * A2312 - self.m02 * A0312 + self.m03 * A0212),
+                             det * (self.m10 * A1323 - self.m11 * A0323 + self.m13 * A0123),
+                             det * -(self.m00 * A1323 - self.m01 * A0323 + self.m03 * A0123),
+                             det * (self.m00 * A1313 - self.m01 * A0313 + self.m03 * A0113),
+                             det * -(self.m00 * A1312 - self.m01 * A0312 + self.m03 * A0112),
+                             det * -(self.m10 * A1223 - self.m11 * A0223 + self.m12 * A0123),
+                             det * (self.m00 * A1223 - self.m01 * A0223 + self.m02 * A0123),
+                             det * -(self.m00 * A1213 - self.m01 * A0213 + self.m02 * A0113),
+                             det * (self.m00 * A1212 - self.m01 * A0212 + self.m02 * A0112)]
+        return self
 
     def __eq__(self, other) -> bool:
         if not isinstance(other, Mat4):
@@ -497,3 +692,28 @@ class Mat4(object):
                     b[12] * self.__data[1] + b[13] * self.__data[5] + b[14] * self.__data[9] + b[15] * self.__data[13],
                     b[12] * self.__data[2] + b[13] * self.__data[6] + b[14] * self.__data[10] + b[15] * self.__data[14],
                     b[12] * self.__data[3] + b[13] * self.__data[7] + b[14] * self.__data[11] + b[15] * self.__data[15])
+
+    def __imul__(self, *args):
+        b = self.__unpack_values(args)
+        res: [float] = \
+            [self.__data[0] * b[0] + self.__data[1] * b[4] + self.__data[2] * b[8] + self.__data[3] * b[12],
+             self.__data[0] * b[1] + self.__data[1] * b[5] + self.__data[2] * b[9] + self.__data[3] * b[13],
+             self.__data[0] * b[2] + self.__data[1] * b[6] + self.__data[2] * b[10] + self.__data[3] * b[14],
+             self.__data[0] * b[3] + self.__data[1] * b[7] + self.__data[2] * b[11] + self.__data[3] * b[15],
+
+             self.__data[4] * b[0] + self.__data[5] * b[4] + self.__data[6] * b[8] + self.__data[7] * b[12],
+             self.__data[4] * b[1] + self.__data[5] * b[5] + self.__data[6] * b[9] + self.__data[7] * b[13],
+             self.__data[4] * b[2] + self.__data[5] * b[6] + self.__data[6] * b[10] + self.__data[7] * b[14],
+             self.__data[4] * b[3] + self.__data[5] * b[7] + self.__data[6] * b[11] + self.__data[7] * b[15],
+
+             self.__data[8] * b[0] + self.__data[9] * b[4] + self.__data[10] * b[8] + self.__data[11] * b[12],
+             self.__data[8] * b[1] + self.__data[9] * b[5] + self.__data[10] * b[9] + self.__data[11] * b[13],
+             self.__data[8] * b[2] + self.__data[9] * b[6] + self.__data[10] * b[10] + self.__data[11] * b[14],
+             self.__data[8] * b[3] + self.__data[9] * b[7] + self.__data[10] * b[11] + self.__data[11] * b[15],
+
+             self.__data[12] * b[0] + self.__data[13] * b[4] + self.__data[14] * b[8] + self.__data[15] * b[12],
+             self.__data[12] * b[1] + self.__data[13] * b[5] + self.__data[14] * b[9] + self.__data[15] * b[13],
+             self.__data[12] * b[2] + self.__data[13] * b[6] + self.__data[14] * b[10] + self.__data[15] * b[14],
+             self.__data[12] * b[3] + self.__data[13] * b[7] + self.__data[14] * b[11] + self.__data[15] * b[15]]
+        self.__data = res
+        return self

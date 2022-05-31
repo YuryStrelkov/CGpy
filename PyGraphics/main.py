@@ -88,7 +88,7 @@ def static_shading(render_camera: Camera = None, draw_wire: bool = False):
 def interactive_solid_color(render_camera: Camera = None):
     frame_buffer = FrameBuffer(1000, 1000)
 
-    model: Model = Model("resources/teapots.obj", "resources/teapots.mtl")
+    model: Model = Model("resources/rabbit.obj", "resources/teapots.mtl")
 
     gr.draw_model_solid_interactive(frame_buffer, model, render_camera)
 
@@ -96,7 +96,7 @@ def interactive_solid_color(render_camera: Camera = None):
 def interactive_shading(render_camera: Camera = None):
     frame_buffer = FrameBuffer(1000, 1000)
 
-    model: Model = Model("resources/teapots.obj", "resources/teapots.mtl")
+    model: Model = Model("resources/rabbit.obj", "resources/teapots.mtl")
 
     model.get_material(0).tile = Vec2(5, 5)
 
@@ -109,7 +109,7 @@ def interactive_shading(render_camera: Camera = None):
 
 if __name__ == '__main__':
     # bezier_intersection_test()
-    bezier_patch_test()
+    interactive_solid_color()
     # static_solid_color()
     # static_shading()
     # interactive_solid_color()
