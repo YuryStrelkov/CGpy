@@ -266,7 +266,7 @@ def read_obj_mesh(path: str) -> List[TrisMesh]:
         if len(lines[i]) == 0:
             continue
 
-        tmp = lines[i].split(" ")
+        tmp = lines[i].strip().split()
 
         id_ = len(tmp) - 1
 
@@ -314,7 +314,7 @@ def read_obj_mesh(path: str) -> List[TrisMesh]:
             continue
 
         if tmp[0] == "f":
-            tmp2 = tmp[1].split("/")
+            tmp2 = tmp[1].strip().split("/")
             face_ = Face()
             face_.p_1 = int(tmp2[0]) - 1 - v__shift
             face_.uv1 = int(tmp2[1]) - 1 - uv_shift

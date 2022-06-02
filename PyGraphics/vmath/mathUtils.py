@@ -1,4 +1,3 @@
-import numpy as np
 import math
 import vmath.vectors as vectors
 from vmath.matrices import Mat4, Mat3
@@ -6,8 +5,8 @@ from vmath.vectors import Vec3, Vec2
 
 
 def rotate_x(angle: float) -> Mat4:
-    cos_a = np.cos(angle)
-    sin_a = np.sin(angle)
+    cos_a = math.cos(angle)
+    sin_a = math.sin(angle)
     return Mat4(1, 0, 0, 0,
                 0, cos_a, -sin_a, 0,
                 0, sin_a, cos_a, 0,
@@ -15,8 +14,8 @@ def rotate_x(angle: float) -> Mat4:
 
 
 def rotate_y(angle: float) -> Mat4:
-    cos_a = np.cos(angle)
-    sin_a = np.sin(angle)
+    cos_a = math.cos(angle)
+    sin_a = math.sin(angle)
     return Mat4(cos_a, 0, -sin_a, 0,
                 0, 1, 0, 0,
                 sin_a, 0, cos_a, 0,
@@ -24,33 +23,33 @@ def rotate_y(angle: float) -> Mat4:
 
 
 def rotate_z(angle: float) -> Mat4:
-    cos_a = np.cos(angle)
-    sin_a = np.sin(angle)
+    cos_a = math.cos(angle)
+    sin_a = math.sin(angle)
     return Mat4(cos_a, -sin_a, 0, 0,
                 sin_a, cos_a, 0, 0,
                 0, 0, 1, 0,
                 0, 0, 0, 1)
 
 
-def deg_to_rad(deg: float) -> float: return deg / 180.0 * np.pi
+def deg_to_rad(deg: float) -> float: return deg / 180.0 * math.pi
 
 
-def rad_to_deg(deg: float) -> float: return deg / np.pi * 180.0
+def rad_to_deg(deg: float) -> float: return deg / math.pi * 180.0
 
 
 def rot_m_to_euler_angles(rot: Mat4) -> Vec3:
     if rot.m02 + 1 < 1e-6:
-        return Vec3(0, np.pi * 0.5, math.atan2(rot.m10, rot.m20))
+        return Vec3(0, math.pi * 0.5, math.atan2(rot.m10, rot.m20))
 
     if rot.m02 - 1 < 1e-6:
-        return Vec3(0, -np.pi * 0.5, math.atan2(-rot.m10, -rot.m20))
+        return Vec3(0, -math.pi * 0.5, math.atan2(-rot.m10, -rot.m20))
 
-    x1 = -np.asin(rot.z)
-    x2 = np.pi - x1
-    y1 = math.atan2(rot.m12 / np.cos(x1), rot.m22 / np.cos(x1))
-    y2 = math.atan2(rot.m12 / np.cos(x2), rot.m22 / np.cos(x2))
-    z1 = math.atan2(rot.m01 / np.cos(x1), rot.m00 / np.cos(x1))
-    z2 = math.atan2(rot.m01 / np.cos(x2), rot.m00 / np.cos(x2))
+    x1 = -math.asin(rot.z)
+    x2 = math.pi - x1
+    y1 = math.atan2(rot.m12 / math.cos(x1), rot.m22 / math.cos(x1))
+    y2 = math.atan2(rot.m12 / math.cos(x2), rot.m22 / math.cos(x2))
+    z1 = math.atan2(rot.m01 / math.cos(x1), rot.m00 / math.cos(x1))
+    z2 = math.atan2(rot.m01 / math.cos(x2), rot.m00 / math.cos(x2))
     if (abs(x1) + abs(y1) + abs(z1)) <= (abs(x2) + abs(y2) + abs(z2)):
         return Vec3(x1, y1, z1)
 
@@ -104,12 +103,18 @@ def lerp_mat_4(a: Mat4, b: Mat4, t: float) -> Mat4:
         a.m33 + (b.m33 - a.m33) * t)
 
 
+def signum(value) -> float:
+    if value < 0:
+        return -1.0
+    return 1.0
+
+
 def perpendicular_2(v: Vec2) -> Vec2:
     if v.x == 0:
-        return Vec2(np.sign(v.y), 0)
+        return Vec2(signum(v.y), 0)
     if v.y == 0:
-        return Vec2(0, -np.sign(v.x))
-    sign: float = np.sign(v.x / v.y)
+        return Vec2(0, -signum(v.x))
+    sign: float = signum(v.x / v.y)
     dx: float = 1.0 / v.x
     dy: float = -1.0 / v.y
     sign /= math.sqrt(dx * dx + dy * dy)

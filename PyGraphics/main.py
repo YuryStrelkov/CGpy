@@ -4,7 +4,7 @@ from camera import Camera
 from models.model import Model
 from surfaces.patch import CubicPatch
 from vmath.mathUtils import Vec2
-from frameBuffer import RGB, FrameBuffer
+from frameBuffer import FrameBuffer
 import graphics as gr
 import time
 from shapes.bezier2 import BezierCurve2
@@ -88,7 +88,7 @@ def static_shading(render_camera: Camera = None, draw_wire: bool = False):
 def interactive_solid_color(render_camera: Camera = None):
     frame_buffer = FrameBuffer(1000, 1000)
 
-    model: Model = Model("resources/rabbit.obj", "resources/teapots.mtl")
+    model: Model = Model("resources/teapots.obj", "resources/teapots.mtl")
 
     gr.draw_model_solid_interactive(frame_buffer, model, render_camera)
 
@@ -96,20 +96,21 @@ def interactive_solid_color(render_camera: Camera = None):
 def interactive_shading(render_camera: Camera = None):
     frame_buffer = FrameBuffer(1000, 1000)
 
-    model: Model = Model("resources/rabbit.obj", "resources/teapots.mtl")
+    model: Model = Model("resources/teapots.obj", "resources/teapots.mtl")
 
-    model.get_material(0).tile = Vec2(5, 5)
+    model.get_material(0).diffuse.tile = Vec2(5, 5)
 
-    model.get_material(1).tile = Vec2(15, 15)
+    model.get_material(1).diffuse.tile = Vec2(15, 15)
 
-    model.get_material(2).tile = Vec2(25, 25)
+    model.get_material(2).diffuse.tile = Vec2(25, 25)
 
     gr.draw_model_shaded_interactive(frame_buffer, model, render_camera)
 
 
 if __name__ == '__main__':
     # bezier_intersection_test()
-    interactive_solid_color()
+    interactive_shading()
+    #interactive_solid_color()
     # static_solid_color()
     # static_shading()
     # interactive_solid_color()

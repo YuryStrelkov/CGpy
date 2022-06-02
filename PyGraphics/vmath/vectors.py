@@ -4,23 +4,23 @@ import math
 class Vec2(object):
 
     @staticmethod
-    def __unpack_values(*args) -> [float]:
+    def __unpack_values(*args) -> tuple:
         args = args[0]
         number_of_args = len(args)
         if number_of_args == 1:  # one argument
             arg_type = type(args[0])
 
             if arg_type is Vec2:
-                return [args[0].x, args[0].y]
+                return args[0].x, args[0].y
 
             if arg_type is float or arg_type is int:  # single int or float argument
-                return [args[0], args[0]]
+                return args[0], args[0]
 
         if number_of_args == 0:
-            return [0, 0]  # no arguments
+            return 0, 0  # no arguments
 
         if number_of_args == 2:
-            return [args[0], args[1]]  # x, y and z passed in
+            return args[0], args[1]  # x, y and z passed in
 
         raise TypeError(f'Invalid Input: {args}')
 
@@ -186,7 +186,7 @@ def min2(a: Vec2, b: Vec2) -> Vec2:
 class Vec3(object):
 
     @staticmethod
-    def __unpack_values(*args) -> [float]:
+    def __unpack_values(*args) -> tuple:
         args = args[0]
 
         number_of_args = len(args)
@@ -195,16 +195,16 @@ class Vec3(object):
             arg_type = type(args[0])
 
             if arg_type is Vec3:
-                return [args[0].x, args[0].y, args[0].z]
+                return args[0].x, args[0].y, args[0].z
 
             if arg_type is float or arg_type is int:  # single int or float argument
-                return [args[0], args[0], args[0]]
+                return args[0], args[0], args[0]
 
         if number_of_args == 0:
-            return [0, 0, 0]  # no arguments
+            return 0, 0, 0  # no arguments
 
         if number_of_args == 3:
-            return [args[0], args[1], args[2]]  # x, y and z passed in
+            return args[0], args[1], args[2]  # x, y and z passed in
 
         raise TypeError(f'Invalid Input: {args}')
 

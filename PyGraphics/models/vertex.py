@@ -6,24 +6,24 @@ from vmath.vectors import Vec3, Vec2
 
 class Vertex(object):
     @staticmethod
-    def __unpack_values(*args) -> [float]:
+    def __unpack_values(*args) -> tuple:
         args = args[0]
 
         number_of_args = len(args)
 
         if number_of_args == 0:
-            return [0, 0, 0, 0, 0, 0, 0, 0]  # no arguments
+            return 0, 0, 0, 0, 0, 0, 0, 0  # no arguments
 
         elif number_of_args == 1:  # one argument
             arg_type = type(args[0])
 
             if arg_type is float or arg_type is int:  # single int or float argument
-                return [args[0], args[0], args[0], args[0], args[0], args[0], args[0], args[0]]
+                return args[0], args[0], args[0], args[0], args[0], args[0], args[0], args[0]
 
             if arg_type is Vertex:
-                return [args[0].v.x, args[0].v.y, args[0].v.z,
-                        args[0].n.x, args[0].n.y, args[0].n.z,
-                        args[0].uv.x, args[0].uv.y]
+                return args[0].v.x, args[0].v.y, args[0].v.z,\
+                       args[0].n.x, args[0].n.y, args[0].n.z,\
+                       args[0].uv.x, args[0].uv.y
 
         raise TypeError(f'Invalid Input: {args}')
 
@@ -67,8 +67,6 @@ class Vertex(object):
     def camera_screen_transform(self, cam: Camera, fb: frameBuffer) -> None:
         self.to_clip_space(cam)
         self.to_screen_space(fb)
-
-
 
 
 def lerp_vertex(a: Vertex, b: Vertex, val: float) -> Vertex:

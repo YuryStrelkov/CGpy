@@ -1,6 +1,6 @@
 class Mat3(object):
     @staticmethod
-    def __unpack_values(*args) -> [float]:
+    def __unpack_values(*args) -> tuple:
         args = args[0]
 
         number_of_args = len(args)
@@ -9,22 +9,24 @@ class Mat3(object):
             arg_type = type(args[0])
 
             if arg_type is Mat3:
-                return [args[0].m00, args[0].m01, args[0].m02,
-                        args[0].m10, args[0].m11, args[0].m12,
-                        args[0].m20, args[0].m21, args[0].m22]
+                return args[0].m00, args[0].m01, args[0].m02,\
+                       args[0].m10, args[0].m11, args[0].m12,\
+                       args[0].m20, args[0].m21, args[0].m22
 
             if arg_type is float or arg_type is int:  # single int or float argument
-                return [args[0], 0, 0,
-                        0, args[0], 0,
-                        0, 0, args[0]]
+                return args[0], 0, 0,\
+                       0, args[0], 0,\
+                       0, 0, args[0]
 
         if number_of_args == 0:
-            return [0, 0, 0, 0, 0, 0, 0, 0, 0]  # no arguments
+            return 0, 0, 0,\
+                   0, 0, 0,\
+                   0, 0, 0  # no arguments
 
         if number_of_args == 9:
-            return [args[0], args[1], args[2],
-                    args[3], args[4], args[5],
-                    args[6], args[7], args[8]]  # x, y and z passed in
+            return args[0], args[1], args[2],\
+                   args[3], args[4], args[5],\
+                   args[6], args[7], args[8]  # x, y and z passed in
 
         raise TypeError(f'Invalid Input: {args}')
 
@@ -275,7 +277,7 @@ class Mat3(object):
 
 class Mat4(object):
     @staticmethod
-    def __unpack_values(*args) -> [float]:
+    def __unpack_values(*args) -> tuple:
         args = args[0]
 
         number_of_args = len(args)
@@ -284,28 +286,28 @@ class Mat4(object):
             arg_type = type(args[0])
 
             if arg_type is Mat4:
-                return [args[0].m00, args[0].m01, args[0].m02, args[0].m03,
-                        args[0].m10, args[0].m11, args[0].m12, args[0].m13,
-                        args[0].m20, args[0].m21, args[0].m22, args[0].m23,
-                        args[0].m30, args[0].m31, args[0].m32, args[0].m33]
+                return args[0].m00, args[0].m01, args[0].m02, args[0].m03,\
+                       args[0].m10, args[0].m11, args[0].m12, args[0].m13,\
+                       args[0].m20, args[0].m21, args[0].m22, args[0].m23,\
+                       args[0].m30, args[0].m31, args[0].m32, args[0].m33
 
             if arg_type is float or arg_type is int:  # single int or float argument
-                return [args[0], 0, 0, 0,
-                        0, args[0], 0, 0,
-                        0, 0, args[0], 0,
-                        0, 0, 0, args[0]]
+                return args[0], 0, 0, 0,\
+                       0, args[0], 0, 0,\
+                       0, 0, args[0], 0,\
+                       0, 0, 0, args[0]
 
         if number_of_args == 0:
-            return [0, 0, 0, 0,
-                    0, 0, 0, 0,
-                    0, 0, 0, 0,
-                    0, 0, 0, 0]  # no arguments
+            return 0, 0, 0, 0,\
+                   0, 0, 0, 0,\
+                   0, 0, 0, 0,\
+                   0, 0, 0, 0  # no arguments
 
         if number_of_args == 9:
-            return [args[0], args[1], args[2], args[3],
-                    args[4], args[5], args[6], args[7],
-                    args[8], args[9], args[10], args[11],
-                    args[12], args[13], args[14], args[15]]  # x, y and z passed in
+            return args[0], args[1], args[2], args[3],\
+                   args[4], args[5], args[6], args[7],\
+                   args[8], args[9], args[10], args[11],\
+                   args[12], args[13], args[14], args[15]  # x, y and z passed in
 
         raise TypeError(f'Invalid Input: {args}')
 

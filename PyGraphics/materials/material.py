@@ -74,6 +74,18 @@ class Material(object):
         res += "\n"
         return res
 
+    @property
+    def diffuse(self) -> Texture:
+        return self.__diffuse
+
+    @property
+    def normals(self) -> Texture:
+        return self.__normals
+
+    @property
+    def specular(self) -> Texture:
+        return self.__specular
+
     def set_diff(self, orig: str):
         if self.__diffuse is None:
             self.__diffuse = Texture()
