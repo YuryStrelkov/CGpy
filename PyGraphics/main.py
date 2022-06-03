@@ -96,7 +96,7 @@ def interactive_solid_color(render_camera: Camera = None):
 def interactive_shading(render_camera: Camera = None):
     frame_buffer = FrameBuffer(1000, 1000)
 
-    model: Model = Model("resources/teapots.obj", "resources/teapots.mtl")
+    model: Model = Model("resources/rabbit.obj", "resources/teapots.mtl")
 
     model.get_material(0).diffuse.tile = Vec2(5, 5)
 
