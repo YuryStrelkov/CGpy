@@ -107,38 +107,6 @@ class BezierPoint2(object):
         self.__anchor_2 = self.__anchor_2 + dp
 
 
-def bezier_pt_max(pt1: BezierPoint2, pt2: BezierPoint2) -> Vec2:
-    pt: Vec2 = mathUtils.max2(pt1.anchor_2, pt1.anchor_2)
-    pt = mathUtils.max2(pt1.point, pt)
-    pt_: Vec2 = mathUtils.max2(pt2.anchor_2, pt2.anchor_2)
-    pt_ = mathUtils.max2(pt2.point, pt_)
-    return mathUtils.max2(pt, pt_)
-
-
-def bezier_pt_min(pt1: BezierPoint2, pt2: BezierPoint2) -> Vec2:
-    pt: Vec2 = mathUtils.min2(pt1.anchor_2, pt1.anchor_2)
-    pt = mathUtils.min2(pt1.point, pt)
-    pt_: Vec2 = mathUtils.min2(pt2.anchor_2, pt2.anchor_2)
-    pt_ = mathUtils.min2(pt2.point, pt_)
-    return mathUtils.min2(pt, pt_)
-
-
-def bezier_overlaps(pt1: BezierPoint2, pt2: BezierPoint2, pt3: BezierPoint2, pt4: BezierPoint2) -> bool:
-    _max1: Vec2 = bezier_pt_max(pt1, pt2)
-    _min1: Vec2 = bezier_pt_min(pt1, pt2)
-
-    _max2: Vec2 = bezier_pt_max(pt3, pt4)
-    _min2: Vec2 = bezier_pt_min(pt3, pt4)
-
-    return False
-
-
-def bezier_intersect(pt1: BezierPoint2, pt2: BezierPoint2, pt3: BezierPoint2, pt4: BezierPoint2) -> [Vec2]:
-    if not bezier_overlaps(pt1, pt2, pt3, pt4):
-        return []
-    return []
-
-
 class BezierCurve2(object):
     def __init__(self):
         self.__sections_per_seg: int = 32
