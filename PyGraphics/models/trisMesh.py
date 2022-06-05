@@ -1,4 +1,4 @@
-from typing import IO, List, Any
+from typing import List
 import re
 
 from models.triangle import Triangle
@@ -149,7 +149,7 @@ class TrisMesh(object):
             return Triangle(self.__vertices[f.p_1], self.__vertices[f.p_2], self.__vertices[f.p_3],
                             self.__normals[f.n_1], self.__normals[f.n_2], self.__normals[f.n_3],
                             self.__uvs[f.uv1], self.__uvs[f.uv2], self.__uvs[f.uv3])
-        except:
+        except IndexError:
             print("bad  triangle info \n")
             print("n_points = %s, n_normals = %s, n_uvs = %s " % (str(self.vertices_count), str(self.normals_count),
                   str(self.uvs_count)))
@@ -236,103 +236,97 @@ class TrisMesh(object):
 
 
 def read_obj_mesh(path: str) -> List[TrisMesh]:
-
-    file: IO
-
     try:
-        file = open(path)
-    except:
+        with open(path, mode='r') as file:
+
+            tmp: [str]
+            tmp2: [str]
+            id_: int
+
+            meshes: List[TrisMesh] = []
+            uv_shift: int = 0
+            v__shift: int = 0
+            n__shift: int = 0
+
+            for str_ in file:
+
+                line = (re.sub(r"[\n\t]*", "", str_))
+
+                if len(line) == 0:
+                    continue
+
+                tmp = line.strip().split()
+
+                id_ = len(tmp) - 1
+
+                if id_ == -1:
+                    continue
+
+                if tmp[0] == "#":
+                    if id_ == 0:
+                        continue
+
+                    if not (tmp[1] == "object"):
+                        continue
+
+                    mesh: TrisMesh = TrisMesh()
+                    mesh.name = tmp[2]
+                    meshes.append(mesh)
+                    if len(meshes) == 1:
+                        continue
+                    uv_shift += meshes[len(meshes) - 2].uvs_count
+                    v__shift += meshes[len(meshes) - 2].vertices_count
+                    n__shift += meshes[len(meshes) - 2].normals_count
+                    continue
+
+                if tmp[0] == "o":
+                    mesh: TrisMesh = TrisMesh()
+                    mesh.name = tmp[1]
+                    meshes.append(mesh)
+                    if len(meshes) == 1:
+                        continue
+                    uv_shift += meshes[len(meshes) - 2].uvs_count
+                    v__shift += meshes[len(meshes) - 2].vertices_count
+                    n__shift += meshes[len(meshes) - 2].normals_count
+                    continue
+
+                if tmp[0] == "vn":
+                    meshes[len(meshes) - 1].append_normal(
+                        Vec3(float(tmp[id_ - 2]), float(tmp[id_ - 1]), float(tmp[id_])))
+                    continue
+
+                if tmp[0] == "v":
+                    meshes[len(meshes) - 1].append_vertex(
+                        Vec3(float(tmp[id_ - 2]), float(tmp[id_ - 1]), float(tmp[id_])))
+                    continue
+
+                if tmp[0] == "vt":
+                    meshes[len(meshes) - 1].append_uv(Vec2(float(tmp[id_ - 1]), float(tmp[id_])))
+                    continue
+
+                if tmp[0] == "f":
+                    tmp2 = tmp[1].strip().split("/")
+                    face_ = Face()
+                    face_.p_1 = int(tmp2[0]) - 1 - v__shift
+                    face_.uv1 = int(tmp2[1]) - 1 - uv_shift
+                    face_.n_1 = int(tmp2[2]) - 1 - n__shift
+
+                    tmp2 = tmp[2].split("/")
+                    face_.p_2 = int(tmp2[0]) - 1 - v__shift
+                    face_.uv2 = int(tmp2[1]) - 1 - uv_shift
+                    face_.n_2 = int(tmp2[2]) - 1 - n__shift
+
+                    tmp2 = tmp[3].split("/")
+                    face_.p_3 = int(tmp2[0]) - 1 - v__shift
+                    face_.uv3 = int(tmp2[1]) - 1 - uv_shift
+                    face_.n_3 = int(tmp2[2]) - 1 - n__shift
+                    meshes[len(meshes) - 1].append_face(face_)
+                    continue
+
+            return meshes
+    except IOError:
         print("file \"%s\" not found" % path)
         return []
-
-    tmp: [str]
-    tmp2: [str]
-    lines: [str] = []
-    id_: int
-
-    for str_ in file:
-        lines.append(re.sub(r"[\n\t]*", "", str_))
-    file.close()
-
-    if len(lines) == 0:
-        print("file \"%s\" empty" % path)
-        return []
-
-    meshes: List[TrisMesh] = []
-    uv_shift: int = 0
-    v__shift: int = 0
-    n__shift: int = 0
-    for i in range(len(lines)):
-        if len(lines[i]) == 0:
-            continue
-
-        tmp = lines[i].strip().split()
-
-        id_ = len(tmp) - 1
-
-        if id_ == -1:
-            continue
-
-        if tmp[0] == "#":
-            if id_ == 0:
-                continue
-
-            if not (tmp[1] == "object"):
-                continue
-
-            mesh: TrisMesh = TrisMesh()
-            mesh.name = tmp[2]
-            meshes.append(mesh)
-            if len(meshes) == 1:
-                continue
-            uv_shift += meshes[len(meshes) - 2].uvs_count
-            v__shift += meshes[len(meshes) - 2].vertices_count
-            n__shift += meshes[len(meshes) - 2].normals_count
-            continue
-
-        if tmp[0] == "o":
-            mesh: TrisMesh = TrisMesh()
-            mesh.name = tmp[1]
-            meshes.append(mesh)
-            if len(meshes) == 1:
-                continue
-            uv_shift += meshes[len(meshes) - 2].uvs_count
-            v__shift += meshes[len(meshes) - 2].vertices_count
-            n__shift += meshes[len(meshes) - 2].normals_count
-            continue
-
-        if tmp[0] == "vn":
-            meshes[len(meshes) - 1].append_normal(Vec3(float(tmp[id_ - 2]), float(tmp[id_ - 1]), float(tmp[id_])))
-            continue
-
-        if tmp[0] == "v":
-            meshes[len(meshes) - 1].append_vertex(Vec3(float(tmp[id_ - 2]), float(tmp[id_ - 1]), float(tmp[id_])))
-            continue
-
-        if tmp[0] == "vt":
-            meshes[len(meshes) - 1].append_uv(Vec2(float(tmp[id_ - 1]), float(tmp[id_])))
-            continue
-
-        if tmp[0] == "f":
-            tmp2 = tmp[1].strip().split("/")
-            face_ = Face()
-            face_.p_1 = int(tmp2[0]) - 1 - v__shift
-            face_.uv1 = int(tmp2[1]) - 1 - uv_shift
-            face_.n_1 = int(tmp2[2]) - 1 - n__shift
-
-            tmp2 = tmp[2].split("/")
-            face_.p_2 = int(tmp2[0]) - 1 - v__shift
-            face_.uv2 = int(tmp2[1]) - 1 - uv_shift
-            face_.n_2 = int(tmp2[2]) - 1 - n__shift
-
-            tmp2 = tmp[3].split("/")
-            face_.p_3 = int(tmp2[0]) - 1 - v__shift
-            face_.uv3 = int(tmp2[1]) - 1 - uv_shift
-            face_.n_3 = int(tmp2[2]) - 1 - n__shift
-            meshes[len(meshes) - 1].append_face(face_)
-            continue
-
-    return meshes
 
 
 def create_plane(height: float = 1.0, width: float = 1.0, rows: int = 10, cols: int = 10) -> TrisMesh:

@@ -118,85 +118,73 @@ class Material(object):
 
 
 def read_material(path: str) -> [Material]:
-    file: IO
-
     try:
-        file = open(path)
-    except:
+        with open(path,mode='r') as file:
+            tmp: [str]
+            tmp2: [str]
+            id_: int
+            materials: [Material] = []
+            for str_ in file:
+
+                line = re.sub(r"[\n\t]*", "", str_)
+
+                if len(line) == 0:
+                    continue
+
+                tmp = line.split(" ")
+
+                id_ = len(tmp) - 1
+
+                if id_ == -1:
+                    continue
+
+                if tmp[0] == "#":
+                    continue
+
+                if tmp[0] == "newmtl":
+                    mat: Material = Material()
+                    mat.name = tmp[1]
+                    materials.append(mat)
+                    continue
+
+                if tmp[0] == "Kd":
+                    materials[len(materials) - 1].diffuse_color = Vec3(float(tmp[id_ - 2]), float(tmp[id_ - 1]),
+                                                                       float(tmp[id_]))
+                    continue
+
+                if tmp[0] == "Ks":
+                    materials[len(materials) - 1].specular_color = Vec3(float(tmp[id_ - 2]), float(tmp[id_ - 1]),
+                                                                        float(tmp[id_]))
+                    continue
+
+                if tmp[0] == "illum":
+                    materials[len(materials) - 1].illum = float(tmp[id_])
+                    continue
+
+                if tmp[0] == "dissolve" or tmp[0] == "Tr":
+                    materials[len(materials) - 1].illum = float(tmp[id_])
+                    continue
+
+                if tmp[0] == "Ns":
+                    materials[len(materials) - 1].ns = float(tmp[id_])
+                    continue
+
+                if tmp[0] == "Ni":
+                    materials[len(materials) - 1].ni = float(tmp[id_])
+                    continue
+
+                if tmp[0] == "map_Kd":
+                    materials[len(materials) - 1].set_diff(tmp[id_])
+                    continue
+
+                if tmp[0] == "map_bump" or tmp[0] == "bump":
+                    materials[len(materials) - 1].set_norm(tmp[id_])
+                    continue
+
+                if tmp[0] == "map_Ks":
+                    materials[len(materials) - 1].set_spec(tmp[id_])
+                    continue
+            return materials
+    except IOError:
         print("file \"%s\" not found" % path)
         return []
-
-    tmp: [str]
-    tmp2: [str]
-    lines: [str] = []
-    id_: int
-
-    for str_ in file:
-        lines.append(re.sub(r"[\n\t]*", "", str_))
-    file.close()
-
-    if len(lines) == 0:
-        print("file \"%s\" empty" % path)
-        return []
-
-    materials: [Material] = []
-
-    for i in range(len(lines)):
-        if len(lines[i]) == 0:
-            continue
-
-        tmp = lines[i].split(" ")
-
-        id_ = len(tmp) - 1
-
-        if id_ == -1:
-            continue
-
-        if tmp[0] == "#":
-            continue
-
-        if tmp[0] == "newmtl":
-            mat: Material = Material()
-            mat.name = tmp[1]
-            materials.append(mat)
-            continue
-
-        if tmp[0] == "Kd":
-            materials[len(materials) - 1].diffuse_color = Vec3(float(tmp[id_ - 2]), float(tmp[id_ - 1]),
-                                                               float(tmp[id_]))
-            continue
-
-        if tmp[0] == "Ks":
-            materials[len(materials) - 1].specular_color = Vec3(float(tmp[id_ - 2]), float(tmp[id_ - 1]),
-                                                                float(tmp[id_]))
-            continue
-
-        if tmp[0] == "illum":
-            materials[len(materials) - 1].illum = float(tmp[id_])
-            continue
-
-        if tmp[0] == "dissolve" or tmp[0] == "Tr":
-            materials[len(materials) - 1].illum = float(tmp[id_])
-            continue
-
-        if tmp[0] == "Ns":
-            materials[len(materials) - 1].ns = float(tmp[id_])
-            continue
-
-        if tmp[0] == "Ni":
-            materials[len(materials) - 1].ni = float(tmp[id_])
-            continue
-
-        if tmp[0] == "map_Kd":
-            materials[len(materials) - 1].set_diff(tmp[id_])
-            continue
-
-        if tmp[0] == "map_bump" or tmp[0] == "bump":
-            materials[len(materials) - 1].set_norm(tmp[id_])
-            continue
-
-        if tmp[0] == "map_Ks":
-            materials[len(materials) - 1].set_spec(tmp[id_])
-            continue
-
-    return materials
