@@ -32,7 +32,7 @@ class Transform2(object):
     def __eq__(self, other) -> bool:
         if not(type(other) is Transform2):
             return False
-        if not(self.transformM == other.transformM):
+        if not(self.transformM == other.__m_transform):
             return False
         return True
 

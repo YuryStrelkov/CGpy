@@ -1,5 +1,3 @@
-import itertools
-
 import materials.material
 import models.trisMesh
 from materials.material import Material
@@ -144,4 +142,3 @@ class Model(object):
             tris.transform(self.__transform)
             yield tris
             tris_id += 1
-

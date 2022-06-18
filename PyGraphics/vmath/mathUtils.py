@@ -38,18 +38,18 @@ def rad_to_deg(deg: float) -> float: return deg / math.pi * 180.0
 
 
 def rot_m_to_euler_angles(rot: Mat4) -> Vec3:
-    if rot.m02 + 1 < 1e-6:
-        return Vec3(0, math.pi * 0.5, math.atan2(rot.m10, rot.m20))
+    if math.fabs(rot.m20 + 1) < 1e-6:
+        return Vec3(0, -math.pi * 0.5, math.atan2(rot.m01, rot.m02))
 
-    if rot.m02 - 1 < 1e-6:
-        return Vec3(0, -math.pi * 0.5, math.atan2(-rot.m10, -rot.m20))
+    if math.fabs(rot.m20 - 1) < 1e-6:
+        return Vec3(0, math.pi * 0.5, math.atan2(-rot.m01, -rot.m02))
 
-    x1 = -math.asin(rot.z)
+    x1 = -math.asin(rot.m20)
     x2 = math.pi - x1
-    y1 = math.atan2(rot.m12 / math.cos(x1), rot.m22 / math.cos(x1))
-    y2 = math.atan2(rot.m12 / math.cos(x2), rot.m22 / math.cos(x2))
-    z1 = math.atan2(rot.m01 / math.cos(x1), rot.m00 / math.cos(x1))
-    z2 = math.atan2(rot.m01 / math.cos(x2), rot.m00 / math.cos(x2))
+    y1 = math.atan2(rot.m21 / math.cos(x1), rot.m22 / math.cos(x1))
+    y2 = math.atan2(rot.m21 / math.cos(x2), rot.m22 / math.cos(x2))
+    z1 = math.atan2(rot.m10 / math.cos(x1), rot.m00 / math.cos(x1))
+    z2 = math.atan2(rot.m10 / math.cos(x2), rot.m00 / math.cos(x2))
     if (abs(x1) + abs(y1) + abs(z1)) <= (abs(x2) + abs(y2) + abs(z2)):
         return Vec3(x1, y1, z1)
 
@@ -126,3 +126,4 @@ def perpendicular_3(v: Vec3) -> Vec3:
     g: float = math.copysign(s, v.z)  # note s instead of 1
     h: float = v.z + g
     return Vec3(g * h - v.x * v.x, -v.x * v.y, -v.x * h)
+

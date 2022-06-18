@@ -14,7 +14,7 @@ class Texture(object):
         self.__width = _w
         self.__height = _h
         self.__bpp = _bpp
-        self.__colors = np.zeros((self.__height * self.__width * self.__bpp), dtype=np.uint8)
+        self.__colors = np.zeros(self.__height * self.__width * self.__bpp, dtype=np.uint8)
         self.clear_color(color)
 
     def __getitem__(self, index):

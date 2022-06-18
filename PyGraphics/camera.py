@@ -1,4 +1,4 @@
-import numpy as np
+import math
 from transforms.transform import Transform
 from vmath.mathUtils import Vec3, Mat4
 from frameBuffer import FrameBuffer
@@ -41,13 +41,13 @@ class Camera(object):
         return res
 
     def __eq__(self, other) -> bool:
-        if not(type(other) is Camera):
+        if not (type(other) is Camera):
             return False
-        if not(self.__transform == other.__transform):
+        if not (self.__transform == other.__transform):
             return False
-        if not(self.__projection == other.__projection):
+        if not (self.__projection == other.__projection):
             return False
-        if not(self.__zfar == other.__zfar):
+        if not (self.__zfar == other.__zfar):
             return False
         if not (self.__znear == other.__znear):
             return False
@@ -106,7 +106,7 @@ class Camera(object):
 
     # Строит матрицу перспективного искажения
     def __build_projection(self):
-        scale = 1.0 / np.tan(self.__fov * 0.5 * 3.1415 / 180)
+        scale = 1.0 / math.tan(self.__fov * 0.5 * 3.1415 / 180)
         self.__projection.m00 = scale * self.__aspect  # scale the x coordinates of the projected point
         self.__projection.m11 = scale  # scale the y coordinates of the projected point
         self.__projection.m22 = -self.__zfar / (self.__zfar - self.__znear)  # used to remap z to [0,1]
@@ -117,11 +117,13 @@ class Camera(object):
         # ось Z системы координат камеры
 
     @property
-    def front(self) -> Vec3: return self.__transform.front
+    def front(self) -> Vec3:
+        return self.__transform.front
 
     # ось Y системы координат камеры
     @property
-    def up(self) -> Vec3: return self.__transform.up
+    def up(self) -> Vec3:
+        return self.__transform.up
 
     # ось Z системы координат камеры
     @property
@@ -133,7 +135,8 @@ class Camera(object):
         self.__transform.look_at(target, eye, up)
 
     # Переводит точку в пространстве в собственную систему координат камеры
-    def to_camera_space(self, v: Vec3) -> Vec3: return self.__transform.inv_transform_vect(v, 1)
+    def to_camera_space(self, v: Vec3) -> Vec3:
+        return self.__transform.inv_transform_vect(v, 1)
 
     # Переводит точку в пространстве сперва в собственную систему координат камеры,
     # а после в пространство перспективной проекции

@@ -1,4 +1,3 @@
-from typing import List
 import re
 
 from models.triangle import Triangle
@@ -89,10 +88,10 @@ class TrisMesh(object):
 
     def __init__(self):
         self.name: str = ""
-        self.__vertices: List[Vec3] = []
-        self.__normals: List[Vec3] = []
-        self.__uvs: List[Vec2] = []
-        self.__faces: List[Face] = []
+        self.__vertices: [Vec3] = []
+        self.__normals: [Vec3] = []
+        self.__uvs: [Vec2] = []
+        self.__faces: [Face] = []
         self.__bbox: BoundingBox = BoundingBox()
 
     def __str__(self):
@@ -152,7 +151,7 @@ class TrisMesh(object):
         except IndexError:
             print("bad  triangle info \n")
             print("n_points = %s, n_normals = %s, n_uvs = %s " % (str(self.vertices_count), str(self.normals_count),
-                  str(self.uvs_count)))
+                                                                  str(self.uvs_count)))
             print(f)
 
     def get_triangle(self, tris_id: int):
@@ -163,8 +162,8 @@ class TrisMesh(object):
         f: Face = self.__faces[tris_id]
 
         return Triangle(self.__vertices[f.p_1], self.__vertices[f.p_2], self.__vertices[f.p_3],
-                        self.__normals[f.n_1],  self.__normals[f.n_2],  self.__normals[f.n_3],
-                        self.__uvs[f.uv1],      self.__uvs[f.uv2],      self.__uvs[f.uv3])
+                        self.__normals[f.n_1], self.__normals[f.n_2], self.__normals[f.n_3],
+                        self.__uvs[f.uv1], self.__uvs[f.uv2], self.__uvs[f.uv3])
 
     def set_vertex(self, i_id: int, v: Vec3) -> None:
         if i_id < 0:
@@ -235,7 +234,7 @@ class TrisMesh(object):
         self.__faces: [Face] = []
 
 
-def read_obj_mesh(path: str) -> List[TrisMesh]:
+def read_obj_mesh(path: str) -> [TrisMesh]:
     try:
         with open(path, mode='r') as file:
 
@@ -243,7 +242,7 @@ def read_obj_mesh(path: str) -> List[TrisMesh]:
             tmp2: [str]
             id_: int
 
-            meshes: List[TrisMesh] = []
+            meshes: [TrisMesh] = []
             uv_shift: int = 0
             v__shift: int = 0
             n__shift: int = 0

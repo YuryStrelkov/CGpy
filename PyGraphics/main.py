@@ -1,13 +1,17 @@
+import math
+
 import numpy as np
 
 from camera import Camera
 from models.model import Model
 from surfaces.patch import CubicPatch
+from transforms.transform import Transform
 from vmath.mathUtils import Vec2
 from frameBuffer import FrameBuffer
 import graphics as gr
 import time
 from shapes.bezier2 import BezierCurve2
+from vmath.vectors import Vec3
 
 
 def bezier_intersection_test():
@@ -62,7 +66,7 @@ def static_solid_color(render_camera: Camera = None, draw_wire: bool = False):
     frame_buffer = FrameBuffer(1000, 1000)
     print("static_solid_color :: frame buffer creation time : ", time.time() - start_time)
     start_time = time.time()
-    model: Model = Model("resources/teapots.obj", "resources/teapots.mtl")
+    model: Model = Model("resources/rabbit.obj", "resources/teapots.mtl")
     print("static_solid_color :: model loading time : ", time.time() - start_time)
     start_time = time.time()
     gr.draw_model_solid_color(frame_buffer, model, render_camera)
@@ -108,9 +112,13 @@ def interactive_shading(render_camera: Camera = None):
 
 
 if __name__ == '__main__':
+
+    t = Transform()
+    t.angles = Vec3(math.pi/6, math.pi/4, math.pi/3)
+    print(t.angles * 180 / math.pi)
     # bezier_intersection_test()
     interactive_shading()
     #interactive_solid_color()
-    # static_solid_color()
+    #static_solid_color()
     # static_shading()
     # interactive_solid_color()

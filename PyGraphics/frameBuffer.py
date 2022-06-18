@@ -31,7 +31,7 @@ class FrameBuffer(object):
     def set_pixel(self, x: int, y: int, color: RGB = RGB(np.uint8(255), np.uint8(0), np.uint8(0))):
         self.__frame_texture.set_color(x, y, color)
 
-    def set_depth(self, x: int, y: int, depth: float) -> bool:
+    def set_depth(self, x: int, y: int, depth: np.float) -> bool:
         pix: int = self.width * y + x
         if pix < 0:
             return False
@@ -45,7 +45,7 @@ class FrameBuffer(object):
     # конвертация массива в объект класса Image библиотеки Pillow и сохранение его
     # см. https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save
     def save(self, path: str):
-        im = Image.fromarray(self.img_arr, mode="RGB")
+        im = self.__frame_texture.image_data
         im.save(path, mode="RGB")
 
     @property
