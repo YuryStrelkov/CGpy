@@ -44,8 +44,8 @@ def rot_m_to_euler_angles(rot: Mat4) -> Vec3:
     if math.fabs(rot.m20 - 1) < 1e-6:
         return Vec3(0, math.pi * 0.5, math.atan2(-rot.m01, -rot.m02))
 
-    x1 = -math.asin(rot.m20)
-    x2 = math.pi - x1
+    x1 = math.asin(rot.m20)
+    x2 = math.pi + x1
     y1 = math.atan2(rot.m21 / math.cos(x1), rot.m22 / math.cos(x1))
     y2 = math.atan2(rot.m21 / math.cos(x2), rot.m22 / math.cos(x2))
     z1 = math.atan2(rot.m10 / math.cos(x1), rot.m00 / math.cos(x1))

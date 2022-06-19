@@ -21,8 +21,8 @@ class Vertex(object):
                 return args[0], args[0], args[0], args[0], args[0], args[0], args[0], args[0]
 
             if arg_type is Vertex:
-                return args[0].v.x, args[0].v.y, args[0].v.z,\
-                       args[0].n.x, args[0].n.y, args[0].n.z,\
+                return args[0].v.x, args[0].v.y, args[0].v.z, \
+                       args[0].n.x, args[0].n.y, args[0].n.z, \
                        args[0].uv.x, args[0].uv.y
 
         raise TypeError(f'Invalid Input: {args}')

@@ -8,7 +8,7 @@ from vmath.vectors import Vec3
 
 class Model(object):
     def __init__(self, geometry_origin: str = "", material_origin: str = ""):
-        self.__meshes: [TrisMesh]    = models.trisMesh.read_obj_mesh(geometry_origin)
+        self.__meshes: [TrisMesh] = models.trisMesh.read_obj_mesh(geometry_origin)
         self.__materials: [Material] = materials.material.read_material(material_origin)
         self.__transform: Transform = Transform()
         self.__mesh_origin: str = ""

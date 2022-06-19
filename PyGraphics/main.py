@@ -77,9 +77,11 @@ def static_solid_color(render_camera: Camera = None, draw_wire: bool = False):
 
 
 def static_shading(render_camera: Camera = None, draw_wire: bool = False):
-    frame_buffer = FrameBuffer(1000, 1000)
+    frame_buffer = FrameBuffer(500, 500)
     start_time: float = time.time()
-    model: Model = Model("resources/teapots.obj", "resources/teapots.mtl")
+    model: Model = Model("resources/rabbit.obj", "resources/teapots.mtl")
+    model.get_material(0).diffuse.tile = Vec2(5, 5)
+    model.get_material(1).diffuse.tile = Vec2(15, 15)
     print("static_shading :: model loading time : ", time.time() - start_time)
     start_time = time.time()
     gr.draw_model_shaded(frame_buffer, model, render_camera)
@@ -114,11 +116,15 @@ def interactive_shading(render_camera: Camera = None):
 if __name__ == '__main__':
 
     t = Transform()
-    t.angles = Vec3(math.pi/6, math.pi/4, math.pi/3)
+    t.up = Vec3(1, 1, 0).normalized()
+    #t.angles = Vec3(math.pi/6, math.pi/4, math.pi/3)
     print(t.angles * 180 / math.pi)
+    print(t)
+    cam = Camera()
+    print(cam)
     # bezier_intersection_test()
     interactive_shading()
     #interactive_solid_color()
     #static_solid_color()
-    # static_shading()
+    #static_shading()
     # interactive_solid_color()

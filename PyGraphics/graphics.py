@@ -13,6 +13,14 @@ from frameBuffer import RGB
 import tkinter as tk
 from PIL import ImageTk
 
+
+def render_camera(fb: FrameBuffer, lookat: Vec3, eye: Vec3) -> Camera:
+    cam = Camera()
+    cam.aspect = float(fb.height) / fb.width
+    cam.look_at(lookat, eye)
+    return cam
+
+
 # рисование линии, первый вариант алгоритма
 def draw_line_1(buffer: FrameBuffer, x0: int, y0: int, x1: int, y1: int,
                 color: RGB = RGB(np.uint8(255), np.uint8(255), np.uint8(255)),

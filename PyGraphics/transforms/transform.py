@@ -53,7 +53,7 @@ class Transform(object):
         self.__m_transform.m12 = ez.y
         self.__m_transform.m22 = ez.z
 
-        self.eulerAngles = mathUtils.rot_m_to_euler_angles(self.__m_transform)
+        self.eulerAngles = mathUtils.rot_m_to_euler_angles(self.rotation_mat())
 
     @property
     def front(self) -> Vec3:
@@ -67,8 +67,8 @@ class Transform(object):
         if length_ < 1e-9:
             raise ArithmeticError("Error transform front set")
         front_dir_ = front_ / length_
-        right_ = vectors. cross(front_dir_, Vec3(0, 1, 0))
-        up_ = vectors. cross(right_, front_dir_)
+        right_ = vectors. cross(front_dir_, Vec3(0, 1, 0)).normalized()
+        up_ = vectors. cross(right_, front_dir_).normalized()
         self.__build_basis(right_ * self.sx, up_ * self.sy, front_)
 
     @property
@@ -83,8 +83,8 @@ class Transform(object):
         if length_ < 1e-9:
             raise ArithmeticError("Error transform up set")
         up_dir_ = up_ / length_
-        front_ = vectors.cross(up_dir_, Vec3(1, 0, 0))
-        right_ = vectors.cross(up_dir_, front_)
+        front_ = vectors.cross(up_dir_, Vec3(1, 0, 0)).normalized()
+        right_ = vectors.cross(up_dir_, front_).normalized()
         self.__build_basis(right_ * self.sx, up_, front_*self.sz)
 
     @property
@@ -99,8 +99,8 @@ class Transform(object):
         if length_ < 1e-9:
             raise ArithmeticError("Error transform up set")
         right_dir_ = right_ / length_
-        front_ = vectors.cross(right_dir_, Vec3(0, 1, 0))
-        up_ = vectors.cross(front_, right_dir_)
+        front_ = vectors.cross(right_dir_, Vec3(0, 1, 0)).normalized()
+        up_ = vectors.cross(front_, right_dir_).normalized()
         self.__build_basis(right_, up_ * self.sy, front_ * self.sz)
 
     # масштаб по Х
@@ -133,9 +133,9 @@ class Transform(object):
         if s_x == 0:
             return
         scl = self.sx
-        self.__m_transform.m00 /= scl / s_x
-        self.__m_transform.m10 /= scl / s_x
-        self.__m_transform.m20 /= scl / s_x
+        self.__m_transform.m00 *= s_x / scl
+        self.__m_transform.m10 *= s_x / scl
+        self.__m_transform.m20 *= s_x / scl
 
     # установить масштаб по Y
     @sy.setter
@@ -143,9 +143,9 @@ class Transform(object):
         if s_y == 0:
             return
         scl = self.sy
-        self.__m_transform.m01 /= scl / s_y
-        self.__m_transform.m11 /= scl / s_y
-        self.__m_transform.m21 /= scl / s_y
+        self.__m_transform.m01 *= s_y / scl
+        self.__m_transform.m11 *= s_y / scl
+        self.__m_transform.m21 *= s_y / scl
 
     # установить масштаб по Z
     @sz.setter
@@ -153,9 +153,9 @@ class Transform(object):
         if s_z == 0:
             return
         scl = self.sz
-        self.__m_transform.m02 /= scl / s_z
-        self.__m_transform.m12 /= scl / s_z
-        self.__m_transform.m22 /= scl / s_z
+        self.__m_transform.m02 *= s_z / scl
+        self.__m_transform.m12 *= s_z / scl
+        self.__m_transform.m22 *= s_z / scl
 
     @property
     def scale(self) -> Vec3:

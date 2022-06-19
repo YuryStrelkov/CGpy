@@ -1,6 +1,4 @@
 import math
-
-import numpy as np
 from vmath.matrices import Mat3
 from vmath.vectors import Vec2
 
@@ -71,8 +69,8 @@ class Transform2(object):
         if s_x == 0:
             return
         scl = self.sx
-        self.transformM.m00 /= scl / s_x
-        self.transformM.m10 /= scl / s_x
+        self.transformM.m00 *= s_x / scl
+        self.transformM.m10 *= s_x / scl
 
     # установить масштаб по Y
     @sy.setter
@@ -80,8 +78,8 @@ class Transform2(object):
         if s_y == 0:
             return
         scl = self.sy
-        self.transformM.m01 /= scl / s_y
-        self.transformM.m11 /= scl / s_y
+        self.transformM.m01 *= s_y / scl
+        self.transformM.m11 *= s_y / scl
 
     @scale.setter
     def scale(self, sxy: Vec2):
@@ -122,8 +120,8 @@ class Transform2(object):
         if self.zAngle == angle:
             return
         self.zAngle = angle
-        cos_a = np.cos(angle)
-        sin_a = np.sin(angle)
+        cos_a = math.cos(angle)
+        sin_a = math.sin(angle)
         rz = Mat3(cos_a, -sin_a, 0,
                   sin_a, cos_a, 0,
                   0, 0, 1)
