@@ -77,7 +77,7 @@ class GPUBuffer(object):
         self.__capacity = 0
         # self.__item_byte_size = 0
 
-    def read_back_data(self, start_element: int = None, elements_number: int = None) -> list:
+    def read_back_data(self, start_element: int = None, elements_number: int = None) -> np.ndarray:
         if start_element is None:
             start_element = 0
 
@@ -85,7 +85,7 @@ class GPUBuffer(object):
             elements_number = self.capacity
 
         if start_element + elements_number > self.__capacity:
-            return [0]
+            return np.zeros((1, 1), dtype=np.float32)
 
         self.bind()
         # b_data = np.zeros((1, elements_number), dtype=np.float32)
@@ -93,7 +93,7 @@ class GPUBuffer(object):
                                     self.__item_byte_size * start_element,
                                     self.__item_byte_size * elements_number)
         # print(b_data.astype('<f4'))
-        return (b_data.view('<f4')).tolist()
+        return b_data.view('<f4')
 
     def resize(self, new_size: int) -> None:
         if self.__capacity == new_size:
@@ -119,10 +119,10 @@ class GPUBuffer(object):
         self.__id = bid
         self.__capacity = new_size
 
-    def load_buffer_data(self, data: list) -> None:
+    def load_buffer_data(self, data: np.ndarray) -> None:
         self.load_buffer_sub_data(0, data)
 
-    def load_buffer_sub_data(self, start_offset, data: list) -> None:
+    def load_buffer_sub_data(self, start_offset, data: np.ndarray) -> None:
         self.bind()
         if len(data) > self.__capacity - start_offset:
             self.resize(len(data) + start_offset)

@@ -49,6 +49,6 @@ if __name__ == "__main__":
 
     w = Window()
     buf = GPUBuffer(6)
-    buf.load_buffer_data([Vec3(0, 1, 2), Vec3(3, 4, 5)])
+    buf.load_buffer_data(np.array([0, 1, 2, 3, 4, 5]))
     print(buf)
     w.main_loop()
