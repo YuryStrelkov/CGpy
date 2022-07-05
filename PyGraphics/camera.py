@@ -14,6 +14,10 @@ class Camera(object):
                                        0, 1, 0, 0,
                                        0, 0, 1, 0,
                                        0, 0, 0, 1)
+        self.__inv_projection: Mat4 = Mat4(1, 0, 0, 0,
+                                           0, 1, 0, 0,
+                                           0, 0, 1, 0,
+                                           0, 0, 0, 1)
         self.fov = 60
         self.aspect = 1
         self.__build_projection()
@@ -60,6 +64,10 @@ class Camera(object):
         return self.__projection
 
     @property
+    def inv_projection(self) -> Mat4:
+        return self.__inv_projection
+
+    @property
     def zfar(self) -> float:
         return self.__zfar
 
@@ -86,6 +94,8 @@ class Camera(object):
         scale = 1.0 / math.tan(fov_ * 0.5 * math.pi / 180)
         self.__projection.m00 *= (scale / self.__projection.m11)
         self.__projection.m11 = scale  # scale the y coordinates of the projected point
+        self.__inv_projection = self.__projection.copy()
+        self.__inv_projection.invert()
 
     @property
     def aspect(self) -> float:
@@ -94,6 +104,8 @@ class Camera(object):
     @aspect.setter
     def aspect(self, aspect_: float) -> None:
         self.__projection.m00 *= (aspect_ / self.aspect)
+        self.__inv_projection = self.__projection.copy()
+        self.__inv_projection.invert()
 
     # Строит матрицу перспективного искажения
     def __build_projection(self):
@@ -104,6 +116,13 @@ class Camera(object):
         self.__projection.m32 = self.__zfar * self.__znear / (self.__znear - self.__zfar)  # used to remap z [0,1]
         self.__projection.m23 = -1  # set w = -z
         self.__projection.m33 = 0
+        self.__inv_projection = self.__projection.copy()
+        self.__inv_projection.invert()
+        # print(f"projection:\n{self.__projection}")
+
+        # print(f"inv projection:\n{self.__inv_projection}")
+
+        # print(self.__projection * self.__inv_projection)
 
         # ось Z системы координат камеры
 

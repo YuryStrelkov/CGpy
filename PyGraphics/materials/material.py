@@ -1,6 +1,7 @@
-from typing import IO
 import re
 import numpy as np
+
+import utils.io_utils
 from vmath.mathUtils import Vec2
 from materials.rgb import RGB
 from materials.texture import Texture
@@ -119,7 +120,8 @@ class Material(object):
 
 def read_material(path: str) -> [Material]:
     try:
-        with open(path,mode='r') as file:
+        with open(path, mode='r') as file:
+            file_dir = utils.io_utils.get_file_dir(path)
             tmp: [str]
             tmp2: [str]
             id_: int
@@ -127,6 +129,7 @@ def read_material(path: str) -> [Material]:
             for str_ in file:
 
                 line = re.sub(r"[\n\t]*", "", str_)
+
 
                 if len(line) == 0:
                     continue
@@ -174,17 +177,18 @@ def read_material(path: str) -> [Material]:
                     continue
 
                 if tmp[0] == "map_Kd":
-                    materials[len(materials) - 1].set_diff(tmp[id_])
+                    materials[len(materials) - 1].set_diff(file_dir + tmp[id_])
                     continue
 
                 if tmp[0] == "map_bump" or tmp[0] == "bump":
-                    materials[len(materials) - 1].set_norm(tmp[id_])
+                    materials[len(materials) - 1].set_norm(file_dir + tmp[id_])
                     continue
 
                 if tmp[0] == "map_Ks":
-                    materials[len(materials) - 1].set_spec(tmp[id_])
+                    materials[len(materials) - 1].set_spec(file_dir + tmp[id_])
                     continue
             return materials
-    except IOError:
-        print("file \"%s\" not found" % path)
+    except IOError as ex_:
+        print(f"read error{ex_.args}")
+        # print("file \"%s\" not found" % path)
         return []

@@ -112,9 +112,12 @@ def interactive_shading(render_camera: Camera = None):
 
     gr.draw_model_shaded_interactive(frame_buffer, model, render_camera)
 
-
+import sys
 if __name__ == '__main__':
-
+    t: np.float32 = np.float32(10.0)
+    l = [t, t, t, t, t]
+    print(sys.getsizeof(l))
+    print(sys.getsizeof(t))
     t = Transform()
     t.up = Vec3(1, 1, 0).normalized()
     #t.angles = Vec3(math.pi/6, math.pi/4, math.pi/3)

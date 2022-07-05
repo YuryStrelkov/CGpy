@@ -1,4 +1,7 @@
+import ctypes
 import math
+
+import numpy as np
 
 
 class Vec2(object):
@@ -23,6 +26,14 @@ class Vec2(object):
             return args[0], args[1]  # x, y and z passed in
 
         raise TypeError(f'Invalid Input: {args}')
+
+    def from_np_array(self, data: np.ndarray) -> None:
+        i: int = 0
+        for element in data.ravel():
+            self.__xy[i] = element
+            i += 1
+            if i == 2:
+                break
 
     @staticmethod
     def dot(a, b) -> float:
@@ -49,6 +60,10 @@ class Vec2(object):
     @property
     def magnitude(self) -> float:
         return math.sqrt(self.__xy[0] * self.__xy[0] + self.__xy[1] * self.__xy[1])
+
+    @property
+    def np_array(self) -> np.ndarray:
+        return np.array(self.__xy, dtype=np.float64)
 
     @property
     def x(self) -> float: return self.__xy[0]
@@ -208,6 +223,14 @@ class Vec3(object):
 
         raise TypeError(f'Invalid Input: {args}')
 
+    def from_np_array(self, data: np.ndarray) -> None:
+        i: int = 0
+        for element in data.ravel():
+            self.__xyz[i] = element
+            i += 1
+            if i == 3:
+                break
+
     @staticmethod
     def dot(a, b) -> float:
         return a.x * b.x + a.y * b.y + a.z * b.z
@@ -236,6 +259,10 @@ class Vec3(object):
         return math.sqrt(self.__xyz[0] * self.__xyz[0] + self.__xyz[1] * self.__xyz[1] + self.__xyz[2] * self.__xyz[2])
 
     @property
+    def np_array(self) -> np.ndarray:
+        return np.array(self.__xyz, dtype=np.float64)
+
+    @property
     def x(self) -> float: return self.__xyz[0]
 
     @property
@@ -259,6 +286,9 @@ class Vec3(object):
 
     def __init__(self, x: float = 0, y: float = 0, z: float = 0):
         self.__xyz: [float] = [x, y, z]
+
+    def __sizeof__(self):
+        return ctypes.c_float * 3
 
     def __eq__(self, other):
         if not isinstance(other, Vec3):

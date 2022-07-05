@@ -12,14 +12,14 @@ newmtl mat_1
 	Kd 0.5882 0.5882 0.5882
 	Ks 0.0000 0.0000 0.0000
 	Ke 0.0000 0.0000 0.0000
-	map_Ka E:\GitHub\CGpy\PyGraphics\resources\checkerboard-rainbow_.jpg
-	map_Kd E:\GitHub\CGpy\PyGraphics\resources\checkerboard-rainbow_.jpg
-	map_Ks E:\GitHub\CGpy\PyGraphics\resources\texture.jpg
-	map_Ke E:\GitHub\CGpy\PyGraphics\resources\texture.jpg
-	map_d E:\GitHub\CGpy\PyGraphics\resources\texture.jpg
-	map_bump E:\GitHub\CGpy\PyGraphics\resources\texture.jpg
-	bump E:\GitHub\CGpy\PyGraphics\resources\texture.jpg
-	map_refl E:\GitHub\CGpy\PyGraphics\resources\texture.jpg
+	map_Ka checkerboard-rainbow_.jpg
+	map_Kd checkerboard-rainbow_.jpg
+	map_Ks texture.jpg
+	map_Ke texture.jpg
+	map_d texture.jpg
+	map_bump texture.jpg
+	bump texture.jpg
+	map_refl texture.jpg
 
 newmtl mat_3
 	Ns 10.0000
@@ -32,14 +32,14 @@ newmtl mat_3
 	Kd 0.5882 0.5882 0.5882
 	Ks 0.0000 0.0000 0.0000
 	Ke 0.0000 0.0000 0.0000
-	map_Ka E:\GitHub\CGpy\PyGraphics\resources\checkerboard-rainbow_.jpg
-	map_Kd E:\GitHub\CGpy\PyGraphics\resources\checkerboard-rainbow_.jpg
-	map_Ks E:\GitHub\CGpy\PyGraphics\resources\texture.jpg
-	map_Ke E:\GitHub\CGpy\PyGraphics\resources\texture.jpg
-	map_d E:\GitHub\CGpy\PyGraphics\resources\texture.jpg
-	map_bump E:\GitHub\CGpy\PyGraphics\resources\texture.jpg
-	bump E:\GitHub\CGpy\PyGraphics\resources\texture.jpg
-	map_refl E:\GitHub\CGpy\PyGraphics\resources\texture.jpg
+	map_Ka checkerboard-rainbow_.jpg
+	map_Kd checkerboard-rainbow_.jpg
+	map_Ks texture.jpg
+	map_Ke texture.jpg
+	map_d texture.jpg
+	map_bump texture.jpg
+	bump texture.jpg
+	map_refl texture.jpg
 
 newmtl mat_2
 	Ns 10.0000
@@ -52,11 +52,11 @@ newmtl mat_2
 	Kd 0.5882 0.5882 0.5882
 	Ks 0.0000 0.0000 0.0000
 	Ke 0.0000 0.0000 0.0000
-	map_Ka E:\GitHub\CGpy\PyGraphics\resources\checkerboard-rainbow_.jpg
-	map_Kd E:\GitHub\CGpy\PyGraphics\resources\checkerboard-rainbow_.jpg
-	map_Ks E:\GitHub\CGpy\PyGraphics\resources\texture.jpg
-	map_Ke E:\GitHub\CGpy\PyGraphics\resources\texture.jpg
-	map_d E:\GitHub\CGpy\PyGraphics\resources\texture.jpg
-	map_bump E:\GitHub\CGpy\PyGraphics\resources\texture.jpg
-	bump E:\GitHub\CGpy\PyGraphics\resources\texture.jpg
-	map_refl E:\GitHub\CGpy\PyGraphics\resources\texture.jpg
+	map_Ka checkerboard-rainbow_.jpg
+	map_Kd checkerboard-rainbow_.jpg
+	map_Ks texture.jpg
+	map_Ke texture.jpg
+	map_d texture.jpg
+	map_bump texture.jpg
+	bump texture.jpg
+	map_refl texture.jpg

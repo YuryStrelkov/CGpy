@@ -1,3 +1,8 @@
+import numpy as np
+
+from vmath import str_utils as su
+
+
 class Mat3(object):
     @staticmethod
     def __unpack_values(*args) -> tuple:
@@ -9,26 +14,49 @@ class Mat3(object):
             arg_type = type(args[0])
 
             if arg_type is Mat3:
-                return args[0].m00, args[0].m01, args[0].m02,\
-                       args[0].m10, args[0].m11, args[0].m12,\
+                return args[0].m00, args[0].m01, args[0].m02, \
+                       args[0].m10, args[0].m11, args[0].m12, \
                        args[0].m20, args[0].m21, args[0].m22
 
             if arg_type is float or arg_type is int:  # single int or float argument
-                return args[0], 0, 0,\
-                       0, args[0], 0,\
+                return args[0], 0, 0, \
+                       0, args[0], 0, \
                        0, 0, args[0]
 
         if number_of_args == 0:
-            return 0, 0, 0,\
-                   0, 0, 0,\
+            return 0, 0, 0, \
+                   0, 0, 0, \
                    0, 0, 0  # no arguments
 
         if number_of_args == 9:
-            return args[0], args[1], args[2],\
-                   args[3], args[4], args[5],\
+            return args[0], args[1], args[2], \
+                   args[3], args[4], args[5], \
                    args[6], args[7], args[8]  # x, y and z passed in
 
         raise TypeError(f'Invalid Input: {args}')
+
+    @staticmethod
+    def from_np_array(data: np.ndarray):
+        m = Mat3()
+        i: int = 0
+        for element in data.ravel():
+            m[i] = element
+            i += 1
+            if i == 9:
+                break
+        return m
+
+    @property
+    def as_array(self):
+        return self.__data
+
+    @property
+    def np_array(self) -> np.ndarray:
+        return np.array(self.__data, dtype=np.float64)
+
+    @property
+    def np_array_3x3(self) -> np.ndarray:
+        return self.np_array.reshape(3, 3)
 
     # row 1 set/get
     @property
@@ -152,18 +180,16 @@ class Mat3(object):
         self.__data[index] = value
 
     def __repr__(self) -> str:
-        res: str = "mat4:\n"
-        res += "[[%s, %s, %s],\n" % (self.__data[0], self.__data[1], self.__data[2])
-        res += " [%s, %s, %s],\n" % (self.__data[3], self.__data[4], self.__data[5])
-        res += " [%s, %s, %s]]\n" % (self.__data[6], self.__data[7], self.__data[8])
-        return res
+        return f"mat:\n" \
+               f"[[{su.format_str(self.m00)}, {su.format_str(self.m01)}, {su.format_str(self.m02)}],\n" \
+               f" [{su.format_str(self.m10)}, {su.format_str(self.m11)}, {su.format_str(self.m12)}],\n" \
+               f" [{su.format_str(self.m20)}, {su.format_str(self.m21)}, {su.format_str(self.m22)}]]\n"
 
     def __str__(self) -> str:
-        res: str = ""
-        res += "[[%s, %s, %s],\n" % (self.__data[0], self.__data[1], self.__data[2])
-        res += " [%s, %s, %s],\n" % (self.__data[3], self.__data[4], self.__data[5])
-        res += " [%s, %s, %s]]\n" % (self.__data[6], self.__data[7], self.__data[8])
-        return res
+        return "" \
+               f"[[{su.format_str(self.m00)}, {su.format_str(self.m01)}, {su.format_str(self.m02)}],\n" \
+               f" [{su.format_str(self.m10)}, {su.format_str(self.m11)}, {su.format_str(self.m12)}],\n" \
+               f" [{su.format_str(self.m20)}, {su.format_str(self.m21)}, {su.format_str(self.m22)}]]\n"
 
     def __add__(self, *args):
         other = self.__unpack_values(args)
@@ -286,27 +312,27 @@ class Mat4(object):
             arg_type = type(args[0])
 
             if arg_type is Mat4:
-                return args[0].m00, args[0].m01, args[0].m02, args[0].m03,\
-                       args[0].m10, args[0].m11, args[0].m12, args[0].m13,\
-                       args[0].m20, args[0].m21, args[0].m22, args[0].m23,\
+                return args[0].m00, args[0].m01, args[0].m02, args[0].m03, \
+                       args[0].m10, args[0].m11, args[0].m12, args[0].m13, \
+                       args[0].m20, args[0].m21, args[0].m22, args[0].m23, \
                        args[0].m30, args[0].m31, args[0].m32, args[0].m33
 
             if arg_type is float or arg_type is int:  # single int or float argument
-                return args[0], 0, 0, 0,\
-                       0, args[0], 0, 0,\
-                       0, 0, args[0], 0,\
+                return args[0], 0, 0, 0, \
+                       0, args[0], 0, 0, \
+                       0, 0, args[0], 0, \
                        0, 0, 0, args[0]
 
         if number_of_args == 0:
-            return 0, 0, 0, 0,\
-                   0, 0, 0, 0,\
-                   0, 0, 0, 0,\
+            return 0, 0, 0, 0, \
+                   0, 0, 0, 0, \
+                   0, 0, 0, 0, \
                    0, 0, 0, 0  # no arguments
 
         if number_of_args == 9:
-            return args[0], args[1], args[2], args[3],\
-                   args[4], args[5], args[6], args[7],\
-                   args[8], args[9], args[10], args[11],\
+            return args[0], args[1], args[2], args[3], \
+                   args[4], args[5], args[6], args[7], \
+                   args[8], args[9], args[10], args[11], \
                    args[12], args[13], args[14], args[15]  # x, y and z passed in
 
         raise TypeError(f'Invalid Input: {args}')
@@ -315,13 +341,36 @@ class Mat4(object):
                  m0: float = 0, m1: float = 0, m2: float = 0, m3: float = 0,
                  m4: float = 0, m5: float = 0, m6: float = 0, m7: float = 0,
                  m8: float = 0, m9: float = 0, m10: float = 0, m11: float = 0,
-                 m12: float = 0, m13: float = 0, m14: float = 0, m15: float = 0):
+                 m12: float = 0, m13: float = 0, m14: float = 0, m15: float = 0) -> object:
         self.__data: [float] = [m0, m1, m2, m3,
                                 m4, m5, m6, m7,
                                 m8, m9, m10, m11,
                                 m12, m13, m14, m15]
 
+    @staticmethod
+    def from_np_array(data: np.ndarray):
+        m = Mat4()
+        i: int = 0
+        for element in data.ravel():
+            m[i] = element
+            i += 1
+            if i == 16:
+                break
+        return m
+
+    @property
+    def as_array(self):
+        return self.__data
+
     # row 1 set/get
+    @property
+    def np_array(self) -> np.ndarray:
+        return np.array(self.__data, dtype=np.float64)
+
+    @property
+    def np_array_4x4(self) -> np.ndarray:
+        return self.np_array.reshape(4, 4)
+
     @property
     def m00(self) -> float:
         return self.__data[0]
@@ -473,10 +522,10 @@ class Mat4(object):
         A0113: float = self.m10 * self.m31 - self.m11 * self.m30
         A0112: float = self.m10 * self.m21 - self.m11 * self.m20
 
-        det: float = self.m00 * (self.m11 * A2323 - self.m12 * A1323 + self.m13 * A1223)\
-                    -self.m01 * (self.m10 * A2323 - self.m12 * A0323 + self.m13 * A0223)\
-                    +self.m02 * (self.m10 * A1323 - self.m11 * A0323 + self.m13 * A0123)\
-                    -self.m03 * (self.m10 * A1223 - self.m11 * A0223 + self.m12 * A0123)
+        det: float = self.m00 * (self.m11 * A2323 - self.m12 * A1323 + self.m13 * A1223) \
+                     - self.m01 * (self.m10 * A2323 - self.m12 * A0323 + self.m13 * A0223) \
+                     + self.m02 * (self.m10 * A1323 - self.m11 * A0323 + self.m13 * A0123) \
+                     - self.m03 * (self.m10 * A1223 - self.m11 * A0223 + self.m12 * A0123)
 
         if abs(det) < 1e-12:
             raise ArithmeticError("Mat4 :: singular matrix")
@@ -539,20 +588,18 @@ class Mat4(object):
     copy = __copy__
 
     def __repr__(self) -> str:
-        res: str = "mat4:\n"
-        res += "[[%s, %s, %s, %s],\n" % (self.__data[0], self.__data[1], self.__data[2], self.__data[3])
-        res += " [%s, %s, %s, %s],\n" % (self.__data[4], self.__data[5], self.__data[6], self.__data[7])
-        res += " [%s, %s, %s, %s],\n" % (self.__data[8], self.__data[9], self.__data[10], self.__data[11])
-        res += " [%s, %s, %s, %s]]" % (self.__data[12], self.__data[13], self.__data[14], self.__data[15])
-        return res
+        return f"mat4:\n" \
+               f"[[{su.format_str(self.m00)}, {su.format_str(self.m01)}, {su.format_str(self.m02)}, {su.format_str(self.m03)}],\n" \
+               f" [{su.format_str(self.m10)}, {su.format_str(self.m11)}, {su.format_str(self.m12)}, {su.format_str(self.m13)}],\n" \
+               f" [{su.format_str(self.m20)}, {su.format_str(self.m21)}, {su.format_str(self.m22)}, {su.format_str(self.m23)}],\n" \
+               f" [{su.format_str(self.m30)}, {su.format_str(self.m31)}, {su.format_str(self.m32)}, {su.format_str(self.m33)}]]\n"
 
     def __str__(self) -> str:
-        res: str = ""
-        res += "[[%s, %s, %s, %s],\n" % (self.__data[0], self.__data[1], self.__data[2], self.__data[3])
-        res += " [%s, %s, %s, %s],\n" % (self.__data[4], self.__data[5], self.__data[6], self.__data[7])
-        res += " [%s, %s, %s, %s],\n" % (self.__data[8], self.__data[9], self.__data[10], self.__data[11])
-        res += " [%s, %s, %s, %s]]" % (self.__data[12], self.__data[13], self.__data[14], self.__data[15])
-        return res
+        return "" \
+               f"[[{su.format_str(self.m00)}, {su.format_str(self.m01)}, {su.format_str(self.m02)}, {su.format_str(self.m03)}],\n" \
+               f" [{su.format_str(self.m10)}, {su.format_str(self.m11)}, {su.format_str(self.m12)}, {su.format_str(self.m13)}],\n" \
+               f" [{su.format_str(self.m20)}, {su.format_str(self.m21)}, {su.format_str(self.m22)}, {su.format_str(self.m23)}],\n" \
+               f" [{su.format_str(self.m30)}, {su.format_str(self.m31)}, {su.format_str(self.m32)}, {su.format_str(self.m33)}]]\n"
 
     def __add__(self, *args):
         other = self.__unpack_values(args)
@@ -719,3 +766,42 @@ class Mat4(object):
              self.__data[12] * b[3] + self.__data[13] * b[7] + self.__data[14] * b[11] + self.__data[15] * b[15]]
         self.__data = res
         return self
+
+
+def identity_3() -> Mat3:
+    return Mat3(1, 0, 0,
+                0, 1, 0,
+                0, 0, 1)
+
+
+def identity_4() -> Mat4:
+    return Mat4(1, 0, 0, 0,
+                0, 1, 0, 0,
+                0, 0, 1, 0,
+                0, 0, 0, 1)
+
+
+def zeros_3() -> Mat3:
+    return Mat3(0, 0, 0,
+                0, 0, 0,
+                0, 0, 0)
+
+
+def zeros_4() -> Mat4:
+    return Mat4(0, 0, 0, 0,
+                0, 0, 0, 0,
+                0, 0, 0, 0,
+                0, 0, 0, 0)
+
+
+def eye_3() -> Mat3:
+    return Mat3(1, 1, 1,
+                1, 1, 1,
+                1, 1, 1)
+
+
+def eye_4() -> Mat4:
+    return Mat4(1, 1, 1, 1,
+                1, 1, 1, 1,
+                1, 1, 1, 1,
+                1, 1, 1, 1)

@@ -88,66 +88,66 @@ class TrisMesh(object):
 
     def __init__(self):
         self.name: str = ""
-        self.__vertices: [Vec3] = []
-        self.__normals: [Vec3] = []
-        self.__uvs: [Vec2] = []
-        self.__faces: [Face] = []
-        self.__bbox: BoundingBox = BoundingBox()
+        self._vertices: [Vec3] = []
+        self._normals: [Vec3] = []
+        self._uvs: [Vec2] = []
+        self._faces: [Face] = []
+        self._bbox: BoundingBox = BoundingBox()
 
     def __str__(self):
         res: str = f"mesh: {self.name}\n"
-        res += f"max: {self.__bbox.max}\n"
-        res += f"min: {self.__bbox.min}\n"
+        res += f"max: {self._bbox.max}\n"
+        res += f"min: {self._bbox.min}\n"
         res += "vertices: \n"
-        for v in self.__vertices:
+        for v in self._vertices:
             res += f"{v}\n"
         res += "normals: \n"
-        for v in self.__normals:
+        for v in self._normals:
             res += f"{v}\n"
         res += "uvs: \n"
-        for v in self.__uvs:
+        for v in self._uvs:
             res += f"{v}\n"
-        for f in self.__faces:
+        for f in self._faces:
             res += f"{f}\n"
         return res
 
     def __repr__(self):
         res: str = f"<\nmesh: {self.name}\n"
-        res += f"max: {self.__bbox.max}\n"
-        res += f"min: {self.__bbox.min}\n"
+        res += f"max: {self._bbox.max}\n"
+        res += f"min: {self._bbox.min}\n"
         res += "vertices: \n"
-        for v in self.__vertices:
+        for v in self._vertices:
             res += f"{v}\n"
         res += "normals: \n"
-        for v in self.__normals:
+        for v in self._normals:
             res += f"{v}\n"
         res += "uvs: \n"
-        for v in self.__uvs:
+        for v in self._uvs:
             res += f"{v}\n"
-        for f in self.__faces:
+        for f in self._faces:
             res += f"{f}\n"
         res += "\n>"
         return res
 
     def __iter__(self):
-        if len(self.__faces) == 0:
+        if len(self._faces) == 0:
             raise StopIteration
-        self.__iter_face_i: int = -1
+        self._iter_face_i: int = -1
         return self
 
     def __next__(self) -> Triangle:
 
         self.__iter_face_i += 1
 
-        if self.__iter_face_i >= len(self.__faces):
+        if self.__iter_face_i >= len(self._faces):
             self.__iter_face_i = -1
             raise StopIteration
 
-        f: Face = self.__faces[self.__iter_face_i]
+        f: Face = self._faces[self.__iter_face_i]
         try:
-            return Triangle(self.__vertices[f.p_1], self.__vertices[f.p_2], self.__vertices[f.p_3],
-                            self.__normals[f.n_1], self.__normals[f.n_2], self.__normals[f.n_3],
-                            self.__uvs[f.uv1], self.__uvs[f.uv2], self.__uvs[f.uv3])
+            return Triangle(self._vertices[f.p_1], self._vertices[f.p_2], self._vertices[f.p_3],
+                            self._normals[f.n_1], self._normals[f.n_2], self._normals[f.n_3],
+                            self._uvs[f.uv1], self._uvs[f.uv2], self._uvs[f.uv3])
         except IndexError:
             print("bad  triangle info \n")
             print("n_points = %s, n_normals = %s, n_uvs = %s " % (str(self.vertices_count), str(self.normals_count),
@@ -156,82 +156,82 @@ class TrisMesh(object):
 
     def get_triangle(self, tris_id: int):
 
-        if len(self.__faces) <= tris_id or tris_id < 0:
+        if len(self._faces) <= tris_id or tris_id < 0:
             raise IndexError(f"no face with index %s in mesh %s " % (str(tris_id), self.name))
 
-        f: Face = self.__faces[tris_id]
+        f: Face = self._faces[tris_id]
 
-        return Triangle(self.__vertices[f.p_1], self.__vertices[f.p_2], self.__vertices[f.p_3],
-                        self.__normals[f.n_1], self.__normals[f.n_2], self.__normals[f.n_3],
-                        self.__uvs[f.uv1], self.__uvs[f.uv2], self.__uvs[f.uv3])
+        return Triangle(self._vertices[f.p_1], self._vertices[f.p_2], self._vertices[f.p_3],
+                        self._normals[f.n_1], self._normals[f.n_2], self._normals[f.n_3],
+                        self._uvs[f.uv1], self._uvs[f.uv2], self._uvs[f.uv3])
 
     def set_vertex(self, i_id: int, v: Vec3) -> None:
         if i_id < 0:
             return
         if i_id >= self.vertices_count:
             return
-        self.__bbox.update_bounds(v)
-        self.__vertices[i_id] = v
+        self._bbox.update_bounds(v)
+        self._vertices[i_id] = v
 
     def set_normal(self, i_id: int, v: Vec3) -> None:
         if i_id < 0:
             return
         if i_id >= self.normals_count:
             return
-        self.__normals[i_id] = v
+        self._normals[i_id] = v
 
     def set_uv(self, i_id: int, v: Vec2) -> None:
         if i_id < 0:
             return
         if i_id >= self.uvs_count:
             return
-        self.__uvs[i_id] = v
+        self._uvs[i_id] = v
 
     @property
     def faces_count(self) -> int:
-        return len(self.__faces)
+        return len(self._faces)
 
     @property
     def vertices_count(self) -> int:
-        return len(self.__vertices)
+        return len(self._vertices)
 
     @property
     def uvs_count(self) -> int:
-        return len(self.__uvs)
+        return len(self._uvs)
 
     @property
     def normals_count(self) -> int:
-        return len(self.__normals)
+        return len(self._normals)
 
     @property
     def bbox(self) -> BoundingBox:
-        return self.__bbox
+        return self._bbox
 
     def append_vertex(self, v: Vec3) -> None:
-        self.__bbox.update_bounds(v)
-        self.__vertices.append(v)
+        self._bbox.update_bounds(v)
+        self._vertices.append(v)
 
     def append_normal(self, v: Vec3) -> None:
-        self.__normals.append(v)
+        self._normals.append(v)
 
     def append_uv(self, v: Vec2) -> None:
-        self.__uvs.append(v)
+        self._uvs.append(v)
 
     def append_face(self, f: Face) -> None:
-        self.__faces.append(f)
+        self._faces.append(f)
 
     def clean_up(self):
-        if len(self.__vertices) == 0:
+        if len(self._vertices) == 0:
             return
-        del self.__uvs
-        del self.__vertices
-        del self.__normals
-        del self.__faces
+        del self._uvs
+        del self._vertices
+        del self._normals
+        del self._faces
 
-        self.__uvs: [Vec2] = []
-        self.__vertices: [Vec3] = []
-        self.__normals: [Vec3] = []
-        self.__faces: [Face] = []
+        self._uvs: [Vec2] = []
+        self._vertices: [Vec3] = []
+        self._normals: [Vec3] = []
+        self._faces: [Face] = []
 
 
 def read_obj_mesh(path: str) -> [TrisMesh]:

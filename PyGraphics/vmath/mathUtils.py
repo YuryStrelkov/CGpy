@@ -1,4 +1,8 @@
 import math
+
+import numpy as np
+
+import vmath.matrices
 import vmath.vectors as vectors
 from vmath.matrices import Mat4, Mat3
 from vmath.vectors import Vec3, Vec2
@@ -126,4 +130,65 @@ def perpendicular_3(v: Vec3) -> Vec3:
     g: float = math.copysign(s, v.z)  # note s instead of 1
     h: float = v.z + g
     return Vec3(g * h - v.x * v.x, -v.x * v.y, -v.x * h)
+
+
+def form_transform(rotation, translation):
+    """
+        Makes a transformation matrix from the given rotation matrix and translation vector
+        Parameters
+        ----------
+        R (ndarray): The rotation matrix
+        t (list): The translation vector
+        Returns
+        -------
+        T (ndarray): The transformation matrix
+        """
+    transform = np.eye(4, dtype=np.float64)
+    transform[:3, :3] = rotation
+    transform[:3, 3] = translation
+    return transform
+
+
+def build_projection_matrix(fov: float = 70, aspect: float = 1, znear: float = 0.01, zfar: float = 1000) -> Mat4:
+    projection = vmath.matrices.identity_4()
+    scale = 1.0 / math.tan(fov * 0.5 * math.pi / 180)
+    projection.m00 = scale * aspect  # scale the x coordinates of the projected point
+    projection.m11 = scale  # scale the y coordinates of the projected point
+    projection.m22 = zfar / (znear - zfar)  # used to remap z to [0,1]
+    projection.m32 = zfar * znear / (znear - zfar)  # used to remap z [0,1]
+    projection.m23 = -1  # set w = -z
+    projection.m33 = 0
+    return projection
+
+
+def build_orthogonal_basis(right: Vec3, up: Vec3, front: Vec3, main_axes=3) -> Mat4:
+    x_: Vec3
+    y_: Vec3
+    z_: Vec3
+    while True:
+        if main_axes == 1:
+            f_mag = right.magnitude
+            z_ = right.normalized()
+            y_ = (up - Vec3.dot(z_, up) * z_ / (f_mag * f_mag)).normalized()
+            x_ = Vec3.cross(z_, y_).normalized()
+            break
+        if main_axes == 2:
+            f_mag = up.magnitude
+            z_ = up.normalized()
+            y_ = (front - Vec3.dot(z_, front) * front / (f_mag * f_mag)).normalized()
+            x_ = Vec3.cross(z_, y_).normalized()
+            break
+        if main_axes == 3:
+            f_mag = front.magnitude
+            z_ = front.normalized()
+            y_ = (up - Vec3.dot(z_, up) * z_ / (f_mag * f_mag)).normalized()
+            x_ = Vec3.cross(z_, y_).normalized()
+            break
+        raise RuntimeError("wrong parameter main_axes")
+    m = Mat4(x_.x, y_.x, z_.x, 0,
+             x_.y, y_.y, z_.y, 0,
+             x_.z, y_.z, z_.z, 0,
+             0, 0, 0, 1)
+    return m
+
 

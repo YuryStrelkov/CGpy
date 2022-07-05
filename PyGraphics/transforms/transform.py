@@ -53,7 +53,29 @@ class Transform(object):
         self.__m_transform.m12 = ez.y
         self.__m_transform.m22 = ez.z
 
-        self.eulerAngles = mathUtils.rot_m_to_euler_angles(self.rotation_mat())
+        # self.eulerAngles = mathUtils.rot_m_to_euler_angles(self.rotation_mat())
+
+    @property
+    def transform_matrix(self) -> Mat4:
+        return self.__m_transform
+
+    @transform_matrix.setter
+    def transform_matrix(self, t: Mat4) -> None:
+        self.__m_transform.m00 = t.m00
+        self.__m_transform.m10 = t.m10
+        self.__m_transform.m20 = t.m20
+
+        self.__m_transform.m01 = t.m01
+        self.__m_transform.m11 = t.m11
+        self.__m_transform.m21 = t.m21
+
+        self.__m_transform.m02 = t.m02
+        self.__m_transform.m12 = t.m12
+        self.__m_transform.m22 = t.m22
+
+        self.__m_transform.m03 = t.m03
+        self.__m_transform.m13 = t.m13
+        self.__m_transform.m23 = t.m23
 
     @property
     def front(self) -> Vec3:
@@ -85,7 +107,7 @@ class Transform(object):
         up_dir_ = up_ / length_
         front_ = vectors.cross(up_dir_, Vec3(1, 0, 0)).normalized()
         right_ = vectors.cross(up_dir_, front_).normalized()
-        self.__build_basis(right_ * self.sx, up_, front_*self.sz)
+        self.__build_basis(right_ * self.sx, up_, front_ * self.sz)
 
     @property
     def right(self) -> Vec3:
@@ -210,7 +232,6 @@ class Transform(object):
         i = mathUtils.rotate_x(xyz.x)
         i = mathUtils.rotate_y(xyz.y) * i
         i = mathUtils.rotate_z(xyz.z) * i
-
         scl = self.scale
         orig = self.origin
         self.__m_transform = i
