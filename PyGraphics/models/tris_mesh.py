@@ -154,6 +154,22 @@ class TrisMesh(object):
                                                                   str(self.uvs_count)))
             print(f)
 
+    @property
+    def vertices(self):
+        return self._vertices
+
+    @property
+    def normals(self):
+        return self._normals
+
+    @property
+    def uvs(self):
+        return self._uvs
+
+    @property
+    def faces(self):
+        return self._faces
+
     def get_triangle(self, tris_id: int):
 
         if len(self._faces) <= tris_id or tris_id < 0:
@@ -321,7 +337,6 @@ def read_obj_mesh(path: str) -> [TrisMesh]:
                     face_.n_3 = int(tmp2[2]) - 1 - n__shift
                     meshes[len(meshes) - 1].append_face(face_)
                     continue
-
             return meshes
     except IOError:
         print("file \"%s\" not found" % path)

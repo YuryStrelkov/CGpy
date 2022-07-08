@@ -1,14 +1,14 @@
 import materials.material
-import models.trisMesh
+import models.tris_mesh
 from materials.material import Material
-from models.trisMesh import TrisMesh, BoundingBox, Triangle
+from models.tris_mesh import TrisMesh, BoundingBox, Triangle
 from transforms.transform import Transform
 from vmath.vectors import Vec3
 
 
 class Model(object):
     def __init__(self, geometry_origin: str = "", material_origin: str = ""):
-        self.__meshes: [TrisMesh] = models.trisMesh.read_obj_mesh(geometry_origin)
+        self.__meshes: [TrisMesh] = models.tris_mesh.read_obj_mesh(geometry_origin)
         self.__materials: [Material] = materials.material.read_material(material_origin)
         self.__transform: Transform = Transform()
         self.__mesh_origin: str = ""
