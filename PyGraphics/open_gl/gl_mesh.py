@@ -71,19 +71,20 @@ class MeshGL(object):
         if self.__vbo is None:
             self.__vbo = GPUBuffer(len(vertices), int(vertices.nbytes / len(vertices)))
         self.__vbo.load_buffer_data(vertices)
-
+        ptr = 0
         if self.__mesh.vertices_count != 0:
             glEnableVertexAttribArray(0)
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 24, ctypes.c_void_p(0))
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 12, ctypes.c_void_p(ptr))
+            ptr += self.__mesh.vertices_count * 3 * 4
 
         if self.__mesh.normals_count != 0:
             glEnableVertexAttribArray(1)
-            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 24, ctypes.c_void_p(self.__mesh.vertices_count * 12))
+            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 12, ctypes.c_void_p(ptr))
+            ptr += self.__mesh.normals_count * 3 * 4
 
         if self.__mesh.uvs_count != 0:
             glEnableVertexAttribArray(2)
-            glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 16,
-                                  ctypes.c_void_p((self.__mesh.vertices_count + self.__mesh.normals_count) * 12))
+            glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8, ctypes.c_void_p(ptr))
 
         return True
 

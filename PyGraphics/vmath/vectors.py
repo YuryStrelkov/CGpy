@@ -63,7 +63,11 @@ class Vec2(object):
 
     @property
     def np_array(self) -> np.ndarray:
-        return np.array(self.__xy, dtype=np.float64)
+        return np.array(self.__xy, dtype=np.float32)
+
+    @property
+    def as_array(self):
+        return self.__xy
 
     @property
     def x(self) -> float: return self.__xy[0]
@@ -260,7 +264,11 @@ class Vec3(object):
 
     @property
     def np_array(self) -> np.ndarray:
-        return np.array(self.__xyz, dtype=np.float64)
+        return np.array(self.__xyz, dtype=np.float32)
+
+    @property
+    def as_array(self):
+        return self.__xyz
 
     @property
     def x(self) -> float: return self.__xyz[0]

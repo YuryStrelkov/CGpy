@@ -52,7 +52,7 @@ class Mat3(object):
 
     @property
     def np_array(self) -> np.ndarray:
-        return np.array(self.__data, dtype=np.float64)
+        return np.array(self.__data, dtype=np.float32)
 
     @property
     def np_array_3x3(self) -> np.ndarray:
@@ -341,7 +341,7 @@ class Mat4(object):
                  m0: float = 0, m1: float = 0, m2: float = 0, m3: float = 0,
                  m4: float = 0, m5: float = 0, m6: float = 0, m7: float = 0,
                  m8: float = 0, m9: float = 0, m10: float = 0, m11: float = 0,
-                 m12: float = 0, m13: float = 0, m14: float = 0, m15: float = 0) -> object:
+                 m12: float = 0, m13: float = 0, m14: float = 0, m15: float = 0):
         self.__data: [float] = [m0, m1, m2, m3,
                                 m4, m5, m6, m7,
                                 m8, m9, m10, m11,
@@ -365,7 +365,7 @@ class Mat4(object):
     # row 1 set/get
     @property
     def np_array(self) -> np.ndarray:
-        return np.array(self.__data, dtype=np.float64)
+        return np.array(self.__data, dtype=np.float32)
 
     @property
     def np_array_4x4(self) -> np.ndarray:

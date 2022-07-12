@@ -23,8 +23,6 @@ class TextureGL(Texture):
     def __init__(self, w: int = 100, h: int = 100, col: RGB = RGB(np.uint8(255), np.uint8(0), np.uint8(0))):
         super().__init__(w, h, 3, col)
         self.__id = 0
-        self.width = w
-        self.height = h
         self.__bind_target: GLenum = GL_TEXTURE_2D
         self.__load_data()
 

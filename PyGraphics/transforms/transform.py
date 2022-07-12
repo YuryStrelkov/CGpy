@@ -288,6 +288,15 @@ class Transform(object):
             self.__m_transform.m20 * vec.x + self.__m_transform.m21 * vec.y + self.__m_transform.m22 * vec.z + self.__m_transform.m23)
 
     # не переводит вектор в собственное пространство координат =)
+    @property
+    def inv_transform_matrix(self) -> Mat4:
+        scl: Vec3 = self.scale
+        scl *= scl
+        return Mat4(self.__m_transform.m00 * scl.x, self.__m_transform.m10 * scl.x, self.__m_transform.m20 * scl.x, -self.__m_transform.m03,
+                    self.__m_transform.m01 * scl.y, self.__m_transform.m11 * scl.y, self.__m_transform.m21 * scl.y, -self.__m_transform.m13,
+                    self.__m_transform.m02 * scl.z, self.__m_transform.m12 * scl.z, self.__m_transform.m22 * scl.z, -self.__m_transform.m23,
+                    0, 0, 0, 1)
+
     def inv_transform_vect(self, vec: Vec3, w) -> Vec3:
         scl: Vec3 = self.scale
         if w == 0:
