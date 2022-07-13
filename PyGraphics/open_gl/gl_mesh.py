@@ -102,56 +102,44 @@ class MeshGL(object):
         self.__ibo.delete_buffer()
 
     def __vertex_array_data(self) -> np.ndarray:
-        size_ = self.__mesh.vertices_count * 3 + self.__mesh.normals_count * 3 + self.__mesh.uvs_count * 2
+        size_ = self.__mesh.vertices_count * 8
         v_data = np.zeros(size_, dtype=np.float32)
-        idx: int = 0
-        for v in self.__mesh.vertices:
-            v_data[idx] = v.x
-            idx += 1
-            v_data[idx] = v.y
-            idx += 1
-            v_data[idx] = v.z
-            idx += 1
+        unique_vert_id = {}
+        for f in self.__mesh.faces:
+            for pt in f.points:
+                if not(pt[0] in unique_vert_id):
+                    if pt[0] != -1:
+                        v = self.__mesh.vertices[pt[0]]
+                        idx = pt[0] * 3
+                        v_data[idx + 0] = v.x
+                        v_data[idx + 1] = v.y
+                        v_data[idx + 2] = v.z
 
-        for v in self.__mesh.normals:
-            v_data[idx] = v.x
-            idx += 1
-            v_data[idx] = v.y
-            idx += 1
-            v_data[idx] = v.z
-            idx += 1
+                    if pt[1] != -1:
+                        n = self.__mesh.normals[pt[1]]
+                        idx = self.__mesh.vertices_count * 3 + pt[0] * 3
+                        v_data[idx + 0] = n.x
+                        v_data[idx + 1] = n.y
+                        v_data[idx + 2] = n.z
 
-        for v in self.__mesh.uvs:
-            v_data[idx] = v.x
-            idx += 1
-            v_data[idx] = v.y
-            idx += 1
+                    if pt[2] != -1:
+                        uv = self.__mesh.uvs[pt[2]]
+                        idx = self.__mesh.vertices_count * 6 + pt[0] * 2
+                        v_data[idx + 0] = uv.x
+                        v_data[idx + 1] = uv.y
+
+                    unique_vert_id[pt[0]] = pt[0]
+
         return v_data
 
     def __index_array_data(self) -> np.ndarray:
-        i_data = np.zeros(self.__mesh.faces_count * 9, dtype=np.uint32)
+        i_data = np.zeros(self.__mesh.faces_count * 3, dtype=np.uint32)
         idx: int = 0
         for f in self.__mesh.faces:
-            i_data[idx] = f.p_1
-            idx += 1
-            i_data[idx] = f.n_1
-            idx += 1
-            i_data[idx] = f.uv1
-            idx += 1
-
-            i_data[idx] = f.p_2
-            idx += 1
-            i_data[idx] = f.n_2
-            idx += 1
-            i_data[idx] = f.uv2
-            idx += 1
-
-            i_data[idx] = f.p_3
-            idx += 1
-            i_data[idx] = f.n_3
-            idx += 1
-            i_data[idx] = f.uv3
-            idx += 1
+            i_data[idx + 0] = f.p_1
+            i_data[idx + 1] = f.p_2
+            i_data[idx + 2] = f.p_3
+            idx += 3
         return i_data
 
     def bind(self):
@@ -165,4 +153,4 @@ class MeshGL(object):
 
     def draw(self):
         self.bind()
-        glDrawElements(GL_TRIANGLES, self.__mesh.faces_count * 9, GL_UNSIGNED_INT, None)
+        glDrawElements(GL_TRIANGLE_STRIP, self.__mesh.faces_count * 9, GL_UNSIGNED_INT, None)

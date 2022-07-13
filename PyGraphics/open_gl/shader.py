@@ -1,4 +1,6 @@
 from OpenGL.GL.shaders import compileProgram, compileShader
+
+import vmath.matrices
 from vmath.matrices import Mat3, Mat4
 from vmath.vectors import Vec2, Vec3
 from OpenGL.GL import *
@@ -11,8 +13,8 @@ layout(location = 1) in vec3 a_normal;
 layout(location = 2) in vec2 a_texture;
 
 uniform mat4 model;
-uniform mat4 projection;
 uniform mat4 view;
+uniform mat4 projection;
 
 out vec3 v_normal;
 out vec2 v_texture;
@@ -20,7 +22,7 @@ out vec2 v_texture;
 void main()
 {
     gl_Position = projection * view * model * vec4(a_position, 1.0);
-    v_normal    = (model * vec4(a_normal, 1.0)).xyz;
+    v_normal    = normalize((model * vec4(a_normal, 0.0)).xyz);
     v_texture   = a_texture;
 }
 
@@ -32,11 +34,26 @@ in vec2 v_texture;
 out vec4 out_color;
 void main()
 {   
-    float amount = (0.1 +  smoothstep(0.1, 1, dot(v_normal, vec3(-0.333, 0.333,-0.333))))*2;
-    //out_color = vec4(amount * v_texture.x, amount * v_texture.y, amount, 1);
-    out_color = vec4(amount, amount, amount, 1);
+    float amount = 0.1 + (dot(-v_normal, vec3(0.333, 0.333,-0.333))) ;
+    out_color = vec4(amount * v_texture.x, amount * v_texture.y, amount, 1);
+    out_color =   vec4(amount, amount, amount, 1);
 }
 """
+
+
+class UniformTypes(GLenum):
+    Matrix4 = 35676
+    Matrix3 = -1
+    Matrix2 = -1
+    Vector4 = -1
+    Vector3 = -1
+    Vector2 = -1
+    Float = -1
+    Int = -1
+    Texture = -1
+    TextureCube = -1
+    TextureArray = -1
+
 
 
 class Shader(object):
@@ -55,7 +72,7 @@ class Shader(object):
         res += "Attribs   :\n"
         for key in self.__shader_attribs.keys():
             res += f"name: {key}, value: {self.__shader_attribs[key]}\n"
-            #  res += f"id : {self.__shader_attribs[key][0]}; name : {key}; type {id : {self.__shader_attribs[key][2]}}\n"
+            # res += f"id : {self.__shader_attribs[key][0]}; name : {key}; type {id : {self.__shader_attribs[key][2]}}\n"
         res += "Uniforms   :\n"
         for key in self.__shader_uniforms.keys():
             res += f"name: {key}, value: {self.__shader_uniforms[key]}\n"
@@ -107,7 +124,7 @@ class Shader(object):
                 raise Exception("Vertex shader creation error::empty src-code...")
             return code
 
-    @ staticmethod
+    @staticmethod
     def gl_get_active_attrib(program, index):
         buf_size = 256
         length = (ctypes.c_int * 1)()
@@ -119,14 +136,13 @@ class Shader(object):
         attrib_name = attrib_name[:length[0]].decode('utf-8')
         return attrib_name, size[0], attrib_type[0]
 
-    @ staticmethod
+    @staticmethod
     def gl_get_active_uniform(program, index):
         buf_size = 256
         length = (ctypes.c_int * 1)()
         size = (ctypes.c_int * 1)()
         attrib_type = (ctypes.c_uint * 1)()
         attrib_name = ctypes.create_string_buffer(buf_size)
-        # pyopengl has a bug, this is a patch
         glGetActiveUniform(program, index, buf_size, length, size, attrib_type, attrib_name)
         attrib_name = attrib_name[:length[0]].decode('utf-8')
         return attrib_name, size[0], attrib_type[0]
@@ -147,7 +163,11 @@ class Shader(object):
             self.__shader_uniforms.clear()
         for i in range(count):
             name_, size_, type_ = Shader.gl_get_active_uniform(self.__program_id, i)
+
             self.__shader_uniforms[name_] = (i, size_, type_)
+
+            if UniformTypes.Matrix4 == type_:
+                self.send_mat_4(name_, vmath.matrices.identity_4())
 
     def frag_shader(self, code: str, from_file: bool = True):
         if from_file:
@@ -187,21 +207,21 @@ class Shader(object):
         self.__get_all_attrib_locations()
         self.__get_all_uniform_locations()
 
-    def send_mat_3(self, mat_name: str, mat: Mat3):
+    def send_mat_3(self, mat_name: str, mat: Mat3, transpose=GL_FALSE):
         loc = self.get_uniform_location(mat_name)
         if loc == -1:
             return
         self.bind()
         data = mat.as_array
-        glUniformMatrix3fv(loc, 1, GL_FALSE, (GLfloat * len(data))(*data))
+        glUniformMatrix3fv(loc, 1, transpose, (GLfloat * len(data))(*data))
 
-    def send_mat_4(self, mat_name: str, mat: Mat4):
+    def send_mat_4(self, mat_name: str, mat: Mat4, transpose=GL_FALSE):
         loc = self.get_uniform_location(mat_name)
         if loc == -1:
             return
         self.bind()
         data = mat.as_array
-        glUniformMatrix4fv(loc, 1, GL_TRUE, (GLfloat * len(data))(*data))
+        glUniformMatrix4fv(loc, 1, transpose, (GLfloat * len(data))(*data))
 
     def send_vec_2(self, vec_name: str, vec: Vec2):
         loc = self.get_uniform_location(vec_name)

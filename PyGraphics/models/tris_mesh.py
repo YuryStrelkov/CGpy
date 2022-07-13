@@ -1,10 +1,27 @@
 import re
-
 from models.triangle import Triangle
 from vmath.mathUtils import Vec3, Vec2
 
 
 class Face:
+    @property
+    def points(self):
+        yield self.pt_1
+        yield self.pt_2
+        yield self.pt_3
+
+    @property
+    def pt_1(self):
+        return self.p_1, self.n_1, self.uv1
+
+    @property
+    def pt_2(self):
+        return self.p_2, self.n_2, self.uv2
+
+    @property
+    def pt_3(self):
+        return self.p_3, self.n_3, self.uv3
+
     def index1(self, index):
         self.p_1: int = index
         self.uv1: int = index
