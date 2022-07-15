@@ -181,15 +181,15 @@ class Mat3(object):
 
     def __repr__(self) -> str:
         return f"mat:\n" \
-               f"[[{su.format_str(self.m00)}, {su.format_str(self.m01)}, {su.format_str(self.m02)}],\n" \
-               f" [{su.format_str(self.m10)}, {su.format_str(self.m11)}, {su.format_str(self.m12)}],\n" \
-               f" [{su.format_str(self.m20)}, {su.format_str(self.m21)}, {su.format_str(self.m22)}]]\n"
+               f"[[{self.m00:20}, {self.m01:20}, {self.m02:20}],\n" \
+               f" [{self.m10:20}, {self.m11:20}, {self.m12:20}],\n" \
+               f" [{self.m20:20}, {self.m21:20}, {self.m22:20}]]\n"
 
     def __str__(self) -> str:
         return "" \
-               f"[[{su.format_str(self.m00)}, {su.format_str(self.m01)}, {su.format_str(self.m02)}],\n" \
-               f" [{su.format_str(self.m10)}, {su.format_str(self.m11)}, {su.format_str(self.m12)}],\n" \
-               f" [{su.format_str(self.m20)}, {su.format_str(self.m21)}, {su.format_str(self.m22)}]]\n"
+               f"[[{self.m00:20}, {self.m01:20}, {self.m02:20}],\n" \
+               f" [{self.m10:20}, {self.m11:20}, {self.m12:20}],\n" \
+               f" [{self.m20:20}, {self.m21:20}, {self.m22:20}]]\n"
 
     def __add__(self, *args):
         other = self.__unpack_values(args)
@@ -589,17 +589,17 @@ class Mat4(object):
 
     def __repr__(self) -> str:
         return f"mat4:\n" \
-               f"[[{su.format_str(self.m00)}, {su.format_str(self.m01)}, {su.format_str(self.m02)}, {su.format_str(self.m03)}],\n" \
-               f" [{su.format_str(self.m10)}, {su.format_str(self.m11)}, {su.format_str(self.m12)}, {su.format_str(self.m13)}],\n" \
-               f" [{su.format_str(self.m20)}, {su.format_str(self.m21)}, {su.format_str(self.m22)}, {su.format_str(self.m23)}],\n" \
-               f" [{su.format_str(self.m30)}, {su.format_str(self.m31)}, {su.format_str(self.m32)}, {su.format_str(self.m33)}]]\n"
+               f"[[{self.m00:20}, {self.m01:20}, {self.m02:20}, {self.m03:20}],\n" \
+               f" [{self.m10:20}, {self.m11:20}, {self.m12:20}, {self.m13:20}],\n" \
+               f" [{self.m20:20}, {self.m21:20}, {self.m22:20}, {self.m23:20}],\n" \
+               f" [{self.m30:20}, {self.m31:20}, {self.m32:20}, {self.m33:20}]]\n"
 
     def __str__(self) -> str:
         return "" \
-               f"[[{su.format_str(self.m00)}, {su.format_str(self.m01)}, {su.format_str(self.m02)}, {su.format_str(self.m03)}],\n" \
-               f" [{su.format_str(self.m10)}, {su.format_str(self.m11)}, {su.format_str(self.m12)}, {su.format_str(self.m13)}],\n" \
-               f" [{su.format_str(self.m20)}, {su.format_str(self.m21)}, {su.format_str(self.m22)}, {su.format_str(self.m23)}],\n" \
-               f" [{su.format_str(self.m30)}, {su.format_str(self.m31)}, {su.format_str(self.m32)}, {su.format_str(self.m33)}]]\n"
+               f"[[{self.m00:20}, {self.m01:20}, {self.m02:20}, {self.m03:20}],\n" \
+               f" [{self.m10:20}, {self.m11:20}, {self.m12:20}, {self.m13:20}],\n" \
+               f" [{self.m20:20}, {self.m21:20}, {self.m22:20}, {self.m23:20}],\n" \
+               f" [{self.m30:20}, {self.m31:20}, {self.m32:20}, {self.m33:20}]]\n"
 
     def __add__(self, *args):
         other = self.__unpack_values(args)

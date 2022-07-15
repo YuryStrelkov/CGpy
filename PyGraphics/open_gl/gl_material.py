@@ -1,4 +1,3 @@
-from materials.material import Material
 from open_gl.gl_texture import TextureGL
 from open_gl.shader import Shader
 from vmath.vectors import Vec3

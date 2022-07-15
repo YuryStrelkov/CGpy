@@ -23,7 +23,7 @@ class Camera(object):
         self.__build_projection()
 
     def __repr__(self) -> str:
-        res: str = "<Camera \n"
+        res: str = f"<Camera   : 0x{id(self)}\n"
         res += f"z far     :{self.__zfar}\n"
         res += f"z near    :{self.__znear}\n"
         res += f"fov       :{self.fov}\n"
@@ -34,11 +34,11 @@ class Camera(object):
         return res
 
     def __str__(self) -> str:
-        res: str = "Camera \n"
-        res += f"z far     :{self.__zfar}\n"
-        res += f"z near    :{self.__znear}\n"
-        res += f"fov       :{self.fov}\n"
-        res += f"aspect    :{self.aspect}\n"
+        res: str = f"Camera    : 0x{id(self)}\n"
+        res += f"z far     : {self.__zfar}\n"
+        res += f"z near    : {self.__znear}\n"
+        res += f"fov       : {self.fov}\n"
+        res += f"aspect    : {self.aspect}\n"
         res += f"projection:\n{self.__projection}\n"
         res += f"transform :\n{self.__transform}\n"
         return res

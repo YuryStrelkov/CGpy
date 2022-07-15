@@ -37,7 +37,7 @@ def bezier_curve_test():
     curve: BezierCurve2 = BezierCurve2()
 
     curve.closed = True
-    n_pnts: int = 8
+    n_pnts: int = 3
     for i in range(0, n_pnts):
         curve.add_point(Vec2(0.666 * np.cos(np.pi / n_pnts * 2 * i), 0.666 * np.sin(np.pi / n_pnts * 2 * i)))
 
@@ -112,12 +112,7 @@ def interactive_shading(render_camera: Camera = None):
 
     gr.draw_model_shaded_interactive(frame_buffer, model, render_camera)
 
-import sys
 if __name__ == '__main__':
-    t: np.float32 = np.float32(10.0)
-    l = [t, t, t, t, t]
-    print(sys.getsizeof(l))
-    print(sys.getsizeof(t))
     t = Transform()
     t.up = Vec3(1, 1, 0).normalized()
     #t.angles = Vec3(math.pi/6, math.pi/4, math.pi/3)
@@ -126,7 +121,8 @@ if __name__ == '__main__':
     cam = Camera()
     print(cam)
     # bezier_intersection_test()
-    interactive_shading()
+    bezier_curve_test()
+    # interactive_shading()
     #interactive_solid_color()
     #static_solid_color()
     #static_shading()

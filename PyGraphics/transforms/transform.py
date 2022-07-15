@@ -1,8 +1,8 @@
-import math
-from vmath import mathUtils
+import vmath.vectors as vectors
 from vmath.matrices import Mat4
 from vmath.vectors import Vec3
-import vmath.vectors as vectors
+from vmath import mathUtils
+import math
 
 
 class Transform(object):
@@ -23,11 +23,11 @@ class Transform(object):
         return res
 
     def __str__(self) -> str:
-        res: str = "Transform \n"
-        res += f"origin   :{self.origin}\n"
-        res += f"scale    :{self.scale}\n"
-        res += f"rotate   :{self.angles / math.pi * 180}\n"
-        res += f"t-matrix :\n{self.__m_transform}\n"
+        res: str = f"Transform : 0x{id(self)} \n"
+        res += f"origin    : {self.origin}\n"
+        res += f"scale     : {self.scale}\n"
+        res += f"rotate    : {self.angles / math.pi * 180}\n"
+        res += f"t-matrix  :\n{self.__m_transform}\n"
         return res
 
     def __eq__(self, other) -> bool:

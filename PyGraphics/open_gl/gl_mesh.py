@@ -1,8 +1,7 @@
-import numpy as np
-from OpenGL.GL import *
-
-from models.tris_mesh import TrisMesh
 from open_gl.gpu_buffer import GPUBuffer
+from models.tris_mesh import TrisMesh
+from OpenGL.GL import *
+import numpy as np
 
 
 class MeshGL(object):
@@ -22,8 +21,8 @@ class MeshGL(object):
 
     def __repr__(self):
         return f"vao  : {self.__vao}\n" \
-               f"vbo  :\n{self.__vbo}"\
-               f"ibo  :\n{self.__ibo}"\
+               f"vbo  :\n{self.__vbo}" \
+               f"ibo  :\n{self.__ibo}" \
                f"mesh :\n{self.__mesh}"
 
     def __init__(self, mesh: TrisMesh = None):
@@ -46,7 +45,6 @@ class MeshGL(object):
         self.__create_gpu_buffers()
 
     def __del__(self):
-        # super(Mesh, self).__del__()
         self.delete_mesh()
 
     def __create_gpu_buffers(self) -> bool:
@@ -57,6 +55,7 @@ class MeshGL(object):
             return False
         if self.__vao == 0:
             self.__vao = glGenVertexArrays(1)
+            MeshGL.__vao_instances[self.__vao] = self
 
         self.bind()
 
@@ -127,7 +126,6 @@ class MeshGL(object):
                         idx = self.__mesh.vertices_count * 6 + pt[0] * 2
                         v_data[idx + 0] = uv.x
                         v_data[idx + 1] = uv.y
-
                     unique_vert_id[pt[0]] = pt[0]
 
         return v_data
@@ -153,4 +151,4 @@ class MeshGL(object):
 
     def draw(self):
         self.bind()
-        glDrawElements(GL_TRIANGLE_STRIP, self.__mesh.faces_count * 9, GL_UNSIGNED_INT, None)
+        glDrawElements(GL_TRIANGLES, self.__mesh.faces_count * 3, GL_UNSIGNED_INT, None)

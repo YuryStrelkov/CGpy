@@ -109,10 +109,10 @@ class Vec2(object):
     copy = __copy__
 
     def __repr__(self):
-        return "<vec3 x:%s y:%s>" % (self.__xy[0], self.__xy[1])
+        return f"<vec2[{self.__xy[0]:20},{self.__xy[1]:20}]>"
 
     def __str__(self):
-        return "[%s, %s]" % (self.__xy[0], self.__xy[1])
+        return f"[{self.__xy[0]:20},{self.__xy[1]:20}]"
 
     ##########################
     #####  + operetor   ######
@@ -152,7 +152,7 @@ class Vec2(object):
 
     def __mul__(self, *args):
         other = self.__unpack_values(args)
-        return Vec3(self.x * other[0], self.y * other[1])
+        return Vec2(self.x * other[0], self.y * other[1])
 
     def __imul__(self, *args):
         other = self.__unpack_values(args)
@@ -321,10 +321,10 @@ class Vec3(object):
     copy = __copy__
 
     def __repr__(self):
-        return "<vec3 x:%s y:%s z:%s>" % (self.__xyz[0], self.__xyz[1], self.__xyz[2])
+        return f"<vec3[{self.__xyz[0]:20},{self.__xyz[1]:20},{self.__xyz[2]:20}]>"
 
     def __str__(self):
-        return "[%s, %s, %s]" % (self.__xyz[0], self.__xyz[1], self.__xyz[2])
+        return f"[{self.__xyz[0]:20},{self.__xyz[1]:20},{self.__xyz[2]:20}]"
 
     ##########################
     #####  + operetor   ######

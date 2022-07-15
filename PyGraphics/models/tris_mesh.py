@@ -1,6 +1,6 @@
-import re
-from models.triangle import Triangle
 from vmath.mathUtils import Vec3, Vec2
+from models.triangle import Triangle
+import re
 
 
 class Face:

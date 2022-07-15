@@ -1,9 +1,9 @@
 from OpenGL.GL.shaders import compileProgram, compileShader
-
-import vmath.matrices
 from vmath.matrices import Mat3, Mat4
 from vmath.vectors import Vec2, Vec3
 from OpenGL.GL import *
+from enum import Enum
+import vmath.matrices
 import re
 
 vertex_src = """
@@ -15,7 +15,6 @@ layout(location = 2) in vec2 a_texture;
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
-
 out vec3 v_normal;
 out vec2 v_texture;
 
@@ -32,68 +31,100 @@ fragment_src = """
 in vec3 v_normal;
 in vec2 v_texture;
 out vec4 out_color;
+
+uniform vec3 diffuse_color;
+uniform vec3 specular_color;
+
 void main()
 {   
     float amount = 0.1 + (dot(-v_normal, vec3(0.333, 0.333,-0.333))) ;
-    out_color = vec4(amount * v_texture.x, amount * v_texture.y, amount, 1);
-    out_color =   vec4(amount, amount, amount, 1);
+    //  out_color = vec4(v_texture.x, v_texture.y, 1, 1);
+    out_color = vec4(diffuse_color * specular_color * amount, 1);
 }
 """
 
 
-class UniformTypes(GLenum):
-    Matrix4 = 35676
-    Matrix3 = -1
-    Matrix2 = -1
-    Vector4 = -1
-    Vector3 = -1
-    Vector2 = -1
-    Float = -1
-    Int = -1
-    Texture = -1
-    TextureCube = -1
-    TextureArray = -1
-
+class ShaderDataTypes(Enum):
+    Matrix4: int = 35676
+    Matrix3: int = 35675
+    Vector3: int = 35665
+    Vector2: int = 35664
+    Float: int = 5126
+    Int: int = 5124
+    Texture: int = 35678
+    TextureCube: int = 35680
+    TextureArray: int = 36289
 
 
 class Shader(object):
+    __shader_instances = {}
+
+    @staticmethod
+    def shaders_enumerate():
+        print(Shader.__shader_instances.items())
+        for buffer in Shader.__shader_instances.items():
+            yield buffer[1]
+
+    @staticmethod
+    def shaders_delete():
+        # print(GPUBuffer.__buffer_instances)
+        while len(Shader.__shader_instances) != 0:
+            item = Shader.__shader_instances.popitem()
+            item[1].delete_buffer()
+
     def __init__(self):
+        self.name: str = "default"
         self.__program_id = 0
         self.__vert_id = 0
         self.__frag_id = 0
         self.__shader_uniforms: dict = {}
-        self.__shader_attribs: dict = {}
+        self.__shader_attributes: dict = {}
 
     def __str__(self):
-        res = "Shader     :\n"
-        res += f"program_id :{self.__program_id},\n"
-        res += f"vert_id    :{self.__vert_id},\n"
-        res += f"frag_id    :{self.__frag_id},\n"
-        res += "Attribs   :\n"
-        for key in self.__shader_attribs.keys():
-            res += f"name: {key}, value: {self.__shader_attribs[key]}\n"
-            # res += f"id : {self.__shader_attribs[key][0]}; name : {key}; type {id : {self.__shader_attribs[key][2]}}\n"
-        res += "Uniforms   :\n"
+        res = f"Shader      : 0x{id(self)},\n"
+        res += f"name        : {self.name},\n"
+        res += f"program_id  : {self.__program_id:4},\n"
+        res += f"vert_id     : {self.__vert_id:4},\n"
+        res += f"frag_id     : {self.__frag_id:4},\n"
+        res += "Attributes__________________________________________________________\n"
+        res += f"|{'id':4}|{'name':30}|{'type':30}|\n"
+        for key in self.__shader_attributes.keys():
+            info = self.__shader_attributes[key]
+            res += f"|{info[0]:4}|{key:30}|{ShaderDataTypes(info[2]):30}|\n"
+        res += "____________________________________________________________________\n"
+
+        res += "Uniforms____________________________________________________________\n"
+        res += f"|{'id':4}|{'name':30}|{'type':30}|\n"
         for key in self.__shader_uniforms.keys():
-            res += f"name: {key}, value: {self.__shader_uniforms[key]}\n"
-            # res += f"id : {self.__shader_uniforms[key][0]}; name : {key}; type {id : {self.__shader_uniforms[key][2]}}\n"
+            info = self.__shader_uniforms[key]
+            res += f"|{info[0]:4}|{key:30}|{ShaderDataTypes(info[2]):30}|\n"
+        res += "____________________________________________________________________\n"
         return res
 
-    def __del__(self):
+    def delete_shader(self):
         glDeleteProgram(self.__vert_id)
         glDeleteProgram(self.__frag_id)
         glDeleteProgram(self.__program_id)
+        if self.__program_id in Shader.__shader_instances:
+            del Shader.__shader_instances[self.__program_id]
+        self.__program_id = 0
+        self.__vert_id = 0
+        self.__frag_id = 0
+
+    def __del__(self):
+        self.delete_shader()
 
     @staticmethod
     def default_shader():
         shader = Shader()
         shader.vert_shader(vertex_src, False)
         shader.frag_shader(fragment_src, False)
+        shader.load_defaults_settings()
         return shader
 
     @property
     def attribytes(self):
-        return self.__shader_attribs
+        return self.__shader_attributes
 
     @property
     def uniforms(self):
@@ -109,8 +140,8 @@ class Shader(object):
         return -1
 
     def get_attrib_location(self, attrib_name: str):
-        if attrib_name in self.__shader_attribs:
-            return self.__shader_attribs[attrib_name][0]
+        if attrib_name in self.__shader_attributes:
+            return self.__shader_attributes[attrib_name][0]
         return -1
 
     @staticmethod
@@ -150,11 +181,11 @@ class Shader(object):
     def __get_all_attrib_locations(self):
         count = glGetProgramiv(self.__program_id, GL_ACTIVE_ATTRIBUTES)
         print(f"Active Attributes: {count}\n", )
-        if len(self.__shader_attribs) != 0:
-            self.__shader_attribs.clear()
+        if len(self.__shader_attributes) != 0:
+            self.__shader_attributes.clear()
         for i in range(count):
             name_, size_, type_ = Shader.gl_get_active_attrib(self.__program_id, i)
-            self.__shader_attribs[name_] = (i, size_, type_)
+            self.__shader_attributes[name_] = (i, size_, type_)
 
     def __get_all_uniform_locations(self):
         count = glGetProgramiv(self.__program_id, GL_ACTIVE_UNIFORMS)
@@ -163,11 +194,29 @@ class Shader(object):
             self.__shader_uniforms.clear()
         for i in range(count):
             name_, size_, type_ = Shader.gl_get_active_uniform(self.__program_id, i)
-
             self.__shader_uniforms[name_] = (i, size_, type_)
 
-            if UniformTypes.Matrix4 == type_:
+    def load_defaults_settings(self):
+        for name_ in self.__shader_uniforms:
+            type_ = ShaderDataTypes(self.__shader_uniforms[name_][2])
+            if ShaderDataTypes.Matrix4 == type_:
                 self.send_mat_4(name_, vmath.matrices.identity_4())
+                continue
+            if ShaderDataTypes.Matrix3 == type_:
+                self.send_mat_3(name_, vmath.matrices.identity_3())
+                continue
+            if ShaderDataTypes.Vector3 == type_:
+                self.send_vec_3(name_, Vec3(1, 1, 1))
+                continue
+            if ShaderDataTypes.Vector2 == type_:
+                self.send_vec_2(name_, Vec2(1, 1))
+                continue
+            if ShaderDataTypes.Float == type_:
+                self.send_float(name_, 0.0)
+                continue
+            if ShaderDataTypes.Int == type_:
+                self.send_int(name_, 0)
+                continue
 
     def frag_shader(self, code: str, from_file: bool = True):
         if from_file:
@@ -199,10 +248,12 @@ class Shader(object):
         if self.__frag_id == 0:
             return
         if self.__program_id != 0:
-            glDeleteProgram(self.__program_id)
+            self.delete_shader()
+            # glDeleteProgram(self.__program_id)
         self.__program_id = compileProgram(self.__vert_id, self.__frag_id)
         if self.__program_id == 0:
             raise Exception("Shader program compilation error...")
+        Shader.__shader_instances[self.__program_id] = self
         self.bind()
         self.__get_all_attrib_locations()
         self.__get_all_uniform_locations()

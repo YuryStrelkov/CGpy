@@ -1,6 +1,3 @@
-import time
-
-import vmath.matrices
 from open_gl.gpu_buffer import GPUBuffer
 from open_gl.gl_mesh import MeshGL
 from open_gl.shader import Shader
@@ -10,6 +7,7 @@ import transforms.transform
 from camera import Camera
 from OpenGL.GL import *
 import glfw
+import time
 
 
 class Window(object):
@@ -44,6 +42,7 @@ class Window(object):
         glfw.set_window_pos(self.__window, 400, 200)
         glfw.make_context_current(self.__window)
         self.shader = Shader.default_shader()
+        print(self.shader)
 
     def _on_begin_draw(self):
         glClearColor(125/255, 135/255, 145/255, 1)
@@ -53,21 +52,24 @@ class Window(object):
 
     def _on_draw(self):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-
         for mesh in self.__meshes:
             mesh.draw()
+
+    @property
+    def is_open(self) -> bool:
+        return not glfw.window_should_close(self.__window)
 
     def main_loop(self):
         self._on_begin_draw()
         # t = 0
-
         t = transforms.transform.Transform()
         t.scale = Vec3(0.2, 0.2, 0.2)
         t.z = -30
         # t.ax = 30
         angle = 0
-        while not glfw.window_should_close(self.__window):
-            angle += 0.01
+        dt: float = 0
+        while self.is_open:
+            angle += 1 * dt
             t.angles = Vec3(0, angle, 0)
             if angle >= 360:
                 angle = 0
@@ -76,8 +78,9 @@ class Window(object):
             self.shader.send_mat_4("model", t.transform_matrix, GL_TRUE)
             self._on_draw()
             glfw.swap_buffers(self.__window)
-            # if time.time() - t_ > 1e-6:
-               # print(f"fps : {round(1 / (time.time() - t_))}")
+            dt = time.time() - t_
+            # if dt > 1e-6:
+                # print(f"fps : {round(1 / dt)}")
 
 
 if __name__ == "__main__":

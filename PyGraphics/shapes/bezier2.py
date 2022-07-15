@@ -109,7 +109,7 @@ class BezierPoint2(object):
 
 class BezierCurve2(object):
     def __init__(self):
-        self.__sections_per_seg: int = 32
+        self.__sections_per_seg: int = 8
         self.__points: [BezierPoint2] = []
         self.closed: bool = False
 

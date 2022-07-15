@@ -1,9 +1,9 @@
-import numpy as np
 from OpenGL.GL import *
+import numpy as np
 
 
 class GPUBuffer(object):
-
+    # MAX_BUFFER_AVAILABLE_SIZE: int = ???
     __buffer_instances = {}
 
     @staticmethod
