@@ -1,7 +1,6 @@
+import numpy as np
 import ctypes
 import math
-
-import numpy as np
 
 
 class Vec2(object):
