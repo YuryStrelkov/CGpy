@@ -57,6 +57,7 @@ class ShaderDataTypes(Enum):
 
 
 class Shader(object):
+
     __shader_instances = {}
 
     @staticmethod
@@ -72,48 +73,6 @@ class Shader(object):
             item = Shader.__shader_instances.popitem()
             item[1].delete_buffer()
 
-    def __init__(self):
-        self.name: str = "default"
-        self.__program_id = 0
-        self.__vert_id = 0
-        self.__frag_id = 0
-        self.__shader_uniforms: dict = {}
-        self.__shader_attributes: dict = {}
-
-    def __str__(self):
-        res = f"Shader      : 0x{id(self)},\n"
-        res += f"name        : {self.name},\n"
-        res += f"program_id  : {self.__program_id:4},\n"
-        res += f"vert_id     : {self.__vert_id:4},\n"
-        res += f"frag_id     : {self.__frag_id:4},\n"
-        res += "Attributes__________________________________________________________\n"
-        res += f"|{'id':4}|{'name':30}|{'type':30}|\n"
-        for key in self.__shader_attributes.keys():
-            info = self.__shader_attributes[key]
-            res += f"|{info[0]:4}|{key:30}|{ShaderDataTypes(info[2]):30}|\n"
-        res += "____________________________________________________________________\n"
-
-        res += "Uniforms____________________________________________________________\n"
-        res += f"|{'id':4}|{'name':30}|{'type':30}|\n"
-        for key in self.__shader_uniforms.keys():
-            info = self.__shader_uniforms[key]
-            res += f"|{info[0]:4}|{key:30}|{ShaderDataTypes(info[2]):30}|\n"
-        res += "____________________________________________________________________\n"
-        return res
-
-    def delete_shader(self):
-        glDeleteProgram(self.__vert_id)
-        glDeleteProgram(self.__frag_id)
-        glDeleteProgram(self.__program_id)
-        if self.__program_id in Shader.__shader_instances:
-            del Shader.__shader_instances[self.__program_id]
-        self.__program_id = 0
-        self.__vert_id = 0
-        self.__frag_id = 0
-
-    def __del__(self):
-        self.delete_shader()
-
     @staticmethod
     def default_shader():
         shader = Shader()
@@ -121,28 +80,6 @@ class Shader(object):
         shader.frag_shader(fragment_src, False)
         shader.load_defaults_settings()
         return shader
-
-    @property
-    def attribytes(self):
-        return self.__shader_attributes
-
-    @property
-    def uniforms(self):
-        return self.__shader_uniforms
-
-    @property
-    def program_id(self):
-        return self.__program_id
-
-    def get_uniform_location(self, uniform_name: str):
-        if uniform_name in self.__shader_uniforms:
-            return self.__shader_uniforms[uniform_name][0]
-        return -1
-
-    def get_attrib_location(self, attrib_name: str):
-        if attrib_name in self.__shader_attributes:
-            return self.__shader_attributes[attrib_name][0]
-        return -1
 
     @staticmethod
     def __read_all_code(code_src: str) -> str:
@@ -177,6 +114,70 @@ class Shader(object):
         glGetActiveUniform(program, index, buf_size, length, size, attrib_type, attrib_name)
         attrib_name = attrib_name[:length[0]].decode('utf-8')
         return attrib_name, size[0], attrib_type[0]
+
+    def __init__(self):
+        self.name: str = "default"
+        self.__program_id = 0
+        self.__vert_id = 0
+        self.__frag_id = 0
+        self.__shader_uniforms: dict = {}
+        self.__shader_attributes: dict = {}
+
+    def __str__(self):
+        res = f"Shader      : 0x{id(self)},\n"
+        res += f"name        : {self.name},\n"
+        res += f"program_id  : {self.__program_id:4},\n"
+        res += f"vert_id     : {self.__vert_id:4},\n"
+        res += f"frag_id     : {self.__frag_id:4},\n"
+        res += "Attributes__________________________________________________________\n"
+        res += f"|{'id':4}|{'name':30}|{'type':30}|\n"
+        for key in self.__shader_attributes.keys():
+            info = self.__shader_attributes[key]
+            res += f"|{info[0]:4}|{key:30}|{ShaderDataTypes(info[2]):30}|\n"
+        res += "____________________________________________________________________\n"
+
+        res += "Uniforms____________________________________________________________\n"
+        res += f"|{'id':4}|{'name':30}|{'type':30}|\n"
+        for key in self.__shader_uniforms.keys():
+            info = self.__shader_uniforms[key]
+            res += f"|{info[0]:4}|{key:30}|{ShaderDataTypes(info[2]):30}|\n"
+        res += "____________________________________________________________________\n"
+        return res
+
+    def __del__(self):
+        self.delete_shader()
+
+    def delete_shader(self):
+        glDeleteProgram(self.__vert_id)
+        glDeleteProgram(self.__frag_id)
+        glDeleteProgram(self.__program_id)
+        if self.__program_id in Shader.__shader_instances:
+            del Shader.__shader_instances[self.__program_id]
+        self.__program_id = 0
+        self.__vert_id = 0
+        self.__frag_id = 0
+
+    @property
+    def attribytes(self):
+        return self.__shader_attributes
+
+    @property
+    def uniforms(self):
+        return self.__shader_uniforms
+
+    @property
+    def program_id(self):
+        return self.__program_id
+
+    def get_uniform_location(self, uniform_name: str):
+        if uniform_name in self.__shader_uniforms:
+            return self.__shader_uniforms[uniform_name][0]
+        return -1
+
+    def get_attrib_location(self, attrib_name: str):
+        if attrib_name in self.__shader_attributes:
+            return self.__shader_attributes[attrib_name][0]
+        return -1
 
     def __get_all_attrib_locations(self):
         count = glGetProgramiv(self.__program_id, GL_ACTIVE_ATTRIBUTES)
@@ -249,7 +250,6 @@ class Shader(object):
             return
         if self.__program_id != 0:
             self.delete_shader()
-            # glDeleteProgram(self.__program_id)
         self.__program_id = compileProgram(self.__vert_id, self.__frag_id)
         if self.__program_id == 0:
             raise Exception("Shader program compilation error...")
