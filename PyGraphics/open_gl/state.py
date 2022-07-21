@@ -6,6 +6,10 @@ def set_bit(bytes_: np.uint8, bit_: int) -> np.uint8:
     return bytes_
 
 
+def is_bit_set(bytes_: np.uint8, bit_: int) -> bool:
+    return (bytes_ & (1 << bit_)) != 0
+
+
 def inverse_bit(bytes_: np.uint8, bit_: int) -> np.uint8:
     bytes_ ^= (1 << bit_)
     return bytes_
@@ -14,10 +18,6 @@ def inverse_bit(bytes_: np.uint8, bit_: int) -> np.uint8:
 def clear_bit(bytes_: np.uint8, bit_: int) -> np.uint8:
     bytes_ &= ~(1 << bit_)
     return bytes_
-
-
-def is_bit_set(bytes_: np.uint8, bit_: int) -> bool:
-    return (bytes_ & (1 << bit_)) != 0
 
 
 class State:
