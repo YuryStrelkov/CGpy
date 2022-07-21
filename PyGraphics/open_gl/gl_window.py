@@ -1,6 +1,7 @@
 from open_gl.gpu_buffer import GPUBuffer
 from open_gl.gl_mesh import MeshGL
 from open_gl.shader import Shader
+from surfaces.patch import CubicPatch
 from vmath.vectors import Vec3
 from models import tris_mesh
 import transforms.transform
@@ -63,8 +64,9 @@ class Window(object):
         self._on_begin_draw()
         # t = 0
         t = transforms.transform.Transform()
-        t.scale = Vec3(0.2, 0.2, 0.2)
+        t.scale = Vec3(20., 20., 20.)
         t.z = -30
+        t.y = -10
         # t.ax = 30
         angle = 0
         dt: float = 0
@@ -87,7 +89,9 @@ if __name__ == "__main__":
     w = Window()
     meshes = tris_mesh.read_obj_mesh("E:/GitHub/CGpy/PyGraphics/resources/fox.obj")
     gl_mesh = MeshGL()
-    gl_mesh.mesh = meshes[0]
+    patch: CubicPatch = CubicPatch()
+
+    gl_mesh.mesh = patch.patch_mesh  # meshes[0]
     # print(gl_mesh)
     w.register_mesh(gl_mesh)
     cam = Camera()
@@ -97,12 +101,10 @@ if __name__ == "__main__":
     # 0.000000    0.000000  - 1.000200  - 1.000000
     # 0.000000    0.000000  - 0.200020    0.000000
     t = transforms.transform.Transform()
-    t.scale = Vec3(0.2, 0.2, 0.2)
-    t.origin = Vec3(0, 0.25, 1)
-    t.look_at(Vec3(0, 0, 0), t.origin)
-    t.up *= -1
+    t.origin = Vec3(0,  5, -20)
+    cam.look_at(Vec3(0, 0, 0), t.origin)
     print(t)
     # w.shader.send_mat_4("model",      t.transform_matrix,          GL_TRUE)
-    w.shader.send_mat_4("view",       t.transform_matrix, GL_TRUE)
+    w.shader.send_mat_4("view",       cam.transform.transform_matrix, GL_TRUE)
     w.shader.send_mat_4("projection", cam.projection)
     w.main_loop()

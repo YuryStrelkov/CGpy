@@ -21,7 +21,8 @@ out vec2 v_texture;
 void main()
 {
     gl_Position = projection * view * model * vec4(a_position, 1.0);
-    v_normal    = normalize((model * vec4(a_normal, 0.0)).xyz);
+    // v_normal    = normalize((model * vec4(a_normal, 0.0)).xyz);
+    v_normal    = normalize((vec4(a_normal, 0.0)).xyz);
     v_texture   = a_texture;
 }
 
@@ -37,9 +38,9 @@ uniform vec3 specular_color;
 
 void main()
 {   
-    float amount = 0.1 + (dot(-v_normal, vec3(0.333, 0.333,-0.333))) ;
+    float amount =  (dot(-v_normal, vec3(0.333, 0.333, 0.333))) ;
     //  out_color = vec4(v_texture.x, v_texture.y, 1, 1);
-    out_color = vec4(diffuse_color * specular_color * amount, 1);
+    out_color = vec4(0.2 + diffuse_color * specular_color * amount, 1);
 }
 """
 
@@ -134,9 +135,9 @@ class Shader(object):
         for key in self.__shader_attributes.keys():
             info = self.__shader_attributes[key]
             res += f"|{info[0]:4}|{key:30}|{ShaderDataTypes(info[2]):30}|\n"
-        res += "____________________________________________________________________\n"
+      #  res += "____________________________________________________________________\n"
 
-        res += "Uniforms____________________________________________________________\n"
+        res += "Uniforms___________________________________________________________|\n"
         res += f"|{'id':4}|{'name':30}|{'type':30}|\n"
         for key in self.__shader_uniforms.keys():
             info = self.__shader_uniforms[key]

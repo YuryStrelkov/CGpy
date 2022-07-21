@@ -88,7 +88,7 @@ class CubicPatch(object):
         self.__width_points = 64
         self.__height_points = 64
         self.__transform: Transform = Transform()
-        self.__mesh: TrisMesh = trisMesh.create_plane(1.0, 1.0, self.__height_points, self.__width_points)
+        self.__mesh: TrisMesh = tris_mesh.create_plane(1.0, 1.0, self.__height_points, self.__width_points)
         self.__controllers: [Vec3] = \
             [Vec3(-0.5, 0,   -0.5),    Vec3(-0.1666, 0.1, -0.5),    Vec3(0.1666, 0.1, -0.5),    Vec3(0.5, 0,   -0.5),
              Vec3(-0.5, 0.1, -0.1666), Vec3(-0.1666, 1,   -0.1666), Vec3(0.1666, 1,   -0.1666), Vec3(0.5, 0.1, -0.1666),
@@ -117,6 +117,10 @@ class CubicPatch(object):
     def __update_control_point(self, control_point_id, pos: Vec3) -> None:
         self.__controllers[control_point_id] = pos
         self.__update_mesh()
+
+    @property
+    def patch_mesh(self) -> TrisMesh:
+        return self.__mesh
 
     @property
     def control_points(self) -> [Vec3]:

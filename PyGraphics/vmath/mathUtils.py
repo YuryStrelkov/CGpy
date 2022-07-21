@@ -60,16 +60,15 @@ def rot_m_to_euler_angles(rot: Mat4) -> Vec3:
     return Vec3(x2, y2, z2)
 
 
-def look_at(target: Vec3, eye: Vec3, up: Vec3 = Vec3(0, 1, 0)) -> Mat4:
+def look_at(target: Vec3, eye: Vec3, up: Vec3 = Vec3(0, -1, 0)) -> Mat4:
     zaxis = target - eye  # The "forward" vector.
     zaxis.normalize()
-    xaxis = vectors.cross(up, zaxis)  # The "right" vector.
+    xaxis = vectors.cross(zaxis, up)  # The "right" vector.
     xaxis.normalize()
-    yaxis = vectors.cross(zaxis, xaxis)  # The "up" vector.
-
-    return Mat4(xaxis.x, -yaxis.x, zaxis.x, eye.x,
-                -xaxis.y, -yaxis.y, zaxis.y, eye.y,
-                xaxis.z, -yaxis.z, zaxis.z, eye.z,
+    yaxis = vectors.cross(xaxis, zaxis)  # The "up" vector.
+    return Mat4(xaxis.x,  yaxis.x, zaxis.x, eye.x,
+                xaxis.y,  yaxis.y, zaxis.y, eye.y,
+                xaxis.z,  yaxis.z, zaxis.z, eye.z,
                 0, 0, 0, 1)
 
 
