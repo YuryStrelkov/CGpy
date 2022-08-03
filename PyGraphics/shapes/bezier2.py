@@ -2,12 +2,14 @@ from vmath import mathUtils
 from vmath.mathUtils import Vec2
 
 
-def bezier_2_quadratic(p1: Vec2, p2: Vec2, p3: Vec2, t: float) -> Vec2:
-    return mathUtils.lerp_vec_2(mathUtils.lerp_vec_2(p1, p2, t), mathUtils.lerp_vec_2(p2, p3, t), t)
-
-
 def bezier_2_cubic(p1: Vec2, p2: Vec2, p3: Vec2, p4: Vec2, t: float) -> Vec2:
-    return mathUtils.lerp_vec_2(bezier_2_quadratic(p1, p2, p3, t), bezier_2_quadratic(p2, p3, p4, t), t)
+    one_min_t: float = 1.0 - t
+    a: float = one_min_t * one_min_t * one_min_t
+    b: float = 3.0 * one_min_t * one_min_t * t
+    c: float = 3.0 * one_min_t * t * t
+    d: float = t * t * t
+    return Vec2(p1.x * a + p2.x * b + p3.x * c + p4.x * d,
+                p1.y * a + p2.y * b + p3.y * c + p4.y * d)
 
 
 def bezier_2_tangent(p1: Vec2, p2: Vec2, p3: Vec2, p4: Vec2, t: float) -> Vec2:

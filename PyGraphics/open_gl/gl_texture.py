@@ -82,11 +82,11 @@ class TextureGL(Texture):
         if self.__id == 0:
             self.__create()
         else:
-            self.delete()
+            self.delete_texture()
             self.__create()
 
         if self.texture_byte_size == 0:
-            self.delete()
+            self.delete_texture()
             return
 
         self.bind()
