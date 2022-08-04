@@ -88,10 +88,9 @@ class Window(object):
 if __name__ == "__main__":
     w = Window()
     meshes = tris_mesh.read_obj_mesh("E:/GitHub/CGpy/PyGraphics/resources/fox.obj")
-    gl_mesh = MeshGL()
     patch: CubicPatch = CubicPatch()
 
-    gl_mesh.mesh = patch.patch_mesh  # meshes[0]
+    gl_mesh = MeshGL(patch.patch_mesh)
     # print(gl_mesh)
     w.register_mesh(gl_mesh)
     cam = Camera()
