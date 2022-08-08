@@ -5,9 +5,9 @@ from vmath.vectors import Vec2
 
 class Transform2(object):
     def __init__(self):
-        self.transformM = Mat3(1.0, 0.0, 0.0,
-                               0.0, 1.0, 0.0,
-                               0.0, 0.0, 1.0)
+        self.__transform_m = Mat3(1.0, 0.0, 0.0,
+                                  0.0, 1.0, 0.0,
+                                  0.0, 0.0, 1.0)
         self.zAngle = 0.0
 
     def __repr__(self) -> str:
@@ -15,7 +15,7 @@ class Transform2(object):
         res += f"origin   :{self.origin}\n"
         res += f"scale    :{self.scale}\n"
         res += f"rotate   :{self.zAngle}\n"
-        res += f"t-matrix :\n{self.transformM}\n"
+        res += f"t-matrix :\n{self.__transform_m}\n"
         res += ">"
         return res
 
@@ -24,26 +24,30 @@ class Transform2(object):
         res += f"origin   :{self.origin}\n"
         res += f"scale    :{self.scale}\n"
         res += f"rotate   :{self.zAngle}\n"
-        res += f"t-matrix :\n{self.transformM}\n"
+        res += f"t-matrix :\n{self.__transform_m}\n"
         return res
 
     def __eq__(self, other) -> bool:
         if not(type(other) is Transform2):
             return False
-        if not(self.transformM == other.__m_transform):
+        if not(self.__transform_m == other.__m_transform):
             return False
         return True
 
     def __hash__(self) -> int:
-        return hash(self.transformM)
+        return hash(self.__transform_m)
+
+    @property
+    def transform_matrix(self) -> Mat3:
+        return self.__transform_m
 
     @property
     def front(self) -> Vec2:
-        return Vec2(self.transformM.m00, self.transformM.m10).normalize()
+        return Vec2(self.__transform_m.m00, self.__transform_m.m10).normalize()
 
     @property
     def up(self) -> Vec2:
-        return Vec2(self.transformM.m01, self.transformM.m11).normalize()
+        return Vec2(self.__transform_m.m01, self.__transform_m.m11).normalize()
 
     @property
     def scale(self) -> Vec2:
@@ -52,15 +56,15 @@ class Transform2(object):
     # масштаб по Х
     @property
     def sx(self) -> float:
-        x = self.transformM.m00
-        y = self.transformM.m10
+        x = self.__transform_m.m00
+        y = self.__transform_m.m10
         return math.sqrt(x * x + y * y)
 
     # масштаб по Y
     @property
     def sy(self) -> float:
-        x = self.transformM.m01
-        y = self.transformM.m11
+        x = self.__transform_m.m01
+        y = self.__transform_m.m11
         return math.sqrt(x * x + y * y)
         # установить масштаб по Х
 
@@ -69,8 +73,8 @@ class Transform2(object):
         if s_x == 0:
             return
         scl = self.sx
-        self.transformM.m00 *= s_x / scl
-        self.transformM.m10 *= s_x / scl
+        self.__transform_m.m00 *= s_x / scl
+        self.__transform_m.m10 *= s_x / scl
 
     # установить масштаб по Y
     @sy.setter
@@ -78,8 +82,8 @@ class Transform2(object):
         if s_y == 0:
             return
         scl = self.sy
-        self.transformM.m01 *= s_y / scl
-        self.transformM.m11 *= s_y / scl
+        self.__transform_m.m01 *= s_y / scl
+        self.__transform_m.m11 *= s_y / scl
 
     @scale.setter
     def scale(self, sxy: Vec2):
@@ -88,11 +92,11 @@ class Transform2(object):
 
     @property
     def x(self) -> float:
-        return self.transformM.m02
+        return self.__transform_m.m02
 
     @property
     def y(self) -> float:
-        return self.transformM.m12
+        return self.__transform_m.m12
 
     @property
     def origin(self) -> Vec2:
@@ -100,11 +104,11 @@ class Transform2(object):
 
     @x.setter
     def x(self, x: float):
-        self.transformM.m02 = x
+        self.__transform_m.m02 = x
 
     @y.setter
     def y(self, y: float):
-        self.transformM.m12 = y
+        self.__transform_m.m12 = y
 
     @origin.setter
     def origin(self, xy: Vec2):
@@ -127,26 +131,26 @@ class Transform2(object):
                   0, 0, 1)
         scl = self.scale
         orig = self.origin
-        self.transformM = rz
+        self.__transform_m = rz
         self.scale = scl
         self.origin = orig
 
     # переводит вектор в собственное пространство координат
     def transform_vect(self, vec: Vec2, w) -> Vec2:
         if w == 0:
-            return Vec2(self.transformM.m00 * vec.x + self.transformM.m01 * vec.y,
-                        self.transformM.m10 * vec.x + self.transformM.m11 * vec.y)
+            return Vec2(self.__transform_m.m00 * vec.x + self.__transform_m.m01 * vec.y,
+                        self.__transform_m.m10 * vec.x + self.__transform_m.m11 * vec.y)
 
-        return Vec2(self.transformM.m00 * vec.x + self.transformM.m01 * vec.y + self.transformM.m02,
-                    self.transformM.m10 * vec.x + self.transformM.m11 * vec.y + self.transformM.m12)
+        return Vec2(self.__transform_m.m00 * vec.x + self.__transform_m.m01 * vec.y + self.__transform_m.m02,
+                    self.__transform_m.m10 * vec.x + self.__transform_m.m11 * vec.y + self.__transform_m.m12)
 
     # не переводит вектор в собственное пространство координат =)
     def inv_transform_vect(self, vec: Vec2, w) -> Vec2:
         scl: Vec2 = self.scale
         if w == 0:
-            return Vec2((self.transformM.m00 * vec.x + self.transformM.m10 * vec.y) / scl.x / scl.x,
-                        (self.transformM.m01 * vec.x + self.transformM.m11 * vec.y) / scl.y / scl.y)
+            return Vec2((self.__transform_m.m00 * vec.x + self.__transform_m.m10 * vec.y) / scl.x / scl.x,
+                        (self.__transform_m.m01 * vec.x + self.__transform_m.m11 * vec.y) / scl.y / scl.y)
 
         vec_ = Vec2(vec.x - self.x, vec.y - self.y)
-        return Vec2((self.transformM.m00 * vec_.x + self.transformM.m10 * vec_.y) / scl.x / scl.x,
-                    (self.transformM.m01 * vec_.x + self.transformM.m11 * vec_.y) / scl.y / scl.y)
+        return Vec2((self.__transform_m.m00 * vec_.x + self.__transform_m.m10 * vec_.y) / scl.x / scl.x,
+                    (self.__transform_m.m01 * vec_.x + self.__transform_m.m11 * vec_.y) / scl.y / scl.y)
