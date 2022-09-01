@@ -1,10 +1,40 @@
-from vmath.mathUtils import Vec3, Vec2
 from models.triangle import Triangle
+from transforms.transform import Transform
+from vmath.math_utils import Vec3, Vec2
 import numpy as np
 import re
 
 
 class Face:
+
+    __slots__ = "__p_1", "__p_2", "__p_3", "__uv1", "__uv2", "__uv3", "__n_1", "__n_2", "__n_3"
+
+    def __init__(self):
+        self.__p_1: int = -1
+        self.__uv1: int = -1
+        self.__n_1: int = -1
+        self.__p_2: int = -1
+        self.__uv2: int = -1
+        self.__n_2: int = -1
+        self.__p_3: int = -1
+        self.__uv3: int = -1
+        self.__n_3: int = -1
+
+    def __repr__(self):
+        res: str = "<face "
+        res += "%s/%s/%s" % (self.__p_1, self.__uv1, self.__n_1)
+        res += "%s/%s/%s" % (self.__p_2, self.__uv2, self.__n_2)
+        res += "%s/%s/%s" % (self.__p_3, self.__uv3, self.__n_3)
+        res += ">"
+        return res
+
+    def __str__(self):
+        res: str = "f ["
+        res += "%s/%s/%s " % (self.__p_1, self.__uv1, self.__n_1)
+        res += "%s/%s/%s " % (self.__p_2, self.__uv2, self.__n_2)
+        res += "%s/%s/%s]" % (self.__p_3, self.__uv3, self.__n_3)
+        return res
+
     @property
     def points(self):
         yield self.pt_1
@@ -12,60 +42,109 @@ class Face:
         yield self.pt_3
 
     @property
-    def pt_1(self):
-        return self.p_1, self.n_1, self.uv1
+    def pt_1(self) -> (int, int, int):
+        return self.__p_1, self.__n_1, self.__uv1
 
     @property
-    def pt_2(self):
-        return self.p_2, self.n_2, self.uv2
+    def pt_2(self) -> (int, int, int):
+        return self.__p_2, self.__n_2, self.__uv2
 
     @property
-    def pt_3(self):
-        return self.p_3, self.n_3, self.uv3
+    def pt_3(self) -> (int, int, int):
+        return self.__p_3, self.__n_3, self.__uv3
 
-    def index1(self, index):
-        self.p_1: int = index
-        self.uv1: int = index
-        self.n_1: int = index
+    @property
+    def p_1(self) -> int:
+        return self.__p_1
 
-    def index2(self, index):
-        self.p_2: int = index
-        self.uv2: int = index
-        self.n_2: int = index
+    @p_1.setter
+    def p_1(self, val: int) -> None:
+        self.__p_1 = max(0, val)
 
-    def index3(self, index):
-        self.p_3: int = index
-        self.uv3: int = index
-        self.n_3: int = index
+    @property
+    def n_1(self) -> int:
+        return self.__n_1
 
-    def __init__(self):
-        self.p_1: int = -1
-        self.uv1: int = -1
-        self.n_1: int = -1
-        self.p_2: int = -1
-        self.uv2: int = -1
-        self.n_2: int = -1
-        self.p_3: int = -1
-        self.uv3: int = -1
-        self.n_3: int = -1
+    @n_1.setter
+    def n_1(self, val: int) -> None:
+        self.__n_1 = max(0, val)
 
-    def __repr__(self):
-        res: str = "<face "
-        res += "%s/%s/%s" % (self.p_1, self.uv1, self.n_1)
-        res += "%s/%s/%s" % (self.p_2, self.uv2, self.n_2)
-        res += "%s/%s/%s" % (self.p_3, self.uv3, self.n_3)
-        res += ">"
-        return res
+    @property
+    def uv1(self) -> int:
+        return self.__uv1
 
-    def __str__(self):
-        res: str = "f ["
-        res += "%s/%s/%s " % (self.p_1, self.uv1, self.n_1)
-        res += "%s/%s/%s " % (self.p_2, self.uv2, self.n_2)
-        res += "%s/%s/%s]" % (self.p_3, self.uv3, self.n_3)
-        return res
+    @uv1.setter
+    def uv1(self, val: int) -> None:
+        self.__uv1 = max(0, val)
+
+    @property
+    def p_2(self) -> int:
+        return self.__p_2
+
+    @p_2.setter
+    def p_2(self, val: int) -> None:
+        self.__p_2 = max(0, val)
+
+    @property
+    def n_2(self) -> int:
+        return self.__n_2
+
+    @n_2.setter
+    def n_2(self, val: int) -> None:
+        self.__n_2 = max(0, val)
+
+    @property
+    def uv2(self) -> int:
+        return self.__uv2
+
+    @uv2.setter
+    def uv2(self, val: int) -> None:
+        self.__uv2 = max(0, val)
+
+    @property
+    def p_3(self) -> int:
+        return self.__p_3
+
+    @p_3.setter
+    def p_3(self, val: int) -> None:
+        self.__p_3 = max(0, val)
+
+    @property
+    def n_3(self) -> int:
+        return self.__n_3
+
+    @n_3.setter
+    def n_3(self, val: int) -> None:
+        self.__n_3 = max(0, val)
+
+    @property
+    def uv3(self) -> int:
+        return self.__uv3
+
+    @uv3.setter
+    def uv3(self, val: int) -> None:
+        self.__uv3 = max(0, val)
+
+    def index1(self, index) -> None:
+        self.__p_1: int = index
+        self.__uv1: int = index
+        self.__n_1: int = index
+
+    def index2(self, index) -> None:
+        self.__p_2: int = index
+        self.__uv2: int = index
+        self.__n_2: int = index
+
+    def index3(self, index) -> None:
+        self.__p_3: int = index
+        self.__uv3: int = index
+        self.__n_3: int = index
 
 
 class BoundingBox(object):
+
+    __slots__ = "__max", "__min"
+
     def __init__(self):
         self.__max: Vec3 = Vec3(-1e12, -1e12, -1e12)
         self.__min: Vec3 = Vec3(1e12, 1e12, 1e12)
@@ -103,6 +182,8 @@ class BoundingBox(object):
 
 
 class TrisMesh(object):
+
+    __slots__ = "name", "_vertices", "_normals", "_uvs", "_faces", "_bbox"
 
     def __init__(self):
         self.name: str = ""
@@ -147,31 +228,6 @@ class TrisMesh(object):
         res += "\n>"
         return res
 
-    def __iter__(self):
-        if len(self._faces) == 0:
-            raise StopIteration
-        self._iter_face_i: int = -1
-        return self
-
-    def __next__(self) -> Triangle:
-
-        self.__iter_face_i += 1
-
-        if self.__iter_face_i >= len(self._faces):
-            self.__iter_face_i = -1
-            raise StopIteration
-
-        f: Face = self._faces[self.__iter_face_i]
-        try:
-            return Triangle(self._vertices[f.p_1], self._vertices[f.p_2], self._vertices[f.p_3],
-                            self._normals[f.n_1], self._normals[f.n_2], self._normals[f.n_3],
-                            self._uvs[f.uv1], self._uvs[f.uv2], self._uvs[f.uv3])
-        except IndexError:
-            print("bad  triangle info \n")
-            print("n_points = %s, n_normals = %s, n_uvs = %s " % (str(self.vertices_count), str(self.normals_count),
-                                                                  str(self.uvs_count)))
-            print(f)
-
     @property
     def vertex_array_data(self) -> np.ndarray:
         size_ = self.vertices_count * 8
@@ -215,31 +271,20 @@ class TrisMesh(object):
         return i_data
 
     @property
-    def vertices(self):
+    def vertices(self) -> [Vec3]:
         return self._vertices
 
     @property
-    def normals(self):
+    def normals(self) -> [Vec3]:
         return self._normals
 
     @property
-    def uvs(self):
+    def uvs(self) -> [Vec2]:
         return self._uvs
 
     @property
-    def faces(self):
+    def faces(self) -> [Face]:
         return self._faces
-
-    def get_triangle(self, tris_id: int):
-
-        if len(self._faces) <= tris_id or tris_id < 0:
-            raise IndexError(f"no face with index %s in mesh %s " % (str(tris_id), self.name))
-
-        f: Face = self._faces[tris_id]
-
-        return Triangle(self._vertices[f.p_1], self._vertices[f.p_2], self._vertices[f.p_3],
-                        self._normals[f.n_1], self._normals[f.n_2], self._normals[f.n_3],
-                        self._uvs[f.uv1], self._uvs[f.uv2], self._uvs[f.uv3])
 
     def set_vertex(self, i_id: int, v: Vec3) -> None:
         if i_id < 0:
@@ -296,7 +341,7 @@ class TrisMesh(object):
     def append_face(self, f: Face) -> None:
         self._faces.append(f)
 
-    def clean_up(self):
+    def clean_up(self) -> None:
         if len(self._vertices) == 0:
             return
         del self._uvs
@@ -308,6 +353,24 @@ class TrisMesh(object):
         self._vertices: [Vec3] = []
         self._normals: [Vec3] = []
         self._faces: [Face] = []
+
+    def transform_mesh(self, transform: Transform = None) -> None:
+        for i in range(len(self._vertices)):
+            self._vertices[i] = transform.transform_vect(self._vertices[i], 1.0)
+
+        for i in range(len(self._normals)):
+            self._normals[i] = transform.transform_vect(self._normals[i], 0.0)
+
+    def get_triangle(self, tris_id: int) -> Triangle:
+
+        if len(self._faces) <= tris_id or tris_id < 0:
+            raise IndexError(f"no face with index %s in mesh %s " % (str(tris_id), self.name))
+
+        f: Face = self._faces[tris_id]
+
+        return Triangle(self._vertices[f.p_1], self._vertices[f.p_2], self._vertices[f.p_3],
+                        self._normals[f.n_1], self._normals[f.n_2], self._normals[f.n_3],
+                        self._uvs[f.uv1], self._uvs[f.uv2], self._uvs[f.uv3])
 
 
 def read_obj_mesh(path: str) -> [TrisMesh]:
@@ -403,7 +466,8 @@ def read_obj_mesh(path: str) -> [TrisMesh]:
         return []
 
 
-def create_plane(height: float = 1.0, width: float = 1.0, rows: int = 10, cols: int = 10) -> TrisMesh:
+def create_plane(height: float = 1.0, width: float = 1.0, rows: int = 10,
+                 cols: int = 10, transform: Transform = None) -> TrisMesh:
     if rows < 2:
         rows = 2
     if cols < 2:
@@ -419,7 +483,7 @@ def create_plane(height: float = 1.0, width: float = 1.0, rows: int = 10, cols: 
         x = width * ((cols - 1) / 2.0 - col) / (cols - 1.0)
         z = height * ((cols - 1) / 2.0 - row) / (cols - 1.0)
         mesh.append_vertex(Vec3(x, 0, z))
-        mesh.append_uv(Vec2(col * 1.0 / cols, row * 1.0 / cols))
+        mesh.append_uv(Vec2(1.0 - col * 1.0 / (cols - 1), row * 1.0 / (cols - 1)))
         mesh.append_normal(normal)
         if (index + 1) % cols == 0:
             continue  # пропускаем последю
@@ -435,4 +499,8 @@ def create_plane(height: float = 1.0, width: float = 1.0, rows: int = 10, cols: 
         f.index2(index + 1)
         f.index3(index + cols + 1)
         mesh.append_face(f)
+    if transform is not None:
+        mesh.transform_mesh(transform)
+
     return mesh
+

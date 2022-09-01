@@ -1,9 +1,8 @@
 import numpy as np
 
-from vmath import str_utils as su
-
 
 class Mat3(object):
+
     @staticmethod
     def __unpack_values(*args) -> tuple:
         args = args[0]
@@ -45,6 +44,10 @@ class Mat3(object):
             if i == 9:
                 break
         return m
+
+    @property
+    def unique_id(self) -> int:
+        return id(self)
 
     @property
     def as_array(self):
@@ -151,6 +154,8 @@ class Mat3(object):
                        (self.m20 * self.m01 - self.m00 * self.m21) * det,
                        (self.m00 * self.m11 - self.m10 * self.m01) * det]
         return self
+
+    __slots__ = "__data"
 
     def __init__(self,
                  m0: float = 0, m1: float = 0, m2: float = 0,
@@ -337,16 +342,6 @@ class Mat4(object):
 
         raise TypeError(f'Invalid Input: {args}')
 
-    def __init__(self,
-                 m0: float = 0, m1: float = 0, m2: float = 0, m3: float = 0,
-                 m4: float = 0, m5: float = 0, m6: float = 0, m7: float = 0,
-                 m8: float = 0, m9: float = 0, m10: float = 0, m11: float = 0,
-                 m12: float = 0, m13: float = 0, m14: float = 0, m15: float = 0):
-        self.__data: [float] = [m0, m1, m2, m3,
-                                m4, m5, m6, m7,
-                                m8, m9, m10, m11,
-                                m12, m13, m14, m15]
-
     @staticmethod
     def from_np_array(data: np.ndarray):
         m = Mat4()
@@ -362,7 +357,10 @@ class Mat4(object):
     def as_array(self):
         return self.__data
 
-    # row 1 set/get
+    @property
+    def unique_id(self) -> int:
+        return id(self)
+
     @property
     def np_array(self) -> np.ndarray:
         return np.array(self.__data, dtype=np.float32)
@@ -551,6 +549,18 @@ class Mat4(object):
                              det * -(self.m00 * A1213 - self.m01 * A0213 + self.m02 * A0113),
                              det * (self.m00 * A1212 - self.m01 * A0212 + self.m02 * A0112)]
         return self
+
+    __slots__ = "__data"
+
+    def __init__(self,
+                 m0: float = 0, m1: float = 0, m2: float = 0, m3: float = 0,
+                 m4: float = 0, m5: float = 0, m6: float = 0, m7: float = 0,
+                 m8: float = 0, m9: float = 0, m10: float = 0, m11: float = 0,
+                 m12: float = 0, m13: float = 0, m14: float = 0, m15: float = 0):
+        self.__data: [float] = [m0, m1, m2, m3,
+                                m4, m5, m6, m7,
+                                m8, m9, m10, m11,
+                                m12, m13, m14, m15]
 
     def __eq__(self, other) -> bool:
         if not isinstance(other, Mat4):

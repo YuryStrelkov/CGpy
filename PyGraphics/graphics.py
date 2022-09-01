@@ -3,9 +3,9 @@ import numpy as np
 from models.model import Model
 from models.vertex import Vertex, lerp_vertex
 from surfaces.patch import CubicPatch
-from vmath import mathUtils
+from vmath import math_utils
 from shapes.bezier2 import BezierCurve2
-from vmath.mathUtils import Vec2, Vec3
+from vmath.math_utils import Vec2, Vec3
 from materials.material import Material
 from camera import Camera
 from frameBuffer import FrameBuffer
@@ -143,14 +143,14 @@ def draw_point(buffer: FrameBuffer, x: int, y: int, color: RGB = RGB(np.uint8(25
 
 
 def point_to_scr_space(buffer: FrameBuffer, pt: Vec3) -> Vec3:
-    return Vec3(round(mathUtils.clamp(0, buffer.width - 1, round(buffer.width * (pt.x * 0.5 + 0.5)))),
-                round(mathUtils.clamp(0, buffer.height - 1, round(buffer.height * (-pt.y * 0.5 + 0.5)))),
+    return Vec3(round(math_utils.clamp(0, buffer.width - 1, round(buffer.width * (pt.x * 0.5 + 0.5)))),
+                round(math_utils.clamp(0, buffer.height - 1, round(buffer.height * (-pt.y * 0.5 + 0.5)))),
                 pt.z)
 
 
 def point_to_scr_space_2(buffer: FrameBuffer, pt: Vec2) -> Vec2:
-    return Vec2(round(mathUtils.clamp(0, buffer.width - 1, round(buffer.width * (pt.x * 0.5 + 0.5)))),
-                round(mathUtils.clamp(0, buffer.height - 1, round(buffer.height * (-pt.y * 0.5 + 0.5)))))
+    return Vec2(round(math_utils.clamp(0, buffer.width - 1, round(buffer.width * (pt.x * 0.5 + 0.5)))),
+                round(math_utils.clamp(0, buffer.height - 1, round(buffer.height * (-pt.y * 0.5 + 0.5)))))
 
 
 # отрисовка одноцветного треугольника(интерполируется только глубина)
@@ -207,7 +207,7 @@ def draw_triangle_solid(buffer: FrameBuffer, p0: Vertex, p1: Vertex, p2: Vertex,
             p: Vertex = lerp_vertex(a, b, phi)
             zx, xy = round(p.v.x), round(p.v.y)
             if buffer.set_depth(zx, xy, p.v.z):
-                col_shading: float = mathUtils.clamp(0.0, 1.0, mathUtils.vectors.dot3(p.n, Vec3(0.333, 0.333, 0.333)))
+                col_shading: float = math_utils.clamp(0.0, 1.0, math_utils.vectors.dot3(p.n, Vec3(0.333, 0.333, 0.333)))
                 buffer.set_pixel(zx, xy, RGB(color.r * col_shading, color.g * col_shading, color.b * col_shading))
 
 
@@ -265,7 +265,7 @@ def draw_triangle_shaded(buffer: FrameBuffer, p0: Vertex, p1: Vertex, p2: Vertex
             ix, jy = round(p.v.x), round(p.v.y)
             if buffer.set_depth(ix, jy, p.v.z):
                 col: RGB = mat.diff_color(p.uv)
-                col_shading: float = mathUtils.clamp(0.0, 1.0, mathUtils.vectors.dot3(p.n, Vec3(0.333, 0.333, 0.333)))
+                col_shading: float = math_utils.clamp(0.0, 1.0, math_utils.vectors.dot3(p.n, Vec3(0.333, 0.333, 0.333)))
                 buffer.set_pixel(ix, jy, RGB(col.r * col_shading, col.g * col_shading, col.b * col_shading))
 
 
@@ -303,9 +303,9 @@ def draw_model_edges(buffer: FrameBuffer, model: Model, cam: Camera = None,
     for i in range(model.meshes_count):
         for tris in model.triangles_world_space(i):
             tris.camera_screen_transform(cam, buffer)
-            a = -mathUtils.vectors.dot3(tris.n1, forward)
-            b = -mathUtils.vectors.dot3(tris.n2, forward)
-            c = -mathUtils.vectors.dot3(tris.n3, forward)
+            a = -math_utils.vectors.dot3(tris.n1, forward)
+            b = -math_utils.vectors.dot3(tris.n2, forward)
+            c = -math_utils.vectors.dot3(tris.n3, forward)
 
             if a > 0 or b > 0:
                 draw_line_4(buffer, round(tris.p1.x), round(tris.p1.y), round(tris.p2.x), round(tris.p2.y), color)
@@ -327,9 +327,9 @@ def draw_model_vertices(buffer: FrameBuffer, model: Model, cam: Camera = None,
     for i in range(model.meshes_count):
         for tris in model.triangles_world_space(i):
             tris.camera_screen_transform(cam, buffer)
-            a = -mathUtils.vectors.dot3(tris.n1, forward)
-            b = -mathUtils.vectors.dot3(tris.n2, forward)
-            c = -mathUtils.vectors.dot3(tris.n3, forward)
+            a = -math_utils.vectors.dot3(tris.n1, forward)
+            b = -math_utils.vectors.dot3(tris.n2, forward)
+            c = -math_utils.vectors.dot3(tris.n3, forward)
             if a > 0:
                 draw_point(buffer, round(tris.p1.x), round(tris.p1.y), color, 0)
             if b > 0:
@@ -351,9 +351,9 @@ def draw_model_solid_color(buffer: FrameBuffer, model: Model, cam: Camera = None
     for i in range(model.meshes_count):
         for tris in model.triangles_world_space(i):
 
-            a = mathUtils.vectors.dot3(tris.n1, forward)
-            b = mathUtils.vectors.dot3(tris.n2, forward)
-            c = mathUtils.vectors.dot3(tris.n3, forward)
+            a = math_utils.vectors.dot3(tris.n1, forward)
+            b = math_utils.vectors.dot3(tris.n2, forward)
+            c = math_utils.vectors.dot3(tris.n3, forward)
             # треугольник к нам задом(back-face culling)
 
             if a > 0 and b > 0 and c > 0:
@@ -374,9 +374,9 @@ def draw_patch_solid_color(buffer: FrameBuffer, model: CubicPatch, cam: Camera =
 
     for tris in model.triangles_world_space():
 
-        a = mathUtils.vectors.dot3(tris.n1, forward)
-        b = mathUtils.vectors.dot3(tris.n2, forward)
-        c = mathUtils.vectors.dot3(tris.n3, forward)
+        a = math_utils.vectors.dot3(tris.n1, forward)
+        b = math_utils.vectors.dot3(tris.n2, forward)
+        c = math_utils.vectors.dot3(tris.n3, forward)
         # треугольник к нам задом(back-face culling)
 
         if a > 0 and b > 0 and c > 0:
@@ -395,9 +395,9 @@ def draw_patch_edges(buffer: FrameBuffer, model: CubicPatch, cam: Camera = None,
     forward = cam.front
     for tris in model.triangles_world_space():
         tris.camera_screen_transform(cam, buffer)
-        a = -mathUtils.vectors.dot3(tris.n1, forward)
-        b = -mathUtils.vectors.dot3(tris.n2, forward)
-        c = -mathUtils.vectors.dot3(tris.n3, forward)
+        a = -math_utils.vectors.dot3(tris.n1, forward)
+        b = -math_utils.vectors.dot3(tris.n2, forward)
+        c = -math_utils.vectors.dot3(tris.n3, forward)
 
         if a > 0 or b > 0:
             draw_line_4(buffer, round(tris.p1.x), round(tris.p1.y), round(tris.p2.x), round(tris.p2.y), color)
@@ -422,9 +422,9 @@ def draw_model_shaded(buffer: FrameBuffer, model: Model, cam: Camera = None):
         mat = model.get_material(min(i, model.materials_count - 1))
         for tris in model.triangles_world_space(i):
 
-            a = mathUtils.vectors.dot3(tris.n1, forward)
-            b = mathUtils.vectors.dot3(tris.n2, forward)
-            c = mathUtils.vectors.dot3(tris.n3, forward)
+            a = math_utils.vectors.dot3(tris.n1, forward)
+            b = math_utils.vectors.dot3(tris.n2, forward)
+            c = math_utils.vectors.dot3(tris.n3, forward)
             # треугольник к нам задом(back-face culling)
 
             if a > 0 and b > 0 and c > 0:

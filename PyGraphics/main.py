@@ -6,7 +6,7 @@ from camera import Camera
 from models.model import Model
 from surfaces.patch import CubicPatch
 from transforms.transform import Transform
-from vmath.mathUtils import Vec2
+from vmath.math_utils import Vec2
 from frameBuffer import FrameBuffer
 import graphics as gr
 import time
@@ -121,8 +121,8 @@ if __name__ == '__main__':
     cam = Camera()
     print(cam)
     # bezier_intersection_test()
-    bezier_curve_test()
-    # interactive_shading()
+    # bezier_curve_test()
+    interactive_shading()
     #interactive_solid_color()
     #static_solid_color()
     #static_shading()

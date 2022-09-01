@@ -1,11 +1,10 @@
-import re
-import numpy as np
-
-import utils.io_utils
-from vmath.mathUtils import Vec2
-from materials.rgb import RGB
 from materials.texture import Texture
+from vmath.math_utils import Vec2
 from vmath.vectors import Vec3
+from materials.rgb import RGB
+import utils.io_utils
+import numpy as np
+import re
 
 
 class Material(object):

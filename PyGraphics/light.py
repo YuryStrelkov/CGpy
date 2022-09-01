@@ -1,5 +1,5 @@
 from transforms.transform import Transform
-from vmath.mathUtils import Vec3
+from vmath.math_utils import Vec3
 
 
 class Ray(object):

@@ -1,11 +1,14 @@
-import math
 from transforms.transform import Transform
-from vmath.mathUtils import Vec3, Mat4
+from vmath.math_utils import Vec3, Mat4
+import math
 
 
 # определяет направление и положение с которого мы смотрим на 3D сцену
 # определяет так же перспективное искажение
 class Camera(object):
+
+    __slots__ = "__transform", "__zfar", "__znear", "__projection", "__inv_projection"
+
     def __init__(self):
         self.__transform: Transform = Transform()
         self.__zfar: float = 1000
@@ -23,7 +26,7 @@ class Camera(object):
         self.__build_projection()
 
     def __repr__(self) -> str:
-        res: str = f"<Camera   : 0x{id(self)}\n"
+        res: str = "<Camera \n"
         res += f"z far     :{self.__zfar}\n"
         res += f"z near    :{self.__znear}\n"
         res += f"fov       :{self.fov}\n"
@@ -34,11 +37,11 @@ class Camera(object):
         return res
 
     def __str__(self) -> str:
-        res: str = f"Camera    : 0x{id(self)}\n"
-        res += f"z far     : {self.__zfar}\n"
-        res += f"z near    : {self.__znear}\n"
-        res += f"fov       : {self.fov}\n"
-        res += f"aspect    : {self.aspect}\n"
+        res: str = "Camera \n"
+        res += f"z far     :{self.__zfar}\n"
+        res += f"z near    :{self.__znear}\n"
+        res += f"fov       :{self.fov}\n"
+        res += f"aspect    :{self.aspect}\n"
         res += f"projection:\n{self.__projection}\n"
         res += f"transform :\n{self.__transform}\n"
         return res
@@ -54,6 +57,19 @@ class Camera(object):
 
     def __hash__(self) -> int:
         return hash((self.__transform, self.__projection))
+
+    # Строит матрицу перспективного искажения
+    def __build_projection(self):
+        self.__projection.m22 = self.__zfar / (self.__znear - self.__zfar)  # used to remap z to [0,1]
+        self.__projection.m32 = self.__zfar * self.__znear / (self.__znear - self.__zfar)  # used to remap z [0,1]
+        self.__projection.m23 = -1  # set w = -z
+        self.__projection.m33 = 0
+        self.__inv_projection = self.__projection.copy()
+        self.__inv_projection.invert()
+
+    @property
+    def unique_id(self) -> int:
+        return id(self)
 
     @property
     def transform(self) -> Transform:
@@ -106,25 +122,6 @@ class Camera(object):
         self.__projection.m00 *= (aspect_ / self.aspect)
         self.__inv_projection = self.__projection.copy()
         self.__inv_projection.invert()
-
-    # Строит матрицу перспективного искажения
-    def __build_projection(self):
-        # scale = 1.0 / math.tan(self.__fov * 0.5 * math.pi / 180)
-        # self.__projection.m00 = scale * self.__aspect  # scale the x coordinates of the projected point
-        # self.__projection.m11 = scale  # scale the y coordinates of the projected point
-        self.__projection.m22 = self.__zfar / (self.__znear - self.__zfar)  # used to remap z to [0,1]
-        self.__projection.m32 = self.__zfar * self.__znear / (self.__znear - self.__zfar)  # used to remap z [0,1]
-        self.__projection.m23 = -1  # set w = -z
-        self.__projection.m33 = 0
-        self.__inv_projection = self.__projection.copy()
-        self.__inv_projection.invert()
-        # print(f"projection:\n{self.__projection}")
-
-        # print(f"inv projection:\n{self.__inv_projection}")
-
-        # print(self.__projection * self.__inv_projection)
-
-        # ось Z системы координат камеры
 
     @property
     def front(self) -> Vec3:

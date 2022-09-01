@@ -1,9 +1,10 @@
+from models.tris_mesh import TrisMesh, BoundingBox
+from transforms.transform import Transform
+from materials.material import Material
+from models.triangle import Triangle
+from vmath.vectors import Vec3
 import materials.material
 import models.tris_mesh
-from materials.material import Material
-from models.tris_mesh import TrisMesh, BoundingBox, Triangle
-from transforms.transform import Transform
-from vmath.vectors import Vec3
 
 
 class Model(object):

@@ -1,5 +1,5 @@
-from vmath import mathUtils
-from vmath.mathUtils import Vec2
+from vmath.math_utils import Vec2
+from vmath import math_utils
 
 
 def bezier_2_cubic(p1: Vec2, p2: Vec2, p3: Vec2, p4: Vec2, t: float) -> Vec2:
@@ -304,11 +304,11 @@ class BezierCurve2(object):
         p2: BezierPoint2 = self.__points[(pid + 1) % len(self.__points)]
 
         if t + dt <= 1:
-            return mathUtils.perpendicular_2(
+            return math_utils.perpendicular_2(
                 bezier_2_cubic(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t + dt) -
                 bezier_2_cubic(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t))
 
-        return mathUtils.perpendicular_2(
+        return math_utils.perpendicular_2(
             bezier_2_cubic(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t) -
             bezier_2_cubic(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t - dt))
 
@@ -355,7 +355,7 @@ class BezierCurve2(object):
                     break
                 p1 = self.__points[point_id]
                 p2 = self.__points[(point_id + 1) % len(self.__points)]
-            yield mathUtils.perpendicular_2(
+            yield math_utils.perpendicular_2(
                 bezier_2_cubic(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t + step) -
                 bezier_2_cubic(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t))
             t += step
@@ -365,7 +365,7 @@ class BezierCurve2(object):
             p1: BezierPoint2 = self.__points[self.n_control_points - 1]
             p2: BezierPoint2 = self.__points[0]
             while t >= 1.0:
-                yield mathUtils.perpendicular_2(
+                yield math_utils.perpendicular_2(
                     bezier_2_cubic(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t + step) -
                     bezier_2_cubic(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t))
                 t += step

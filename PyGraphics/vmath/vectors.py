@@ -42,6 +42,9 @@ class Vec2(object):
     def cross(a, b) -> float:
         return a.y * b.x - a.x * b.y
 
+    def unique_id(self) -> int:
+        return id(self)
+
     def normalize(self):
         nrm = self.magnitude
         if abs(nrm) < 1e-12:
@@ -84,6 +87,8 @@ class Vec2(object):
     def magnitude_sqr(self) -> float:
         return self.__xy[0] * self.__xy[0] + self.__xy[1] * self.__xy[1]
 
+    __slots__ = "__xy"
+
     def __init__(self, x: float = 0, y: float = 0):
         self.__xy: [float] = [x, y]
 
@@ -111,7 +116,7 @@ class Vec2(object):
         return f"<vec2[{self.__xy[0]:20},{self.__xy[1]:20}]>"
 
     def __str__(self):
-        return f"[{self.__xy[0]:20},{self.__xy[1]:20}]"
+        return f"{{\"x\": {self.__xy[0]:20}, \"y\": {self.__xy[1]:20}}}"
 
     ##########################
     #####  + operetor   ######
@@ -242,6 +247,9 @@ class Vec3(object):
     def cross(a, b):
         return Vec3(a.z * b.y - a.y * b.z, a.x * b.z - a.z * b.x, a.y * b.x - a.x * b.y)
 
+    def unique_id(self) -> int:
+        return id(self)
+
     def normalize(self):
         nrm = self.magnitude
         if abs(nrm) < 1e-12:
@@ -291,6 +299,8 @@ class Vec3(object):
     def magnitude_sqr(self) -> float:
         return self.__xyz[0] * self.__xyz[0] + self.__xyz[1] * self.__xyz[1] + self.__xyz[2] * self.__xyz[2]
 
+    __slots__ = "__xyz"
+
     def __init__(self, x: float = 0, y: float = 0, z: float = 0):
         self.__xyz: [float] = [x, y, z]
 
@@ -323,7 +333,7 @@ class Vec3(object):
         return f"<vec3[{self.__xyz[0]:20},{self.__xyz[1]:20},{self.__xyz[2]:20}]>"
 
     def __str__(self):
-        return f"[{self.__xyz[0]:20},{self.__xyz[1]:20},{self.__xyz[2]:20}]"
+        return f"{{\"x\": {self.__xyz[0]:20}, \"y\": {self.__xyz[1]:20}, \"z\": {self.__xyz[2]:20}}}"
 
     ##########################
     #####  + operetor   ######

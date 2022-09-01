@@ -1,37 +1,39 @@
 import ctypes
 
 
-def set_bit(bytes_: ctypes.c_int8, bit_: int) -> ctypes.c_int8:
+def set_bit(bytes_: ctypes.c_uint32, bit_: int) -> ctypes.c_uint32:
     bytes_.value |= (1 << bit_)
     return bytes_
 
 
-def is_bit_set(bytes_: ctypes.c_int8, bit_: int) -> bool:
+def is_bit_set(bytes_: ctypes.c_uint32, bit_: int) -> bool:
     return (bytes_.value & (1 << bit_)) != 0
 
 
-def inverse_bit(bytes_: ctypes.c_int8, bit_: int) -> ctypes.c_int8:
+def inverse_bit(bytes_: ctypes.c_uint32, bit_: int) -> ctypes.c_uint32:
     bytes_.value ^= (1 << bit_)
     return bytes_
 
 
-def clear_bit(bytes_: ctypes.c_int8, bit_: int) -> ctypes.c_int8:
+def clear_bit(bytes_: ctypes.c_uint32, bit_: int) -> ctypes.c_uint32:
     bytes_.value &= ~(1 << bit_)
     return bytes_
 
 
-class BitSet(ctypes.c_int8):
+class BitSet32:
 
-    __empty_state = ctypes.c_uint8(0)
+    __empty_state = ctypes.c_uint32(0)
 
-    __full_state = ctypes.c_uint8(255)
+    __full_state = ctypes.c_uint32(4294967295)
 
-    def __init__(self):
-        super().__init__()
+    __slots__ = "__state"
+
+    def __init__(self, value: int = 0):
+        self.__state: ctypes.c_uint32 = ctypes.c_uint32(value)
 
     def __str__(self):
         res: str = ""
-        for i in range(8):
+        for i in range(32):
             if self.is_bit_set(i):
                 res += "1"
                 continue
@@ -39,21 +41,50 @@ class BitSet(ctypes.c_int8):
         return res
 
     @property
+    def state(self) -> int:
+        return self.__state.value
+
+    @property
     def is_empty(self) -> bool:
-        return self == BitSet.__empty_state
+        return self.__state == BitSet32.__empty_state
 
     @property
     def is_full(self) -> bool:
-        return self == BitSet.__full_state
+        return self.__state == BitSet32.__full_state
 
     def is_bit_set(self, bit_: int):
-        return is_bit_set(self, bit_)
+        return is_bit_set(self.__state, bit_)
 
     def set_bit(self, bit_: int):
-        set_bit(self, bit_)
+        set_bit(self.__state, bit_)
 
     def inverse_bit(self, bit_: int):
-        inverse_bit(self, bit_)
+        inverse_bit(self.__state, bit_)
 
     def clear_bit(self, bit_: int):
-        clear_bit(self, bit_)
+        clear_bit(self.__state, bit_)
+
+    def clear(self):
+        self.__state = BitSet32.__empty_state
+
+    def inverse(self):
+        for i in range(32):
+            inverse_bit(self.__state, i)
+
+
+def test_bit_set():
+    bit_set = BitSet32()
+    bit_set.set_bit(0)
+    bit_set.set_bit(2)
+    bit_set.set_bit(4)
+    bit_set.set_bit(6)
+    print(bit_set)
+    bit_set.inverse()
+    print(bit_set)
+    bit_set.clear()
+    print(bit_set)
+
+
+if __name__ == '__main__':
+    test_bit_set()
+

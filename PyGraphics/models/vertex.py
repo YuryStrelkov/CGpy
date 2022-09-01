@@ -1,10 +1,10 @@
-import frameBuffer
-from camera import Camera
-from vmath import mathUtils
 from vmath.vectors import Vec3, Vec2
+from vmath import math_utils
+from camera import Camera
+import frameBuffer
 
 
-class Vertex(object):
+class Vertex:
     @staticmethod
     def __unpack_values(*args) -> tuple:
         args = args[0]
@@ -27,10 +27,12 @@ class Vertex(object):
 
         raise TypeError(f'Invalid Input: {args}')
 
+    __slots__ = "__v", "__n", "__uv"
+
     def __init__(self, v_: Vec3, n_: Vec3, uv_: Vec2):
-        self.v: Vec3 = v_
-        self.n: Vec3 = n_
-        self.uv: Vec2 = uv_
+        self.__v: Vec3 = v_
+        self.__n: Vec3 = n_
+        self.__uv: Vec2 = uv_
 
     def __add__(self, *args):
         other = self.__unpack_values(args)
@@ -56,13 +58,25 @@ class Vertex(object):
                       self.n / Vec3(other[3], other[4], other[5]),
                       self.uv / Vec2(other[6], other[7]))
 
+    @property
+    def v(self) -> Vec3:
+        return self.__v
+
+    @property
+    def n(self) -> Vec3:
+        return self.__n
+
+    @property
+    def uv(self) -> Vec2:
+        return self.__uv
+
     def to_clip_space(self, cam: Camera) -> None:
-        self.v = cam.to_clip_space(self.v)
+        self.__v = cam.to_clip_space(self.v)
 
     def to_screen_space(self, fb: frameBuffer) -> None:
-        self.v = Vec3(round(mathUtils.clamp(0, fb.width - 1, round(fb.width * (self.v.x * 0.5 + 0.5)))),
-                      round(mathUtils.clamp(0, fb.height - 1, round(fb.height * (-self.v.y * 0.5 + 0.5)))),
-                      self.v.z)
+        self.__v = Vec3(round(math_utils.clamp(0, fb.width - 1, round(fb.width * (self.v.x * 0.5 + 0.5)))),
+                        round(math_utils.clamp(0, fb.height - 1, round(fb.height * (-self.v.y * 0.5 + 0.5)))),
+                        self.v.z)
 
     def camera_screen_transform(self, cam: Camera, fb: frameBuffer) -> None:
         self.to_clip_space(cam)

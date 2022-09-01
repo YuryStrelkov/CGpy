@@ -3,6 +3,8 @@ import numpy as np
 
 class RGB(object):
 
+    __slots__ = "__rgb"
+
     def __init__(self, r: np.uint8 = 255, g: np.uint8 = 255, b: np.uint8 = 255):
         self.__rgb: [np.uint8] = [np.uint8(r), np.uint8(g), np.uint8(b)]
 
@@ -44,13 +46,13 @@ class RGB(object):
         return self.__rgb[2]
 
     @r.setter
-    def r(self, r: np.uint8):
+    def r(self, r: np.uint8) -> None:
         self.__rgb[0] = r
 
     @g.setter
-    def g(self, g: np.uint8):
+    def g(self, g: np.uint8) -> None:
         self.__rgb[1] = g
 
     @b.setter
-    def b(self, b: np.uint8):
+    def b(self, b: np.uint8) -> None:
         self.__rgb[2] = b

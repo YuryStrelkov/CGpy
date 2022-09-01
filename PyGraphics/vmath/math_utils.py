@@ -1,11 +1,9 @@
-import math
-
-import numpy as np
-
-import vmath.matrices
-import vmath.vectors as vectors
 from vmath.matrices import Mat4, Mat3
 from vmath.vectors import Vec3, Vec2
+import vmath.vectors as vectors
+import vmath.matrices
+import numpy as np
+import math
 
 
 def rotate_x(angle: float) -> Mat4:
@@ -35,6 +33,10 @@ def rotate_z(angle: float) -> Mat4:
                 0, 0, 0, 1)
 
 
+def rotate(angle_x: float, angle_y: float, angle_z: float) -> Mat4:
+    return rotate_x(angle_x) * rotate_y(angle_y) * rotate_z(angle_z)
+
+
 def deg_to_rad(deg: float) -> float: return deg / 180.0 * math.pi
 
 
@@ -60,15 +62,16 @@ def rot_m_to_euler_angles(rot: Mat4) -> Vec3:
     return Vec3(x2, y2, z2)
 
 
-def look_at(target: Vec3, eye: Vec3, up: Vec3 = Vec3(0, -1, 0)) -> Mat4:
+def look_at(target: Vec3, eye: Vec3, up: Vec3 = Vec3(0, 1, 0)) -> Mat4:
     zaxis = target - eye  # The "forward" vector.
     zaxis.normalize()
-    xaxis = vectors.cross(zaxis, up)  # The "right" vector.
+    xaxis = vectors.cross(up, zaxis)  # The "right" vector.
     xaxis.normalize()
-    yaxis = vectors.cross(xaxis, zaxis)  # The "up" vector.
-    return Mat4(xaxis.x,  yaxis.x, zaxis.x, eye.x,
-                xaxis.y,  yaxis.y, zaxis.y, eye.y,
-                xaxis.z,  yaxis.z, zaxis.z, eye.z,
+    yaxis = vectors.cross(zaxis, xaxis)  # The "up" vector.
+
+    return Mat4(xaxis.x, -yaxis.x, zaxis.x, eye.x,
+                -xaxis.y, -yaxis.y, zaxis.y, eye.y,
+                xaxis.z, -yaxis.z, zaxis.z, eye.z,
                 0, 0, 0, 1)
 
 

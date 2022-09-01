@@ -1,11 +1,13 @@
-import vmath.vectors as vectors
 from vmath.matrices import Mat4
+import vmath.vectors as vectors
 from vmath.vectors import Vec3
-from vmath import mathUtils
+from vmath import math_utils
 import math
 
 
 class Transform(object):
+
+    __slots__ = "__m_transform"
 
     def __init__(self):
         self.__m_transform = Mat4(1.0, 0.0, 0.0, 0.0,
@@ -23,11 +25,11 @@ class Transform(object):
         return res
 
     def __str__(self) -> str:
-        res: str = f"Transform : 0x{id(self)} \n"
-        res += f"origin    : {self.origin}\n"
-        res += f"scale     : {self.scale}\n"
-        res += f"rotate    : {self.angles / math.pi * 180}\n"
-        res += f"t-matrix  :\n{self.__m_transform}\n"
+        res: str = "Transform \n"
+        res += f"origin   :{self.origin}\n"
+        res += f"scale    :{self.scale}\n"
+        res += f"rotate   :{self.angles / math.pi * 180}\n"
+        res += f"t-matrix :\n{self.__m_transform}\n"
         return res
 
     def __eq__(self, other) -> bool:
@@ -54,6 +56,9 @@ class Transform(object):
         self.__m_transform.m22 = ez.z
 
         # self.eulerAngles = mathUtils.rot_m_to_euler_angles(self.rotation_mat())
+    @property
+    def unique_id(self) -> int:
+        return id(self)
 
     @property
     def transform_matrix(self) -> Mat4:
@@ -151,7 +156,7 @@ class Transform(object):
         # установить масштаб по Х
 
     @sx.setter
-    def sx(self, s_x: float):
+    def sx(self, s_x: float) -> None:
         if s_x == 0:
             return
         scl = self.sx
@@ -161,7 +166,7 @@ class Transform(object):
 
     # установить масштаб по Y
     @sy.setter
-    def sy(self, s_y: float):
+    def sy(self, s_y: float) -> None:
         if s_y == 0:
             return
         scl = self.sy
@@ -171,7 +176,7 @@ class Transform(object):
 
     # установить масштаб по Z
     @sz.setter
-    def sz(self, s_z: float):
+    def sz(self, s_z: float) -> None:
         if s_z == 0:
             return
         scl = self.sz
@@ -202,15 +207,15 @@ class Transform(object):
         return self.__m_transform.m23
 
     @x.setter
-    def x(self, x: float):
+    def x(self, x: float) -> None:
         self.__m_transform.m03 = x
 
     @y.setter
-    def y(self, y: float):
+    def y(self, y: float) -> None:
         self.__m_transform.m13 = y
 
     @z.setter
-    def z(self, z: float):
+    def z(self, z: float) -> None:
         self.__m_transform.m23 = z
 
     @property
@@ -218,20 +223,20 @@ class Transform(object):
         return Vec3(self.x, self.y, self.z)
 
     @origin.setter
-    def origin(self, xyz: Vec3):
+    def origin(self, xyz: Vec3) -> None:
         self.x = xyz.x
         self.y = xyz.y
         self.z = xyz.z
 
     @property
     def angles(self) -> Vec3:
-        return mathUtils.rot_m_to_euler_angles(self.rotation_mat())
+        return math_utils.rot_m_to_euler_angles(self.rotation_mat())
 
     @angles.setter
-    def angles(self, xyz: Vec3):
-        i = mathUtils.rotate_x(xyz.x)
-        i = mathUtils.rotate_y(xyz.y) * i
-        i = mathUtils.rotate_z(xyz.z) * i
+    def angles(self, xyz: Vec3) -> None:
+        i = math_utils.rotate_x(xyz.x)
+        i = math_utils.rotate_y(xyz.y) * i
+        i = math_utils.rotate_z(xyz.z) * i
         scl = self.scale
         orig = self.origin
         self.__m_transform = i
@@ -240,30 +245,30 @@ class Transform(object):
 
     @property
     def ax(self) -> float:
-        return mathUtils.rot_m_to_euler_angles(self.rotation_mat()).x
+        return math_utils.rot_m_to_euler_angles(self.rotation_mat()).x
 
     @property
     def ay(self) -> float:
-        return mathUtils.rot_m_to_euler_angles(self.rotation_mat()).y
+        return math_utils.rot_m_to_euler_angles(self.rotation_mat()).y
 
     @property
     def az(self) -> float:
-        return mathUtils.rot_m_to_euler_angles(self.rotation_mat()).z
+        return math_utils.rot_m_to_euler_angles(self.rotation_mat()).z
 
     @ax.setter
-    def ax(self, x: float):
+    def ax(self, x: float) -> None:
         _angles = self.angles
-        self.angles = Vec3(mathUtils.deg_to_rad(x), _angles.y, _angles.z)
+        self.angles = Vec3(math_utils.deg_to_rad(x), _angles.y, _angles.z)
 
     @ay.setter
-    def ay(self, y: float):
+    def ay(self, y: float) -> None:
         _angles = self.angles
-        self.angles = Vec3(_angles.x, mathUtils.deg_to_rad(y), _angles.z)
+        self.angles = Vec3(_angles.x, math_utils.deg_to_rad(y), _angles.z)
 
     @az.setter
-    def az(self, z: float):
+    def az(self, z: float) -> None:
         _angles = self.angles
-        self.angles = Vec3(_angles.x, _angles.y, mathUtils.deg_to_rad(z))
+        self.angles = Vec3(_angles.x, _angles.y, math_utils.deg_to_rad(z))
 
     def rotation_mat(self) -> Mat4:
         scl = self.scale
@@ -272,8 +277,8 @@ class Transform(object):
                     self.__m_transform.m20 / scl.x, self.__m_transform.m21 / scl.y, self.__m_transform.m22 / scl.z, 0,
                     0, 0, 0, 1)
 
-    def look_at(self, target: Vec3, eye: Vec3, up: Vec3 = Vec3(0, 1, 0)):
-        self.__m_transform = mathUtils.look_at(target, eye, up)
+    def look_at(self, target: Vec3, eye: Vec3, up: Vec3 = Vec3(0, 1, 0)) -> None:
+        self.__m_transform = math_utils.look_at(target, eye, up)
 
     # переводит вектор в собственное пространство координат
     def transform_vect(self, vec: Vec3, w) -> Vec3:
@@ -288,15 +293,6 @@ class Transform(object):
             self.__m_transform.m20 * vec.x + self.__m_transform.m21 * vec.y + self.__m_transform.m22 * vec.z + self.__m_transform.m23)
 
     # не переводит вектор в собственное пространство координат =)
-    @property
-    def inv_transform_matrix(self) -> Mat4:
-        scl: Vec3 = self.scale
-        scl *= scl
-        return Mat4(self.__m_transform.m00 * scl.x, self.__m_transform.m10 * scl.x, self.__m_transform.m20 * scl.x, -self.__m_transform.m03,
-                    self.__m_transform.m01 * scl.y, self.__m_transform.m11 * scl.y, self.__m_transform.m21 * scl.y, -self.__m_transform.m13,
-                    self.__m_transform.m02 * scl.z, self.__m_transform.m12 * scl.z, self.__m_transform.m22 * scl.z, -self.__m_transform.m23,
-                    0, 0, 0, 1)
-
     def inv_transform_vect(self, vec: Vec3, w) -> Vec3:
         scl: Vec3 = self.scale
         if w == 0:

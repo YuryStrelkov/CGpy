@@ -1,10 +1,11 @@
-import numpy as np
-from PIL import Image
 from materials.material import Texture, RGB
-from vmath.mathUtils import Vec2
+from vmath.math_utils import Vec2
+from PIL import Image
+import numpy as np
 
 
 class FrameBuffer(object):
+
     def __init__(self, w: int, h: int, color: RGB = RGB(np.uint8(125), np.uint8(135), np.uint8(145))):
         self.__frame_texture = Texture(w, h, 3, color)
         self.__z_buffer = np.full((self.height * self.width), -np.inf)

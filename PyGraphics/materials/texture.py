@@ -1,12 +1,13 @@
-import numpy as np
-from PIL import Image
-from vmath import mathUtils
-from vmath.mathUtils import Vec2
 from transforms.transform2 import Transform2
+from vmath.vectors import Vec2
 from materials.rgb import RGB
+from vmath import math_utils
+from PIL import Image
+import numpy as np
 
 
 class Texture(object):
+
     def __init__(self, _w: int = 0, _h: int = 0, _bpp: int = 0,
                  color: RGB = RGB(np.uint8(125), np.uint8(135), np.uint8(145))):
         self.__source_file: str = ""
@@ -45,6 +46,10 @@ class Texture(object):
         res += "affine transform:\n"
         res += f"{self.__transform}\n"
         return res
+
+    @property
+    def pixel_data(self) -> np.ndarray:
+        return self.__colors
 
     @property
     def name(self) -> str:
@@ -87,7 +92,7 @@ class Texture(object):
         return self.__bpp
 
     @property
-    def texture_pixel_size(self):
+    def texture_pixel_size(self) -> int:
         return self.__height * self.__width
 
     @property
@@ -99,7 +104,7 @@ class Texture(object):
         return self.__transform.origin
 
     @property
-    def texture_byte_size(self):
+    def texture_byte_size(self) -> int:
         return self.__bpp * self.__height * self.__width
 
     @property
@@ -116,7 +121,7 @@ class Texture(object):
 
     @rotation.setter
     def rotation(self, angle: float):
-        self.__transform.az = mathUtils.deg_to_rad(angle)
+        self.__transform.az = math_utils.deg_to_rad(angle)
 
     @property
     def image_data(self) -> Image:
@@ -125,7 +130,7 @@ class Texture(object):
         if self.bpp == 4:
             return Image.frombytes('RGBA', (self.__width, self.__height), self.__colors)
 
-    def load(self, origin: str):
+    def load(self, origin: str) -> None:
         if not (self.__colors is None):
             del self.__colors
             self.__width = -1
@@ -134,10 +139,10 @@ class Texture(object):
         self.__source_file = origin
         im = Image.open(self.__source_file)
         self.__width, self.__height = im.size
-        self.__bpp = im.layers
         self.__colors: [np.uint8] = (np.asarray(im, dtype=np.uint8)).ravel()
+        self.__bpp = int(len(self.__colors) / self.__width / self.__height)
 
-    def set_color(self, i: int, j: int, color: RGB):
+    def set_color(self, i: int, j: int, color: RGB) -> None:
         pix = round((i + j * self.__width) * self.__bpp)
         if pix < 0:
             return
@@ -158,7 +163,7 @@ class Texture(object):
                    self.__colors[pix + 2])
 
     # uv:: uv.x in range[0,1], uv.y in range[0,1]
-    def set_color_uv(self, uv: Vec2, color: RGB):
+    def set_color_uv(self, uv: Vec2, color: RGB) -> None:
         uv_ = self.__transform.inv_transform_vect(uv, 1)
         pix = round((uv_.x + uv_.y * self.__width) * self.__bpp)
         if pix < 0:
@@ -177,12 +182,13 @@ class Texture(object):
         pix = (uv_x + uv_y * self.__width) * self.__bpp
         return RGB(self.__colors[pix], self.__colors[pix + 1], self.__colors[pix + 2])
 
-    def show(self):
+    def show(self) -> None:
         self.image_data.show()
 
-    def clear_color(self, color: RGB = RGB(np.uint8(125), np.uint8(135), np.uint8(145))):
+    def clear_color(self, color: RGB = RGB(np.uint8(125), np.uint8(135), np.uint8(145))) -> None:
         if self.texture_byte_size == 0:
             return
-        rgb = [color.r, color.g, color.g]
+        rgb = (color.r, color.g, color.b)
+        # self.__colors = [rgb[i % self.__bpp] for i in range(self.texture_byte_size)]
         for i in range(0, self.texture_byte_size):
-            self.__colors[i] = rgb[i % 3]
+            self.__colors[i] = rgb[i % self.__bpp]

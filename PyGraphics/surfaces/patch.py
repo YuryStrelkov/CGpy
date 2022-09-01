@@ -1,9 +1,9 @@
-from models import tris_mesh
-from models.triangle import Triangle
-from transforms.transform import Transform
-from vmath import vectors
-from vmath.mathUtils import Vec3
 from models.tris_mesh import TrisMesh, BoundingBox
+from transforms.transform import Transform
+from models.triangle import Triangle
+from vmath.math_utils import Vec3
+from models import tris_mesh
+from vmath import vectors
 
 
 def quadratic_bezier_patch(p1: Vec3, p2: Vec3, p3: Vec3,

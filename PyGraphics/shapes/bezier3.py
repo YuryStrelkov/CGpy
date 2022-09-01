@@ -1,29 +1,29 @@
-from vmath import mathUtils
-from vmath.mathUtils import Vec3, Mat4, Mat3
+from vmath.math_utils import Vec3, Mat4, Mat3
+from vmath import math_utils
 
 
 def bezier_3_quadratic(p1: Vec3, p2: Vec3, p3: Vec3, t: float) -> Vec3:
-    return mathUtils.lerp_vec_3(mathUtils.lerp_vec_3(p1, p2, t), mathUtils.lerp_vec_3(p2, p3, t), t)
+    return math_utils.lerp_vec_3(math_utils.lerp_vec_3(p1, p2, t), math_utils.lerp_vec_3(p2, p3, t), t)
 
 
 def bezier_3_cubic(p1: Vec3, p2: Vec3, p3: Vec3, p4: Vec3, t: float) -> Vec3:
-    return mathUtils.lerp_vec_3(bezier_3_quadratic(p1, p2, p3, t), bezier_3_quadratic(p2, p3, p4, t), t)
+    return math_utils.lerp_vec_3(bezier_3_quadratic(p1, p2, p3, t), bezier_3_quadratic(p2, p3, p4, t), t)
 
 
 def bezier_mat_3_quadratic(p1: Mat3, p2: Mat3, p3: Mat3, t: float) -> Mat3:
-    return mathUtils.lerp_mat_3(mathUtils.lerp_mat_3(p1, p2, t), mathUtils.lerp_mat_3(p2, p3, t), t)
+    return math_utils.lerp_mat_3(math_utils.lerp_mat_3(p1, p2, t), math_utils.lerp_mat_3(p2, p3, t), t)
 
 
 def bezier_mat_3_cubic(p1: Mat3, p2: Mat3, p3: Mat3, p4: Mat3, t: float) -> Mat3:
-    return mathUtils.lerp_mat_3(bezier_mat_3_quadratic(p1, p2, p3, t), bezier_mat_3_quadratic(p2, p3, p4, t), t)
+    return math_utils.lerp_mat_3(bezier_mat_3_quadratic(p1, p2, p3, t), bezier_mat_3_quadratic(p2, p3, p4, t), t)
 
 
 def bezier_mat_4_quadratic(p1: Mat4, p2: Mat4, p3: Mat4, t: float) -> Mat4:
-    return mathUtils.lerp_mat_4(mathUtils.lerp_mat_4(p1, p2, t), mathUtils.lerp_mat_4(p2, p3, t), t)
+    return math_utils.lerp_mat_4(math_utils.lerp_mat_4(p1, p2, t), math_utils.lerp_mat_4(p2, p3, t), t)
 
 
 def bezier_mat_4_cubic(p1: Mat4, p2: Mat4, p3: Mat4, p4: Mat4, t: float) -> Mat4:
-    return mathUtils.lerp_mat_4(bezier_mat_4_quadratic(p1, p2, p3, t), bezier_mat_4_quadratic(p2, p3, p4, t), t)
+    return math_utils.lerp_mat_4(bezier_mat_4_quadratic(p1, p2, p3, t), bezier_mat_4_quadratic(p2, p3, p4, t), t)
 
 
 def bezier_3_tangent(p1: Vec3, p2: Vec3, p3: Vec3, p4: Vec3, t: float) -> Vec3:
@@ -308,11 +308,11 @@ class BezierCurve3(object):
         p2: BezierPoint3 = self.__points[(pid + 1) % len(self.__points)]
 
         if t + dt <= 1:
-            return mathUtils.perpendicular_3(
+            return math_utils.perpendicular_3(
                 bezier_3_cubic(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t + dt) -
                 bezier_3_cubic(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t))
 
-        return mathUtils.perpendicular_3(
+        return math_utils.perpendicular_3(
             bezier_3_cubic(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t) -
             bezier_3_cubic(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t - dt))
 
@@ -370,7 +370,7 @@ class BezierCurve3(object):
                     break
                 p1 = self.__points[point_id]
                 p2 = self.__points[(point_id + 1) % len(self.__points)]
-            yield mathUtils.perpendicular_2(
+            yield math_utils.perpendicular_2(
                 bezier_3_tangent(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t + step) -
                 bezier_3_tangent(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t))
             t += step
@@ -380,7 +380,7 @@ class BezierCurve3(object):
             p1: BezierPoint3 = self.__points[self.n_control_points - 1]
             p2: BezierPoint3 = self.__points[0]
             while t >= 1.0:
-                yield mathUtils.perpendicular_2(
+                yield math_utils.perpendicular_2(
                     bezier_3_tangent(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t + step) -
                     bezier_3_tangent(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t))
                 t += step
