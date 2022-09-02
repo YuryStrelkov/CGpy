@@ -21,28 +21,21 @@ def bezier_2_tangent(p1: Vec2, p2: Vec2, p3: Vec2, p4: Vec2, t: float) -> Vec2:
                 p1.y * a + p2.y * b + p3.y * c + p4.y * d)
 
 
-class BezierPoint2(object):
+class BezierPoint2:
+
+    __slots__ = "__point", "__anchor_1", "__anchor_2", "smooth"
+
     def __init__(self, p: Vec2):
         self.__point: Vec2 = p
         self.__anchor_1: Vec2 = p + Vec2(0.125, 0.125)
         self.__anchor_2: Vec2 = p + Vec2(-0.125, -0.125)
         self.smooth: bool = True
 
-    def __repr__(self):
-        res: str = "BezierPoint2:\n"
-        res += "[\n point   : %s,\n" % self.__point
-        res += " smooth  : %s,\n" % self.smooth
-        res += " anchor_1: %s,\n" % self.__anchor_1
-        res += " anchor_2: %s\n]" % self.__anchor_2
-        return res
-
     def __str__(self):
-        res: str = ""
-        res += "[\n point   : %s,\n" % self.__point
-        res += " smooth  : %s,\n" % self.smooth
-        res += " anchor_1: %s,\n" % self.__anchor_1
-        res += " anchor_2: %s\n]" % self.__anchor_2
-        return res
+        return f"{{\n\t\"point\":     {self.__point},\n" \
+                   f"\t\"smooth\":    {self.smooth},\n" \
+                   f"\t\"anchor_1\":  {self.__anchor_1},\n" \
+                   f"\t\"anchor_2\":  {self.__anchor_2}\n}}"
 
     def align_anchors(self, dir_: Vec2, weight: float = 1) -> None:
         w_1: float = self.anchor_1_weight * weight
@@ -255,7 +248,7 @@ class BezierCurve2(object):
 
     def get_point(self, pid: int) -> Vec2:
         if not self.__in_range(pid):
-            return None
+            return Vec2(0)
         return self.__points[pid].point
 
     def set_anchor_1(self, pid: int, pos: Vec2) -> None:

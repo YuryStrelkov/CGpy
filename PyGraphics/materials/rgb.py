@@ -1,18 +1,15 @@
 import numpy as np
 
 
-class RGB(object):
+class RGB:
 
     __slots__ = "__rgb"
 
     def __init__(self, r: np.uint8 = 255, g: np.uint8 = 255, b: np.uint8 = 255):
         self.__rgb: [np.uint8] = [np.uint8(r), np.uint8(g), np.uint8(b)]
 
-    def __repr__(self):
-        return "<RGB r:%s g:%s b:%s>" % (self.__rgb[0], self.__rgb[1], self.__rgb[2])
-
     def __str__(self):
-        return "[%s, %s, %s]" % (self.__rgb[0], self.__rgb[1], self.__rgb[2])
+        return f"{{\"r\":{self.r:3}, \"g\":{self.g:3}, \"b\":{self.b:3}}}"
 
     def __getitem__(self, index):
         if index < 0 or index >= 3:

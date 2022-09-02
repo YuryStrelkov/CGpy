@@ -184,17 +184,10 @@ class Mat3(object):
             raise IndexError(f"Mat3 :: trying to access index: {index}")
         self.__data[index] = value
 
-    def __repr__(self) -> str:
-        return f"mat:\n" \
-               f"[[{self.m00:20}, {self.m01:20}, {self.m02:20}],\n" \
-               f" [{self.m10:20}, {self.m11:20}, {self.m12:20}],\n" \
-               f" [{self.m20:20}, {self.m21:20}, {self.m22:20}]]\n"
-
     def __str__(self) -> str:
-        return "" \
-               f"[[{self.m00:20}, {self.m01:20}, {self.m02:20}],\n" \
-               f" [{self.m10:20}, {self.m11:20}, {self.m12:20}],\n" \
-               f" [{self.m20:20}, {self.m21:20}, {self.m22:20}]]\n"
+        return f"{{\n\t\"m00\": {self.m00:20}, \"m01\": {self.m01:20}, \"m02\": {self.m02:20}],\n" \
+                   f"\t\"m10\": {self.m10:20}, \"m11\": {self.m11:20}, \"m12\": {self.m12:20}],\n" \
+                   f"\t\"m20\": {self.m20:20}, \"m21\": {self.m21:20}, \"m22\": {self.m22:20}\n}}\n"
 
     def __add__(self, *args):
         other = self.__unpack_values(args)
@@ -597,19 +590,12 @@ class Mat4(object):
 
     copy = __copy__
 
-    def __repr__(self) -> str:
-        return f"mat4:\n" \
-               f"[[{self.m00:20}, {self.m01:20}, {self.m02:20}, {self.m03:20}],\n" \
-               f" [{self.m10:20}, {self.m11:20}, {self.m12:20}, {self.m13:20}],\n" \
-               f" [{self.m20:20}, {self.m21:20}, {self.m22:20}, {self.m23:20}],\n" \
-               f" [{self.m30:20}, {self.m31:20}, {self.m32:20}, {self.m33:20}]]\n"
-
     def __str__(self) -> str:
         return "" \
-               f"[[{self.m00:20}, {self.m01:20}, {self.m02:20}, {self.m03:20}],\n" \
-               f" [{self.m10:20}, {self.m11:20}, {self.m12:20}, {self.m13:20}],\n" \
-               f" [{self.m20:20}, {self.m21:20}, {self.m22:20}, {self.m23:20}],\n" \
-               f" [{self.m30:20}, {self.m31:20}, {self.m32:20}, {self.m33:20}]]\n"
+               f"{{\n\t\"m00\": {self.m00:20}, \"m01\": {self.m01:20}, \"m02\": {self.m02:20}, \"m03\": {self.m03:20},\n"\
+               f"\t\"m10\": {self.m10:20}, \"m11\": {self.m11:20}, \"m12\": {self.m12:20}, \"m13\": {self.m13:20},\n"\
+               f"\t\"m20\": {self.m20:20}, \"m21\": {self.m21:20}, \"m22\": {self.m22:20}, \"m23\": {self.m23:20},\n"\
+               f"\t\"m30\": {self.m30:20}, \"m31\": {self.m31:20}, \"m32\": {self.m32:20}, \"m33\": {self.m33:20}\n}}"
 
     def __add__(self, *args):
         other = self.__unpack_values(args)

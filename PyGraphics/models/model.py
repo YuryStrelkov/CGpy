@@ -78,12 +78,12 @@ class Model(object):
 
     def get_mesh(self, _id: int) -> TrisMesh:
         if not self.__mesh_id_in_range(_id):
-            raise IndexError("no mesh with index " + str(_id))
+            raise IndexError(f"no mesh with index: {_id}")
         return self.__meshes[_id]
 
     def get_material(self, _id: int) -> Material:
         if not self.__material_id_in_range(_id):
-            raise IndexError("no material with index " + str(_id))
+            raise IndexError(f"no material with index: {_id}")
         return self.__materials[_id]
 
     def add_mesh(self, mesh: TrisMesh) -> None:
@@ -96,12 +96,12 @@ class Model(object):
 
     def get_vert_local_space(self, vert_id, mesh_id: int = 0):
         if not self.__mesh_id_in_range(mesh_id):
-            raise IndexError("no mesh with index " + str(mesh_id))
+            raise IndexError(f"no mesh with index: {mesh_id}")
         return self.__meshes[mesh_id].vertices[vert_id]
 
     def get_normal_local_space(self, normal_id, mesh_id: int = 0):
         if not self.__mesh_id_in_range(mesh_id):
-            raise IndexError("no mesh with index " + str(mesh_id))
+            raise IndexError(f"no mesh with index: {mesh_id}")
         return self.__meshes[mesh_id].normals[normal_id]
 
     def get_vert_world_space(self, vert_id, mesh_id: int = 0):
@@ -114,13 +114,13 @@ class Model(object):
 
     def tris_local_space(self, mesh_id: int, tris_id: int) -> Triangle:
         if not self.__mesh_id_in_range(mesh_id):
-            raise IndexError("no mesh with index " + str(mesh_id))
+            raise IndexError(f"no mesh with index {mesh_id}")
 
         return self.__meshes[mesh_id].get_triangle(tris_id)
 
     def tris_world_space(self, mesh_id: int, tris_id: int) -> Triangle:
         if not self.__mesh_id_in_range(mesh_id):
-            raise IndexError("no mesh with index " + str(mesh_id))
+            raise IndexError(f"no mesh with index: {mesh_id}")
 
         tris: Triangle = self.__meshes[mesh_id].get_triangle(tris_id)
         tris.transform(self.__transform)
@@ -128,7 +128,7 @@ class Model(object):
 
     def triangles_local_space(self, mesh_id: int):
         if not self.__mesh_id_in_range(mesh_id):
-            raise IndexError("no mesh with index " + str(mesh_id))
+            raise IndexError(f"no mesh with index: {mesh_id}")
         tris_id: int = 0
         while tris_id < self.__meshes[mesh_id].faces_count:
             yield self.__meshes[mesh_id].get_triangle(tris_id)
@@ -136,7 +136,7 @@ class Model(object):
 
     def triangles_world_space(self, mesh_id: int):
         if not self.__mesh_id_in_range(mesh_id):
-            raise IndexError("no mesh with index " + str(mesh_id))
+            raise IndexError(f"no mesh with index: {mesh_id}")
         tris_id: int = 0
         while tris_id < self.__meshes[mesh_id].faces_count:
             tris: Triangle = self.__meshes[mesh_id].get_triangle(tris_id)

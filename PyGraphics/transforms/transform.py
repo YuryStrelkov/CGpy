@@ -15,22 +15,12 @@ class Transform(object):
                                   0.0, 0.0, 1.0, 0.0,
                                   0.0, 0.0, 0.0, 1.0)
 
-    def __repr__(self) -> str:
-        res: str = "<Transform \n"
-        res += f"origin   :{self.origin}\n"
-        res += f"scale    :{self.scale}\n"
-        res += f"rotate   :{self.angles / math.pi * 180}\n"
-        res += f"t-matrix :\n{self.__m_transform}\n"
-        res += ">"
-        return res
-
     def __str__(self) -> str:
-        res: str = "Transform \n"
-        res += f"origin   :{self.origin}\n"
-        res += f"scale    :{self.scale}\n"
-        res += f"rotate   :{self.angles / math.pi * 180}\n"
-        res += f"t-matrix :\n{self.__m_transform}\n"
-        return res
+        return f"{{\n\t\"unique_id\"   :{self.unique_id},\n" \
+                   f"\t\"origin\"      :{self.origin},\n" \
+                   f"\t\"scale\"       :{self.scale},\n" \
+                   f"\t\"rotate\"      :{self.angles / math.pi * 180},\n" \
+                   f"\t\"transform_m\" :\n{self.__m_transform}\n}}"
 
     def __eq__(self, other) -> bool:
         if not(type(other) is Transform):

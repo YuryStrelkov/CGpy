@@ -112,9 +112,6 @@ class Vec2(object):
 
     copy = __copy__
 
-    def __repr__(self):
-        return f"<vec2[{self.__xy[0]:20},{self.__xy[1]:20}]>"
-
     def __str__(self):
         return f"{{\"x\": {self.__xy[0]:20}, \"y\": {self.__xy[1]:20}}}"
 
@@ -328,9 +325,6 @@ class Vec3(object):
         return Vec3(self.x, self.y, self.z)
 
     copy = __copy__
-
-    def __repr__(self):
-        return f"<vec3[{self.__xyz[0]:20},{self.__xyz[1]:20},{self.__xyz[2]:20}]>"
 
     def __str__(self):
         return f"{{\"x\": {self.__xyz[0]:20}, \"y\": {self.__xyz[1]:20}, \"z\": {self.__xyz[2]:20}}}"

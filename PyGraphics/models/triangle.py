@@ -24,6 +24,11 @@ class Triangle(object):
         self.__uv2: Vec2 = _uv2
         self.__uv3: Vec2 = _uv3
 
+    def __str__(self):
+        return f"{{\n\t\"p1\":  {self.p1},\n\t\"p2\":  {self.p2},\n\t\"p3\":  {self.p3},\n" \
+                  f"\t\"n1\":  {self.n1},\n\t\"n2\":  {self.n2},\n\t\"n3\":  {self.n3},\n" \
+                  f"\t\"uv1\": {self.uv1},\n\t\"uv2\": {self.uv2},\n\t\"uv3\": {self.uv3}\n}}"
+
     @property
     def p1(self) -> Vec3:
         return self.__p1

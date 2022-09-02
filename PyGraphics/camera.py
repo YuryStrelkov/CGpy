@@ -25,26 +25,14 @@ class Camera(object):
         self.aspect = 1
         self.__build_projection()
 
-    def __repr__(self) -> str:
-        res: str = "<Camera \n"
-        res += f"z far     :{self.__zfar}\n"
-        res += f"z near    :{self.__znear}\n"
-        res += f"fov       :{self.fov}\n"
-        res += f"aspect    :{self.aspect}\n"
-        res += f"projection:\n{self.__projection}\n"
-        res += f"transform :\n{self.__transform}\n"
-        res += ">"
-        return res
-
     def __str__(self) -> str:
-        res: str = "Camera \n"
-        res += f"z far     :{self.__zfar}\n"
-        res += f"z near    :{self.__znear}\n"
-        res += f"fov       :{self.fov}\n"
-        res += f"aspect    :{self.aspect}\n"
-        res += f"projection:\n{self.__projection}\n"
-        res += f"transform :\n{self.__transform}\n"
-        return res
+        return f"{{\n\t\"unique_id\" :{self.unique_id},\n" \
+                   f"\t\"z_far\"     :{self.__zfar},\n" \
+                   f"\t\"z_near\"    :{self.__znear},\n" \
+                   f"\t\"fov\"       :{self.fov},\n" \
+                   f"\t\"aspect\"    :{self.aspect},\n" \
+                   f"\t\"projection\":\n{self.__projection},\n" \
+                   f"\t\"transform\" :\n{self.__transform}\n}}"
 
     def __eq__(self, other) -> bool:
         if not (type(other) is Camera):

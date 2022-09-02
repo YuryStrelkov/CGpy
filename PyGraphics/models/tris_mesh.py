@@ -1,6 +1,6 @@
-from models.triangle import Triangle
 from transforms.transform import Transform
 from vmath.math_utils import Vec3, Vec2
+from models.triangle import Triangle
 import numpy as np
 import re
 
@@ -20,20 +20,12 @@ class Face:
         self.__uv3: int = -1
         self.__n_3: int = -1
 
-    def __repr__(self):
-        res: str = "<face "
-        res += "%s/%s/%s" % (self.__p_1, self.__uv1, self.__n_1)
-        res += "%s/%s/%s" % (self.__p_2, self.__uv2, self.__n_2)
-        res += "%s/%s/%s" % (self.__p_3, self.__uv3, self.__n_3)
-        res += ">"
-        return res
-
     def __str__(self):
-        res: str = "f ["
-        res += "%s/%s/%s " % (self.__p_1, self.__uv1, self.__n_1)
-        res += "%s/%s/%s " % (self.__p_2, self.__uv2, self.__n_2)
-        res += "%s/%s/%s]" % (self.__p_3, self.__uv3, self.__n_3)
-        return res
+        return f"{{" \
+               f"\t\"p_1\": {self.p_1}, \"uv1\": {self.uv1}, \"n_1\": {self.n_1},\n" \
+               f"\t\"p_2\": {self.p_2}, \"uv2\": {self.uv2}, \"n_2\": {self.n_2},\n" \
+               f"\t\"p_3\": {self.p_3}, \"uv3\": {self.uv3}, \"n_3\": {self.n_3}\n" \
+               f"}}"
 
     @property
     def points(self):
@@ -148,6 +140,12 @@ class BoundingBox(object):
     def __init__(self):
         self.__max: Vec3 = Vec3(-1e12, -1e12, -1e12)
         self.__min: Vec3 = Vec3(1e12, 1e12, 1e12)
+
+    def __str__(self):
+        return f"{{\n" \
+               f"\t\"min\": {self.min}," \
+               f"\t\"max\": {self.max}" \
+               f"\n}}"
 
     def update_bounds(self, v: Vec3) -> None:
         if v.x > self.__max.x:
@@ -364,7 +362,7 @@ class TrisMesh(object):
     def get_triangle(self, tris_id: int) -> Triangle:
 
         if len(self._faces) <= tris_id or tris_id < 0:
-            raise IndexError(f"no face with index %s in mesh %s " % (str(tris_id), self.name))
+            raise IndexError(f"no face with index: {tris_id} in mesh: {self.name}")
 
         f: Face = self._faces[tris_id]
 
@@ -462,7 +460,7 @@ def read_obj_mesh(path: str) -> [TrisMesh]:
                     continue
             return meshes
     except IOError:
-        print("file \"%s\" not found" % path)
+        print(f"file: \"{path}\" not found")
         return []
 
 
@@ -501,6 +499,5 @@ def create_plane(height: float = 1.0, width: float = 1.0, rows: int = 10,
         mesh.append_face(f)
     if transform is not None:
         mesh.transform_mesh(transform)
-
     return mesh
 

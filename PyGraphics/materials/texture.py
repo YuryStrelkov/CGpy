@@ -27,25 +27,13 @@ class Texture(object):
                    self.__colors[index + 1],
                    self.__colors[index + 2])
 
-    def __repr__(self) -> str:
-        res: str = "<Texture\n"
-        res += f"source file    : {self.__source_file}\n"
-        res += f"width          : {self.__width}\n"
-        res += f"height         : {self.__height}\n"
-        res += f"bpp            : {self.__bpp}\n"
-        res += "affine transform:\n"
-        res += f"{self.__transform}\n>\n"
-        return res
-
     def __str__(self) -> str:
-        res: str = ""
-        res += f"source file    : {self.__source_file}\n"
-        res += f"width          : {self.__width}\n"
-        res += f"height         : {self.__height}\n"
-        res += f"bpp            : {self.__bpp}\n"
-        res += "affine transform:\n"
-        res += f"{self.__transform}\n"
-        return res
+        return f"{{\n \"source_file\": {self.__source_file},\n" \
+               f" \"unique_id\":       {id(self)},\n" \
+               f" \"width\":           {self.__width},\n" \
+               f" \"height\":          {self.__height},\n" \
+               f" \"bpp\":             {self.__bpp},\n" \
+               f" \"transform\":\n{self.__transform}\n}}"
 
     @property
     def pixel_data(self) -> np.ndarray:
