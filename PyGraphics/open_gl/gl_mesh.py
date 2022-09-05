@@ -1,6 +1,6 @@
 from open_gl.gpu_buffer import GPUBuffer
 from models.tris_mesh import TrisMesh
-from utils.bit_set import BitSet
+from utils.bit_set import BitSet32
 from models import tris_mesh
 from OpenGL.GL import *
 import numpy as np
@@ -42,7 +42,7 @@ class MeshGL(object):
         self.__vao: int = 0
         self.__vbo: GPUBuffer = None
         self.__ibo: GPUBuffer = None
-        self.__vertex_attributes: BitSet = BitSet()
+        self.__vertex_attributes: BitSet32 = BitSet32()
         self.__vertex_byte_size = 0
         if not(mesh is None):
             self.__create_gpu_buffers(mesh)
@@ -135,7 +135,7 @@ class MeshGL(object):
             self.__vbo = GPUBuffer(len(vertices), int(vertices.nbytes / len(vertices)))
         self.__vbo.load_buffer_data(vertices)
 
-    def set_attributes(self, attributes: BitSet):
+    def set_attributes(self, attributes: BitSet32):
 
         if self.__vao == 0:
             return

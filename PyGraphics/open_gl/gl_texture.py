@@ -1,7 +1,7 @@
-import numpy as np
 from materials.material import Texture
-from OpenGL.GL import *
 from materials.rgb import RGB
+from OpenGL.GL import *
+import numpy as np
 
 
 # TODO texture_cube

@@ -271,7 +271,7 @@ class Transform(object):
         self.__m_transform = math_utils.look_at(target, eye, up)
 
     # переводит вектор в собственное пространство координат
-    def transform_vect(self, vec: Vec3, w) -> Vec3:
+    def transform_vect(self, vec: Vec3, w=1.0) -> Vec3:
         if w == 0:
             return Vec3(self.__m_transform.m00 * vec.x + self.__m_transform.m01 * vec.y + self.__m_transform.m02 * vec.z,
                         self.__m_transform.m10 * vec.x + self.__m_transform.m11 * vec.y + self.__m_transform.m12 * vec.z,
@@ -283,7 +283,7 @@ class Transform(object):
             self.__m_transform.m20 * vec.x + self.__m_transform.m21 * vec.y + self.__m_transform.m22 * vec.z + self.__m_transform.m23)
 
     # не переводит вектор в собственное пространство координат =)
-    def inv_transform_vect(self, vec: Vec3, w) -> Vec3:
+    def inv_transform_vect(self, vec: Vec3, w=1.0) -> Vec3:
         scl: Vec3 = self.scale
         if w == 0:
             return Vec3((self.__m_transform.m00 * vec.x + self.__m_transform.m10 * vec.y + self.__m_transform.m20 * vec.z) / scl.x / scl.x,

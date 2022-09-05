@@ -1,7 +1,7 @@
 from open_gl.gpu_buffer import GPUBuffer
+from surfaces.patch import CubicPatch
 from open_gl.gl_mesh import MeshGL
 from open_gl.shader import Shader
-from surfaces.patch import CubicPatch
 from vmath.vectors import Vec3
 from models import tris_mesh
 import transforms.transform

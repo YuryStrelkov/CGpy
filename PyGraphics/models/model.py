@@ -87,8 +87,8 @@ class Model(object):
         return self.__materials[_id]
 
     def add_mesh(self, mesh: TrisMesh) -> None:
-        self.__bbox.update_bounds(mesh.bbox.max)
-        self.__bbox.update_bounds(mesh.bbox.min)
+        self.__bbox.encapsulate(mesh.bbox.max)
+        self.__bbox.encapsulate(mesh.bbox.min)
         self.__meshes.append(mesh)
 
     def add_material(self, mat: Material) -> None:

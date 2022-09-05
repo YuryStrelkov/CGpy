@@ -1,3 +1,4 @@
+from models.bounding_box import BoundingBox
 from transforms.transform import Transform
 from vmath.math_utils import Vec3, Vec2
 from models.triangle import Triangle
@@ -131,52 +132,6 @@ class Face:
         self.__p_3: int = index
         self.__uv3: int = index
         self.__n_3: int = index
-
-
-class BoundingBox(object):
-
-    __slots__ = "__max", "__min"
-
-    def __init__(self):
-        self.__max: Vec3 = Vec3(-1e12, -1e12, -1e12)
-        self.__min: Vec3 = Vec3(1e12, 1e12, 1e12)
-
-    def __str__(self):
-        return f"{{\n" \
-               f"\t\"min\": {self.min}," \
-               f"\t\"max\": {self.max}" \
-               f"\n}}"
-
-    def update_bounds(self, v: Vec3) -> None:
-        if v.x > self.__max.x:
-            self.__max.x = v.x
-        if v.y > self.__max.y:
-            self.__max.y = v.y
-        if v.z > self.__max.z:
-            self.__max.z = v.z
-        # update min bound
-        if v.x < self.__min.x:
-            self.__min.x = v.x
-        if v.y < self.__min.y:
-            self.__min.y = v.y
-        if v.z < self.__min.z:
-            self.__min.z = v.z
-
-    @property
-    def min(self) -> Vec3:
-        return self.__min
-
-    @property
-    def max(self) -> Vec3:
-        return self.__max
-
-    @property
-    def size(self) -> Vec3:
-        return self.__max - self.__min
-
-    @property
-    def center(self) -> Vec3:
-        return (self.__max + self.__min) * 0.5
 
 
 class TrisMesh(object):
