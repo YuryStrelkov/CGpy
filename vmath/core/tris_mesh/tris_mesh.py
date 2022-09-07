@@ -1,7 +1,7 @@
-from models.bounding_box import BoundingBox
-from transforms.transform import Transform
-from vmath.math_utils import Vec3, Vec2
-from models.triangle import Triangle
+from core.transforms.transform import Transform
+from core.tris_mesh.triangle import Triangle
+from core.bounding_box import BoundingBox
+from core.vectors import Vec3, Vec2
 import numpy as np
 import re
 
@@ -455,4 +455,3 @@ def create_plane(height: float = 1.0, width: float = 1.0, rows: int = 10,
     if transform is not None:
         mesh.transform_mesh(transform)
     return mesh
-

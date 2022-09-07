@@ -1,122 +1,6 @@
-from vmath.math_utils import Vec3, Mat4, Mat3
-from vmath import math_utils
-
-
-def bezier_3_quadratic(p1: Vec3, p2: Vec3, p3: Vec3, t: float) -> Vec3:
-    return math_utils.lerp_vec_3(math_utils.lerp_vec_3(p1, p2, t), math_utils.lerp_vec_3(p2, p3, t), t)
-
-
-def bezier_3_cubic(p1: Vec3, p2: Vec3, p3: Vec3, p4: Vec3, t: float) -> Vec3:
-    return math_utils.lerp_vec_3(bezier_3_quadratic(p1, p2, p3, t), bezier_3_quadratic(p2, p3, p4, t), t)
-
-
-def bezier_mat_3_quadratic(p1: Mat3, p2: Mat3, p3: Mat3, t: float) -> Mat3:
-    return math_utils.lerp_mat_3(math_utils.lerp_mat_3(p1, p2, t), math_utils.lerp_mat_3(p2, p3, t), t)
-
-
-def bezier_mat_3_cubic(p1: Mat3, p2: Mat3, p3: Mat3, p4: Mat3, t: float) -> Mat3:
-    return math_utils.lerp_mat_3(bezier_mat_3_quadratic(p1, p2, p3, t), bezier_mat_3_quadratic(p2, p3, p4, t), t)
-
-
-def bezier_mat_4_quadratic(p1: Mat4, p2: Mat4, p3: Mat4, t: float) -> Mat4:
-    return math_utils.lerp_mat_4(math_utils.lerp_mat_4(p1, p2, t), math_utils.lerp_mat_4(p2, p3, t), t)
-
-
-def bezier_mat_4_cubic(p1: Mat4, p2: Mat4, p3: Mat4, p4: Mat4, t: float) -> Mat4:
-    return math_utils.lerp_mat_4(bezier_mat_4_quadratic(p1, p2, p3, t), bezier_mat_4_quadratic(p2, p3, p4, t), t)
-
-
-def bezier_3_tangent(p1: Vec3, p2: Vec3, p3: Vec3, p4: Vec3, t: float) -> Vec3:
-    d: float = 3 * t * t
-    a: float = -3 + 6 * t - d
-    b: float = 3 - 12 * t + 3 * d
-    c: float = 6 * t - 3 * d
-    return Vec3(p1.x * a + p2.x * b + p3.x * c + p4.x * d,
-                p1.y * a + p2.y * b + p3.y * c + p4.y * d,
-                p1.z * a + p2.z * b + p3.z * c + p4.z * d)
-
-
-class BezierPoint3:
-
-    __slots__ = "__point", "__anchor_1", "__anchor_2", "smooth"
-
-    def __init__(self, p: Vec3):
-        self.__point: Vec3 = p
-        self.__anchor_1: Vec3 = p + Vec3(0.125, 0, 0.125)
-        self.__anchor_2: Vec3 = p + Vec3(-0.125, 0, -0.125)
-        self.smooth: bool = True
-
-    def __str__(self):
-        return f"{{\n\t\"point\":     {self.__point},\n" \
-                   f"\t\"smooth\":    {self.smooth},\n" \
-                   f"\t\"anchor_1\":  {self.__anchor_1},\n" \
-                   f"\t\"anchor_2\":  {self.__anchor_2}\n}}"
-
-    def align_anchors(self, dir_: Vec3) -> None:
-        w_1: float = self.anchor_1_weight
-        w_2: float = self.anchor_2_weight
-        dir_.normalize()
-        self.__anchor_1 = self.__point + dir_ * w_1
-        self.__anchor_2 = self.__point - dir_ * w_2
-
-    @property
-    def anchor_1_weight(self) -> float:
-        return (self.__point - self.__anchor_1).magnitude
-
-    @property
-    def anchor_2_weight(self) -> float:
-        return (self.__point - self.__anchor_2).magnitude
-
-    @anchor_1_weight.setter
-    def anchor_1_weight(self, w: float) -> None:
-        _dw: Vec3 = self.__anchor_1 - self.__point
-        _w: float = _dw.magnitude
-        _dw.x *= (w / _w)
-        _dw.y *= (w / _w)
-        _dw.z *= (w / _w)
-        self.__anchor_1 = _dw + self.__point
-
-    @anchor_2_weight.setter
-    def anchor_2_weight(self, w: float) -> None:
-        _dw: Vec3 = self.__anchor_2 - self.__point
-        _w: float = _dw.magnitude
-        _dw.x *= (w / _w)
-        _dw.y *= (w / _w)
-        _dw.z *= (w / _w)
-        self.__anchor_2 = _dw + self.__point
-
-    @property
-    def anchor_1(self) -> Vec3:
-        return self.__anchor_1
-
-    @anchor_1.setter
-    def anchor_1(self, anchor: Vec3) -> None:
-        self.__anchor_1 = anchor
-        if self.smooth:
-            distance = (self.point - self.__anchor_2).norm()
-            self.__anchor_2 = self.point + (self.point - self.__anchor_1).normalize() * distance
-
-    @property
-    def anchor_2(self) -> Vec3:
-        return self.__anchor_2
-
-    @anchor_2.setter
-    def anchor_2(self, anchor: Vec3) -> None:
-        self.__anchor_2 = anchor
-        if self.smooth:
-            distance = (self.point - self.__anchor_1).norm()
-            self.__anchor_1 = self.point + (self.point - self.__anchor_2).normalize() * distance
-
-    @property
-    def point(self) -> Vec3:
-        return self.__point
-
-    @point.setter
-    def point(self, p: Vec3) -> None:
-        dp: Vec3 = p - self.__point
-        self.__point = p
-        self.__anchor_1 = self.__anchor_1 + dp
-        self.__anchor_2 = self.__anchor_2 + dp
+from core.bezier.bezier_point_3 import BezierPoint3
+from core.vectors import Vec3
+from core import math_utils
 
 
 class BezierCurve3(object):
@@ -151,8 +35,8 @@ class BezierCurve3(object):
 
         self.__iter_sect_i += 1
 
-        return bezier_3_cubic(self.__iter_p1.point, self.__iter_p1.anchor_1,
-                              self.__iter_p2.anchor_2, self.__iter_p2.point, t)
+        return math_utils.bezier_3_cubic(self.__iter_p1.point, self.__iter_p1.anchor_1,
+                                         self.__iter_p2.anchor_2, self.__iter_p2.point, t)
 
     def __repr__(self):
         res: str = "BezierCurve2:\n"
@@ -290,7 +174,7 @@ class BezierCurve3(object):
         t = min(max(t, 0.0), 1.0)
         p1: BezierPoint3 = self.__points[pid]
         p2: BezierPoint3 = self.__points[(pid + 1) % len(self.__points)]
-        return bezier_3_cubic(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t)
+        return math_utils.bezier_3_cubic(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t)
 
     def curve_normal(self, pid: int, t: float) -> Vec3:
         if not self.__in_range(pid):
@@ -302,12 +186,12 @@ class BezierCurve3(object):
 
         if t + dt <= 1:
             return math_utils.perpendicular_3(
-                bezier_3_cubic(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t + dt) -
-                bezier_3_cubic(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t))
+                math_utils.bezier_3_cubic(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t + dt) -
+                math_utils.bezier_3_cubic(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t))
 
         return math_utils.perpendicular_3(
-            bezier_3_cubic(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t) -
-            bezier_3_cubic(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t - dt))
+            math_utils.bezier_3_cubic(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t) -
+            math_utils.bezier_3_cubic(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t - dt))
 
     def curve_tangent(self, pid: int, t: float) -> Vec3:
         if not self.__in_range(pid):
@@ -318,7 +202,7 @@ class BezierCurve3(object):
         t = min(max(t, 0.0), 1.0)
         p1: BezierPoint3 = self.__points[pid]
         p2: BezierPoint3 = self.__points[(pid + 1) % len(self.__points)]
-        return bezier_3_tangent(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t)
+        return math_utils.bezier_3_tangent(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t)
 
     def curve_values(self, step: float = 0.01):
         if self.n_control_points < 2:
@@ -336,7 +220,7 @@ class BezierCurve3(object):
                     break
                 p1 = self.__points[point_id]
                 p2 = self.__points[(point_id + 1) % len(self.__points)]
-            yield bezier_3_tangent(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t)
+            yield math_utils.bezier_3_tangent(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t)
             t += step
 
         if self.closed:
@@ -344,7 +228,7 @@ class BezierCurve3(object):
             p1: BezierPoint3 = self.__points[self.n_control_points - 1]
             p2: BezierPoint3 = self.__points[0]
             while t >= 1.0:
-                yield bezier_3_tangent(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t)
+                yield math_utils.bezier_3_tangent(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t)
                 t += step
 
     def curve_normals(self, step: float = 0.01):
@@ -364,8 +248,8 @@ class BezierCurve3(object):
                 p1 = self.__points[point_id]
                 p2 = self.__points[(point_id + 1) % len(self.__points)]
             yield math_utils.perpendicular_2(
-                bezier_3_tangent(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t + step) -
-                bezier_3_tangent(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t))
+                math_utils.bezier_3_tangent(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t + step) -
+                math_utils.bezier_3_tangent(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t))
             t += step
 
         if self.closed:
@@ -374,8 +258,8 @@ class BezierCurve3(object):
             p2: BezierPoint3 = self.__points[0]
             while t >= 1.0:
                 yield math_utils.perpendicular_2(
-                    bezier_3_tangent(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t + step) -
-                    bezier_3_tangent(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t))
+                    math_utils.bezier_3_tangent(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t + step) -
+                    math_utils.bezier_3_tangent(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t))
                 t += step
 
     def curve_tangents(self, step: float = 0.01):
@@ -394,7 +278,7 @@ class BezierCurve3(object):
                     break
                 p1 = self.__points[point_id]
                 p2 = self.__points[(point_id + 1) % len(self.__points)]
-            yield bezier_3_tangent(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t)
+            yield math_utils.bezier_3_tangent(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t)
             t += step
 
         if self.closed:
@@ -402,8 +286,5 @@ class BezierCurve3(object):
             p1: BezierPoint3 = self.__points[self.n_control_points - 1]
             p2: BezierPoint3 = self.__points[0]
             while t >= 1.0:
-                yield bezier_3_tangent(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t)
+                yield math_utils.bezier_3_tangent(p1.point, p1.anchor_1, p2.anchor_2, p2.point, t)
                 t += step
-    # def outline(self, value:):
-    # def __repr__(self): return "<vec2 x:%s y:%s>" % (self.xy[0], self.xy[1])
-    # def __str__(self): return "[%s, %s]" % (self.xy[0], self.xy[1])

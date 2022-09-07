@@ -1,17 +1,16 @@
-import numpy as np
-
-from models.model import Model
 from models.vertex import Vertex, lerp_vertex
-from surfaces.patch import CubicPatch
-from vmath import math_utils
-from shapes.bezier2 import BezierCurve2
 from vmath.math_utils import Vec2, Vec3
+from shapes.bezier2 import BezierCurve2
 from materials.material import Material
-from camera import Camera
+from surfaces.patch import CubicPatch
 from frameBuffer import FrameBuffer
+from models.model import Model
+from vmath import math_utils
 from frameBuffer import RGB
-import tkinter as tk
+from camera import Camera
 from PIL import ImageTk
+import tkinter as tk
+import numpy as np
 
 
 def render_camera(fb: FrameBuffer, lookat: Vec3, eye: Vec3) -> Camera:

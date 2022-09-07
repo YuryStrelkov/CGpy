@@ -1,17 +1,15 @@
-import math
-
-import numpy as np
-
-from camera import Camera
-from models.model import Model
-from surfaces.patch import CubicPatch
 from transforms.transform import Transform
-from vmath.math_utils import Vec2
-from frameBuffer import FrameBuffer
-import graphics as gr
-import time
 from shapes.bezier2 import BezierCurve2
+from surfaces.patch import CubicPatch
+from frameBuffer import FrameBuffer
+from vmath.math_utils import Vec2
 from vmath.vectors import Vec3
+from models.model import Model
+from camera import Camera
+import graphics as gr
+import numpy as np
+import math
+import time
 
 
 def bezier_intersection_test():

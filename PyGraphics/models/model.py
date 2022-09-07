@@ -15,8 +15,8 @@ class Model(object):
         self.__mesh_origin: str = ""
         self.__bbox: BoundingBox = BoundingBox()
         for m in self.__meshes:
-            self.__bbox.update_bounds(m.bbox.min)
-            self.__bbox.update_bounds(m.bbox.max)
+            self.__bbox.encapsulate(m.bbox.min)
+            self.__bbox.encapsulate(m.bbox.max)
 
     def __mesh_id_in_range(self, _id: int) -> bool:
         if _id < 0:
