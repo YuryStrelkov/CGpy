@@ -220,13 +220,13 @@ class Transform:
 
     @property
     def angles(self) -> Vec3:
-        return math_utils.rot_m_to_euler_angles(self.rotation_mat())
+        return geometry_utils.rot_m_to_euler_angles(self.rotation_mat())
 
     @angles.setter
     def angles(self, xyz: Vec3) -> None:
-        i = math_utils.rotate_x(xyz.x)
-        i = math_utils.rotate_y(xyz.y) * i
-        i = math_utils.rotate_z(xyz.z) * i
+        i = geometry_utils.rotate_x(xyz.x)
+        i = geometry_utils.rotate_y(xyz.y) * i
+        i = geometry_utils.rotate_z(xyz.z) * i
         scl = self.scale
         orig = self.origin
         self.__m_transform = i
@@ -235,30 +235,30 @@ class Transform:
 
     @property
     def ax(self) -> float:
-        return math_utils.rot_m_to_euler_angles(self.rotation_mat()).x
+        return geometry_utils.rot_m_to_euler_angles(self.rotation_mat()).x
 
     @property
     def ay(self) -> float:
-        return math_utils.rot_m_to_euler_angles(self.rotation_mat()).y
+        return geometry_utils.rot_m_to_euler_angles(self.rotation_mat()).y
 
     @property
     def az(self) -> float:
-        return math_utils.rot_m_to_euler_angles(self.rotation_mat()).z
+        return geometry_utils.rot_m_to_euler_angles(self.rotation_mat()).z
 
     @ax.setter
     def ax(self, x: float) -> None:
         _angles = self.angles
-        self.angles = Vec3(math_utils.deg_to_rad(x), _angles.y, _angles.z)
+        self.angles = Vec3(geometry_utils.deg_to_rad(x), _angles.y, _angles.z)
 
     @ay.setter
     def ay(self, y: float) -> None:
         _angles = self.angles
-        self.angles = Vec3(_angles.x, math_utils.deg_to_rad(y), _angles.z)
+        self.angles = Vec3(_angles.x, geometry_utils.deg_to_rad(y), _angles.z)
 
     @az.setter
     def az(self, z: float) -> None:
         _angles = self.angles
-        self.angles = Vec3(_angles.x, _angles.y, math_utils.deg_to_rad(z))
+        self.angles = Vec3(_angles.x, _angles.y, geometry_utils.deg_to_rad(z))
 
     def rotation_mat(self) -> Mat4:
         scl = self.scale
@@ -268,7 +268,7 @@ class Transform:
                     0, 0, 0, 1)
 
     def look_at(self, target: Vec3, eye: Vec3, up: Vec3 = Vec3(0, 1, 0)) -> None:
-        self.__m_transform = math_utils.look_at(target, eye, up)
+        self.__m_transform = geometry_utils.look_at(target, eye, up)
 
     # переводит вектор в собственное пространство координат
     def transform_vect(self, vec: Vec3, w=1.0) -> Vec3:

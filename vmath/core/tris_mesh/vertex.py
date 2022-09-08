@@ -78,8 +78,8 @@ class Vertex:
         self.__v = cam.to_clip_space(self.v)
 
     def to_screen_space(self, scr_size: Vec2) -> None:
-        self.__v = Vec3(round(math_utils.clamp(0, scr_size.x - 1, round(scr_size.x * (self.v.x * 0.5 + 0.5)))),
-                        round(math_utils.clamp(0, scr_size.y - 1, round(scr_size.y * (-self.v.y * 0.5 + 0.5)))),
+        self.__v = Vec3(round(geometry_utils.clamp(0, scr_size.x - 1, round(scr_size.x * (self.v.x * 0.5 + 0.5)))),
+                        round(geometry_utils.clamp(0, scr_size.y - 1, round(scr_size.y * (-self.v.y * 0.5 + 0.5)))),
                         self.v.z)
 
     def camera_screen_transform(self, cam: Camera, scr_size: Vec2) -> None:
