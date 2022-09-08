@@ -16,6 +16,7 @@ class BoundingBox:
                f"\t\"max\": {self.max}" \
                f"\n}}"
 
+    @property
     def points(self):
         c = self.center
         s = self.size

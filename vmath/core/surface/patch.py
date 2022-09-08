@@ -1,6 +1,6 @@
 from core.tris_mesh.tris_mesh import create_plane
 from core.transforms.transform import Transform
-from core.math_utils import cubic_bezier_patch
+from core.geometry_utils import cubic_bezier_patch
 from core.tris_mesh.tris_mesh import TrisMesh
 from core.tris_mesh.triangle import Triangle
 from core.bounding_box import BoundingBox

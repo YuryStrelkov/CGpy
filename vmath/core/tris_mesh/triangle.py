@@ -2,7 +2,7 @@ from core.transforms.transform import Transform
 from core.tris_mesh.vertex import Vertex
 from core.vectors import Vec3, Vec2
 from core.camera import Camera
-from core import math_utils
+from core import geometry_utils
 
 
 class Triangle(object):
@@ -106,14 +106,14 @@ class Triangle(object):
         self.__p3 = cam.to_clip_space(self.__p3)
 
     def to_screen_space(self, scr_size: Vec2) -> None:
-        self.__p1 = Vec3(round(math_utils.clamp(0, scr_size.x - 1, round(scr_size.x * (self.__p1.x * 0.5 + 0.5)))),
-                         round(math_utils.clamp(0, scr_size.y - 1, round(scr_size.y * (-self.__p1.y * 0.5 + 0.5)))),
+        self.__p1 = Vec3(round(geometry_utils.clamp(0, scr_size.x - 1, round(scr_size.x * (self.__p1.x * 0.5 + 0.5)))),
+                         round(geometry_utils.clamp(0, scr_size.y - 1, round(scr_size.y * (-self.__p1.y * 0.5 + 0.5)))),
                          self.__p1.z)
-        self.__p2 = Vec3(round(math_utils.clamp(0, scr_size.x - 1, round(scr_size.x * (self.__p2.x * 0.5 + 0.5)))),
-                         round(math_utils.clamp(0, scr_size.y - 1, round(scr_size.y * (-self.__p2.y * 0.5 + 0.5)))),
+        self.__p2 = Vec3(round(geometry_utils.clamp(0, scr_size.x - 1, round(scr_size.x * (self.__p2.x * 0.5 + 0.5)))),
+                         round(geometry_utils.clamp(0, scr_size.y - 1, round(scr_size.y * (-self.__p2.y * 0.5 + 0.5)))),
                          self.__p2.z)
-        self.__p3 = Vec3(round(math_utils.clamp(0, scr_size.x - 1, round(scr_size.x * (self.__p3.x * 0.5 + 0.5)))),
-                         round(math_utils.clamp(0, scr_size.y - 1, round(scr_size.y * (-self.__p3.y * 0.5 + 0.5)))),
+        self.__p3 = Vec3(round(geometry_utils.clamp(0, scr_size.x - 1, round(scr_size.x * (self.__p3.x * 0.5 + 0.5)))),
+                         round(geometry_utils.clamp(0, scr_size.y - 1, round(scr_size.y * (-self.__p3.y * 0.5 + 0.5)))),
                          self.__p3.z)
 
     def camera_screen_transform(self, cam: Camera, scr_size: Vec2) -> None:

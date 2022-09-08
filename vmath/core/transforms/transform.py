@@ -1,7 +1,7 @@
 from core.matrices import Mat4
 import core.vectors as vectors
 from core.vectors import Vec3
-from core import math_utils
+from core import geometry_utils
 import math
 
 

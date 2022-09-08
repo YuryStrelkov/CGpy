@@ -1,3 +1,4 @@
+from core.bounding_box import BoundingBox
 from core.transforms.transform import Transform
 from matrices import Mat4
 from vectors import Vec3
@@ -148,3 +149,22 @@ class Camera(object):
             out.y /= w
             out.z /= w
         return out
+
+    def cast_object(self, b_box: BoundingBox) -> bool:
+        for pt in b_box.points():
+            pt = self.to_clip_space(pt)
+            if pt.x < -1.0:
+                continue
+            if pt.x > 1.0:
+                continue
+            if pt.y < -1.0:
+                continue
+            if pt.y > 1.0:
+                continue
+            if pt.z < -1.0:
+                continue
+            if pt.z > 1.0:
+                continue
+            return True
+        return False
+

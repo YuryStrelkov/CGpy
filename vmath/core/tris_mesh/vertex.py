@@ -1,6 +1,6 @@
 from core.vectors import Vec3, Vec2
 from core.camera import Camera
-from core import math_utils
+from core import geometry_utils
 
 
 class Vertex:

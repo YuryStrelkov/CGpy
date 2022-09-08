@@ -1,11 +1,15 @@
 from matrices import Mat4, Mat3
 from vectors import Vec3, Vec2
-import vectors as vectors
 import matrices
+import vectors
 import math
 
 
 def rotate_x(angle: float) -> Mat4:
+    """
+    :param angle: угол поворота вокру оси х
+    :return: матрица поворота вокруг оси x
+    """
     cos_a = math.cos(angle)
     sin_a = math.sin(angle)
     return Mat4(1, 0, 0, 0,
@@ -15,6 +19,10 @@ def rotate_x(angle: float) -> Mat4:
 
 
 def rotate_y(angle: float) -> Mat4:
+    """
+     :param angle: угол поворота вокру оси y
+     :return: матрица поворота вокруг оси y
+     """
     cos_a = math.cos(angle)
     sin_a = math.sin(angle)
     return Mat4(cos_a, 0, -sin_a, 0,
@@ -24,6 +32,10 @@ def rotate_y(angle: float) -> Mat4:
 
 
 def rotate_z(angle: float) -> Mat4:
+    """
+     :param angle: угол поворота вокру оси z
+     :return: матрица поворота вокруг оси z
+     """
     cos_a = math.cos(angle)
     sin_a = math.sin(angle)
     return Mat4(cos_a, -sin_a, 0, 0,
@@ -33,16 +45,36 @@ def rotate_z(angle: float) -> Mat4:
 
 
 def rotate(angle_x: float, angle_y: float, angle_z: float) -> Mat4:
+    """
+    :param angle_x: угол поворота вокру оси x
+    :param angle_y: угол поворота вокру оси y
+    :param angle_z: угол поворота вокру оси z
+    :return: матрица поворота
+    """
     return rotate_x(angle_x) * rotate_y(angle_y) * rotate_z(angle_z)
 
 
-def deg_to_rad(deg: float) -> float: return deg / 180.0 * math.pi
+def deg_to_rad(deg: float) -> float:
+    """
+    :param deg: угол в градусах
+    :return: угол в радианах
+    """
+    return deg / 180.0 * math.pi
 
 
-def rad_to_deg(deg: float) -> float: return deg / math.pi * 180.0
+def rad_to_deg(deg: float) -> float:
+    """
+    :param deg: угол в радианах
+    :return: угол в градусах
+    """
+    return deg / math.pi * 180.0
 
 
 def rot_m_to_euler_angles(rot: Mat4) -> Vec3:
+    """
+    :param rot: матрица поворота
+    :return: углы поворота по осям
+    """
     if math.fabs(rot.m20 + 1) < 1e-6:
         return Vec3(0, -math.pi * 0.5, math.atan2(rot.m01, rot.m02))
 
@@ -62,6 +94,12 @@ def rot_m_to_euler_angles(rot: Mat4) -> Vec3:
 
 
 def look_at(target: Vec3, eye: Vec3, up: Vec3 = Vec3(0, 1, 0)) -> Mat4:
+    """
+    :param target: цель на которую смотрим
+    :param eye: положение глаза в пространстве
+    :param up: вектор вверх
+    :return: матрица взгляда
+    """
     zaxis = target - eye  # The "forward" vector.
     zaxis.normalize()
     xaxis = vectors.cross(up, zaxis)  # The "right" vector.
@@ -75,6 +113,12 @@ def look_at(target: Vec3, eye: Vec3, up: Vec3 = Vec3(0, 1, 0)) -> Mat4:
 
 
 def clamp(min_: float, max_: float, val: float) -> float:
+    """
+    :param min_: минимальная граница
+    :param max_: максимальная граница
+    :param val: значение
+    :return: возвращает указанное значение val в границах от min до max
+    """
     if val < min_:
         return min_
     if val > max_:
@@ -83,20 +127,44 @@ def clamp(min_: float, max_: float, val: float) -> float:
 
 
 def lerp_vec_2(a: Vec2, b: Vec2, t: float) -> Vec2:
+    """
+    :param a: вектор начала
+    :param b: вектор конца
+    :param t: параметр в пределах от 0 до 1
+    :return: возвращает линейную интерполяцию между двухмерными векторами a и b
+    """
     return Vec2(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t)
 
 
 def lerp_vec_3(a: Vec3, b: Vec3, t: float) -> Vec3:
+    """
+    :param a: вектор начала
+    :param b: вектор конца
+    :param t: параметр в пределах от 0 до 1
+    :return: возвращает линейную интерполяцию между трёхмерными векторами a и b
+    """
     return Vec3(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t, a.z + (b.z - a.z) * t)
 
 
 def lerp_mat_3(a: Mat3, b: Mat3, t: float) -> Mat3:
+    """
+    :param a: матрица начала
+    :param b: матрица конца
+    :param t: параметр в пределах от 0 до 1
+    :return: возвращает линейную интерполяцию между трёхмернми матрицами a и b
+    """
     return Mat3(a.m00 + (b.m00 - a.m00) * t, a.m01 + (b.m01 - a.m01) * t, a.m02 + (b.m02 - a.m02) * t,
                 a.m10 + (b.m10 - a.m10) * t, a.m11 + (b.m11 - a.m11) * t, a.m12 + (b.m12 - a.m12) * t,
                 a.m20 + (b.m20 - a.m20) * t, a.m21 + (b.m21 - a.m21) * t, a.m22 + (b.m22 - a.m22) * t)
 
 
 def lerp_mat_4(a: Mat4, b: Mat4, t: float) -> Mat4:
+    """
+    :param a: матрица начала
+    :param b: матрица конца
+    :param t: параметр в пределах от 0 до 1
+    :return: возвращает линейную интерполяцию между четырёхмерными матрицами a и b
+    """
     return Mat4(
         a.m00 + (b.m00 - a.m00) * t, a.m01 + (b.m01 - a.m01) * t, a.m02 + (b.m02 - a.m02) * t,
         a.m03 + (b.m03 - a.m03) * t,
@@ -109,12 +177,20 @@ def lerp_mat_4(a: Mat4, b: Mat4, t: float) -> Mat4:
 
 
 def signum(value) -> float:
+    """
+    :param value:
+    :return: возвращает знач числа
+    """
     if value < 0:
         return -1.0
     return 1.0
 
 
 def perpendicular_2(v: Vec2) -> Vec2:
+    """
+    :param v:
+    :return: возвращает единичный вектор пермендикулярный заданному
+    """
     if v.x == 0:
         return Vec2(signum(v.y), 0)
     if v.y == 0:
@@ -127,6 +203,10 @@ def perpendicular_2(v: Vec2) -> Vec2:
 
 
 def perpendicular_3(v: Vec3) -> Vec3:
+    """
+    :param v:
+    :return: возвращает единичный вектор пермендикулярный заданному
+    """
     s: float = math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z)
     g: float = math.copysign(s, v.z)  # note s instead of 1
     h: float = v.z + g
@@ -134,6 +214,13 @@ def perpendicular_3(v: Vec3) -> Vec3:
 
 
 def build_projection_matrix(fov: float = 70, aspect: float = 1, znear: float = 0.01, zfar: float = 1000) -> Mat4:
+    """
+    :param fov: угол обзора
+    :param aspect: соотношение сторон
+    :param znear: ближняя плоскость отсечения
+    :param zfar: дальняя плоскость отсечения
+    :return: матрица перспективной проекции
+    """
     projection = matrices.identity_4()
     scale = 1.0 / math.tan(fov * 0.5 * math.pi / 180)
     projection.m00 = scale * aspect  # scale the x coordinates of the projected point
@@ -146,6 +233,13 @@ def build_projection_matrix(fov: float = 70, aspect: float = 1, znear: float = 0
 
 
 def build_orthogonal_basis(right: Vec3, up: Vec3, front: Vec3, main_axes=3) -> Mat4:
+    """
+    :param right:
+    :param up:
+    :param front:
+    :param main_axes:
+    :return:
+    """
     x_: Vec3
     y_: Vec3
     z_: Vec3
@@ -177,6 +271,14 @@ def build_orthogonal_basis(right: Vec3, up: Vec3, front: Vec3, main_axes=3) -> M
 
 
 def bezier_2_cubic(p1: Vec2, p2: Vec2, p3: Vec2, p4: Vec2, t: float) -> Vec2:
+    """
+    :param p1:
+    :param p2:
+    :param p3:
+    :param p4:
+    :param t:
+    :return: координаты точки на кривой
+    """
     one_min_t: float = 1.0 - t
     a: float = one_min_t * one_min_t * one_min_t
     b: float = 3.0 * one_min_t * one_min_t * t
@@ -187,6 +289,14 @@ def bezier_2_cubic(p1: Vec2, p2: Vec2, p3: Vec2, p4: Vec2, t: float) -> Vec2:
 
 
 def bezier_2_tangent(p1: Vec2, p2: Vec2, p3: Vec2, p4: Vec2, t: float) -> Vec2:
+    """
+    :param p1:
+    :param p2:
+    :param p3:
+    :param p4:
+    :param t:
+    :return: касательная для точки на кривой
+    """
     d: float = 3 * t * t
     a: float = -3 + 6 * t - d
     b: float = 3 - 12 * t + 3 * d
@@ -196,6 +306,14 @@ def bezier_2_tangent(p1: Vec2, p2: Vec2, p3: Vec2, p4: Vec2, t: float) -> Vec2:
 
 
 def bezier_3_cubic(p1: Vec3, p2: Vec3, p3: Vec3, p4: Vec3, t: float) -> Vec3:
+    """
+    :param p1:
+    :param p2:
+    :param p3:
+    :param p4:
+    :param t:
+    :return: координаты точки на кривой
+    """
     one_min_t: float = 1.0 - t
     a: float = one_min_t * one_min_t * one_min_t
     b: float = 3.0 * one_min_t * one_min_t * t
@@ -207,6 +325,14 @@ def bezier_3_cubic(p1: Vec3, p2: Vec3, p3: Vec3, p4: Vec3, t: float) -> Vec3:
 
 
 def bezier_3_tangent(p1: Vec3, p2: Vec3, p3: Vec3, p4: Vec3, t: float) -> Vec3:
+    """
+    :param p1:
+    :param p2:
+    :param p3:
+    :param p4:
+    :param t:
+    :return: касательная для точки на кривой
+    """
     d: float = 3 * t * t
     a: float = -3 + 6 * t - d
     b: float = 3 - 12 * t + 3 * d
@@ -219,6 +345,20 @@ def bezier_3_tangent(p1: Vec3, p2: Vec3, p3: Vec3, p4: Vec3, t: float) -> Vec3:
 def quadratic_bezier_patch(p1: Vec3, p2: Vec3, p3: Vec3,
                            p4: Vec3, p5: Vec3, p6: Vec3,
                            p7: Vec3, p8: Vec3, p9: Vec3, u: float, v: float) -> (Vec3, Vec3):
+    """
+    :param p1:
+    :param p2:
+    :param p3:
+    :param p4:
+    :param p5:
+    :param p6:
+    :param p7:
+    :param p8:
+    :param p9:
+    :param u:
+    :param v:
+    :return:
+    """
     phi1: float = (1 - u) * (1 - u)
     phi3: float = u * u
     phi2: float = -2 * phi3 + 2 * u
@@ -254,6 +394,27 @@ def cubic_bezier_patch(p1: Vec3, p2: Vec3, p3: Vec3, p4: Vec3,
                        p5: Vec3, p6: Vec3, p7: Vec3, p8: Vec3,
                        p9: Vec3, p10: Vec3, p11: Vec3, p12: Vec3,
                        p13: Vec3, p14: Vec3, p15: Vec3, p16: Vec3, u: float, v: float) -> (Vec3, Vec3):
+    """
+    :param p1:
+    :param p2:
+    :param p3:
+    :param p4:
+    :param p5:
+    :param p6:
+    :param p7:
+    :param p8:
+    :param p9:
+    :param p10:
+    :param p11:
+    :param p12:
+    :param p13:
+    :param p14:
+    :param p15:
+    :param p16:
+    :param u:
+    :param v:
+    :return:
+    """
 
     phi1: float = (1 - u) * (1 - u) * (1 - u)
     phi4: float =  u * u * u
@@ -291,3 +452,82 @@ def cubic_bezier_patch(p1: Vec3, p2: Vec3, p3: Vec3, p4: Vec3,
                 p13 * phi4 * d1 + p14 * phi4 * d2 + p15 * phi4 * d3 + p16 * phi4 * d4
 
     return [p, vectors.cross(dpv, dpu).normalize()]
+
+
+def point_to_line_dist(point: Vec3, origin: Vec3, direction: Vec3) -> float:
+    """
+    :arg point точка до которой ищем расстоняие
+    :arg origin начало луча
+    :arg direction направление луча (единичный вектор)
+    :return расстояние между точкой и прямой
+    """
+    pass
+
+
+def line_to_line_dist(origin_1: Vec3, direction_1: Vec3, origin_2: Vec3, direction_2: Vec3) -> float:
+    """
+    :arg origin_1 начало первого луча
+    :arg direction_1 направление первого луча (единичный вектор)
+    :arg origin_2 начало второго луча
+    :arg direction_2 направление второго луча (единичный вектор)
+    :return расстояние между первой и второй прямой
+    """
+    pass
+
+
+def plane_to_point_dist(r_0: Vec3, n: Vec3, point: Vec3) -> float:
+    # (r - r_0, n) = 0
+    """
+    :arg r_0 точка через которую проходит плоскость
+    :arg n нормаль к плоскости (единичный вектор)
+    :arg point точка для которой ищем расстояние
+    :return расстояние между точкой и плоскостью
+    """
+    pass
+
+
+def ray_plane_intersect(r_0: Vec3, n: Vec3, origin: Vec3, direction: Vec3) -> (bool, float):
+    # (r - r_0, n) = 0
+    """
+    :arg r_0 точка через которую проходит плоскость
+    :arg n нормаль к плоскости (единичный вектор)
+    :arg origin начало луча
+    :arg direction направление луча (единичный вектор)
+    :return длина луча вдоль его направления до пересечения с плоскостью
+    """
+    pass
+
+
+def ray_sphere_intersect(r_0: Vec3, r: float, origin: Vec3, direction: Vec3) -> (bool, float, float):
+    """
+    :arg r_0 точка центра сферы
+    :arg r радиус сферы
+    :arg origin начало луча
+    :arg direction направление луча (единичный вектор)
+    :return длина луча вдоль его направления до первого и воторого пересечений со сферой, если они есть
+    """
+    pass
+
+
+def ray_box_intersect(box_min: Vec3, box_max: Vec3, origin: Vec3, direction: Vec3) -> (bool, float, float):
+    # r = r_0 + e * t
+    """
+    :arg box_min минимальная точка бокса
+    :arg box_max  максимальная точка бокса
+    :arg origin начало луча
+    :arg direction направление луча (единичный вектор)
+    :return длина луча вдоль его направления до первого и воторого пересечений со боксом, если они есть
+    """
+    pass
+
+
+def ray_triangle_intersect(p1: Vec3, p2: Vec3, p3: Vec3, origin: Vec3, direction: Vec3) -> (bool, float):
+    """
+       :arg p1 первая вершина трекугольника
+       :arg p2 вторая вершина трекугольника
+       :arg p3 третья вершина трекугольника
+       :arg origin начало луча
+       :arg direction направление луча (единичный вектор)
+       :return длина луча вдоль его направления до пересечения с треугольником, если оно
+    """
+    pass

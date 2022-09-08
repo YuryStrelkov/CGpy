@@ -1,6 +1,6 @@
 from core.bezier.bezier_point_3 import BezierPoint3
 from core.vectors import Vec3
-from core import math_utils
+from core import geometry_utils
 
 
 class BezierCurve3(object):

@@ -1,4 +1,4 @@
-from core.math_utils import Vec2
+from core.geometry_utils import Vec2
 
 
 class BezierPoint2:
