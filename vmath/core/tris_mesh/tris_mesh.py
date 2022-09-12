@@ -23,9 +23,9 @@ class Face:
 
     def __str__(self):
         return f"{{" \
-               f"\t\"p_1\": {self.p_1}, \"uv1\": {self.uv1}, \"n_1\": {self.n_1},\n" \
-               f"\t\"p_2\": {self.p_2}, \"uv2\": {self.uv2}, \"n_2\": {self.n_2},\n" \
-               f"\t\"p_3\": {self.p_3}, \"uv3\": {self.uv3}, \"n_3\": {self.n_3}\n" \
+               f"\t\"p_1\": {self.p_1:4}, \"uv1\": {self.uv1:4}, \"n_1\": {self.n_1:4}," \
+               f"\t\"p_2\": {self.p_2:4}, \"uv2\": {self.uv2:4}, \"n_2\": {self.n_2:4}," \
+               f"\t\"p_3\": {self.p_3:4}, \"uv3\": {self.uv3:4}, \"n_3\": {self.n_3:4}" \
                f"}}"
 
     @property
@@ -134,12 +134,12 @@ class Face:
         self.__n_3: int = index
 
 
-class TrisMesh(object):
+class TrisMesh:
 
     __slots__ = "name", "_vertices", "_normals", "_uvs", "_faces", "_bbox"
 
     def __init__(self):
-        self.name: str = ""
+        self.name: str = "no name"
         self._vertices: [Vec3] = []
         self._normals: [Vec3] = []
         self._uvs: [Vec2] = []
@@ -147,39 +147,20 @@ class TrisMesh(object):
         self._bbox: BoundingBox = BoundingBox()
 
     def __str__(self):
-        res: str = f"mesh: {self.name}\n"
-        res += f"max: {self._bbox.max}\n"
-        res += f"min: {self._bbox.min}\n"
-        res += "vertices: \n"
-        for v in self._vertices:
-            res += f"{v}\n"
-        res += "normals: \n"
-        for v in self._normals:
-            res += f"{v}\n"
-        res += "uvs: \n"
-        for v in self._uvs:
-            res += f"{v}\n"
-        for f in self._faces:
-            res += f"{f}\n"
-        return res
+        new_l = ",\n\t\t"
+        return f"{{\n" \
+               f"\t\"name\"     : \"{self.name}\",\n" \
+               f"\t\"unique_id\": {self.unique_id},\n" \
+               f"\t\"bounds\"   :\n{self._bbox},\n" \
+               f"\t\"vertices\" :\n\t[\n\t\t{new_l.join(str(v) for v in self._vertices)}\n\t],\n" \
+               f"\t\"normals\"  :\n\t[\n\t\t{new_l.join(str(v) for v in self._normals)}\n\t],\n" \
+               f"\t\"uvs\"      :\n\t[\n\t\t{new_l.join(str(v) for v in self._uvs)}\n\t],\n" \
+               f"\t\"faces\"    :\n\t[\n\t\t{new_l.join(str(v) for v in self._faces)}\n\t]\n" \
+               f"}}"
 
-    def __repr__(self):
-        res: str = f"<\nmesh: {self.name}\n"
-        res += f"max: {self._bbox.max}\n"
-        res += f"min: {self._bbox.min}\n"
-        res += "vertices: \n"
-        for v in self._vertices:
-            res += f"{v}\n"
-        res += "normals: \n"
-        for v in self._normals:
-            res += f"{v}\n"
-        res += "uvs: \n"
-        for v in self._uvs:
-            res += f"{v}\n"
-        for f in self._faces:
-            res += f"{f}\n"
-        res += "\n>"
-        return res
+    @property
+    def unique_id(self) -> int:
+        return id(self)
 
     @property
     def vertex_array_data(self) -> np.ndarray:

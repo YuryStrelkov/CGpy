@@ -1,7 +1,7 @@
 import numpy as np
 
 
-class Mat3(object):
+class Mat3:
 
     @staticmethod
     def __unpack_values(*args) -> tuple:
@@ -299,7 +299,7 @@ class Mat3(object):
                     b[6] * self.__data[2] + b[7] * self.__data[5] + b[8] * self.__data[8])
 
 
-class Mat4(object):
+class Mat4:
     @staticmethod
     def __unpack_values(*args) -> tuple:
         args = args[0]

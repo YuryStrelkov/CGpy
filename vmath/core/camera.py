@@ -1,13 +1,13 @@
 from core.bounding_box import BoundingBox
 from core.transforms.transform import Transform
-from matrices import Mat4
-from vectors import Vec3
+from core.matrices import Mat4
+from core.vectors import Vec3
 import math
 
 
 # определяет направление и положение с которого мы смотрим на 3D сцену
 # определяет так же перспективное искажение
-class Camera(object):
+class Camera:
 
     __slots__ = "__transform", "__zfar", "__znear", "__projection", "__inv_projection"
 

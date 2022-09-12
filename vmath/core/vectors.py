@@ -3,7 +3,7 @@ import ctypes
 import math
 
 
-class Vec2(object):
+class Vec2:
 
     @staticmethod
     def __unpack_values(*args) -> tuple:
@@ -41,6 +41,22 @@ class Vec2(object):
     @staticmethod
     def cross(a, b) -> float:
         return a.y * b.x - a.x * b.y
+
+    @staticmethod
+    def max(a,  b):
+        return Vec2(max(a.x, b.x), max(a.y, b.y))
+
+    @staticmethod
+    def min(a, b):
+        return Vec2(min(a.x, b.x), min(a.y, b.y))
+
+    @staticmethod
+    def reflect(n, e):
+        pass
+
+    @staticmethod
+    def refract(n, e, ri_ratio: float):
+        pass
 
     def unique_id(self) -> int:
         return id(self)
@@ -191,19 +207,7 @@ class Vec2(object):
         self.__xy[index] = value
 
 
-def dot2(a: Vec2, b: Vec2) -> float:
-    return a.x * b.x + a.y * b.y
-
-
-def max2(a: Vec2, b: Vec2) -> Vec2:
-    return Vec2(max(a.x, b.x), max(a.y, b.y))
-
-
-def min2(a: Vec2, b: Vec2) -> Vec2:
-    return Vec2(min(a.x, b.x), min(a.y, b.y))
-
-
-class Vec3(object):
+class Vec3:
 
     @staticmethod
     def __unpack_values(*args) -> tuple:
@@ -243,6 +247,14 @@ class Vec3(object):
     @staticmethod
     def cross(a, b):
         return Vec3(a.z * b.y - a.y * b.z, a.x * b.z - a.z * b.x, a.y * b.x - a.x * b.y)
+
+    @staticmethod
+    def max(a, b):
+        return Vec3(max(a.x, b.x), max(a.y, b.y), min(a.z, b.z))
+
+    @staticmethod
+    def min(a, b):
+        return Vec3(min(a.x, b.x), min(a.y, b.y), min(a.z, b.z))
 
     def unique_id(self) -> int:
         return id(self)
@@ -407,17 +419,3 @@ class Vec3(object):
         if index < 0 or index >= 3:
             raise IndexError(f"Vec3 :: trying to access index: {index}")
         self.__xyz[index] = value
-
-
-def dot3(a: Vec3, b: Vec3) -> float: return a.x * b.x + a.y * b.y + a.z * b.z
-
-
-def cross(a: Vec3, b: Vec3) -> Vec3: return Vec3(a.z * b.y - a.y * b.z, a.x * b.z - a.z * b.x, a.y * b.x - a.x * b.y)
-
-
-def max3(a: Vec3, b: Vec3) -> Vec3:
-    return Vec3(max(a.x, b.x), max(a.y, b.y), min(a.z, b.z))
-
-
-def min3(a: Vec3, b: Vec3) -> Vec3:
-    return Vec3(min(a.x, b.x), min(a.y, b.y), min(a.z, b.z))

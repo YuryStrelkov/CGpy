@@ -144,7 +144,7 @@ class Transform2:
         self.origin = orig
 
     # переводит вектор в собственное пространство координат
-    def transform_vect(self, vec: Vec2, w) -> Vec2:
+    def transform_vect(self, vec: Vec2, w: float = 1.0) -> Vec2:
         if w == 0:
             return Vec2(self.__transform_m.m00 * vec.x + self.__transform_m.m01 * vec.y,
                         self.__transform_m.m10 * vec.x + self.__transform_m.m11 * vec.y)
@@ -153,7 +153,7 @@ class Transform2:
                     self.__transform_m.m10 * vec.x + self.__transform_m.m11 * vec.y + self.__transform_m.m12)
 
     # не переводит вектор в собственное пространство координат =)
-    def inv_transform_vect(self, vec: Vec2, w) -> Vec2:
+    def inv_transform_vect(self, vec: Vec2, w: float = 1.0) -> Vec2:
         scl: Vec2 = self.scale
         if w == 0:
             return Vec2((self.__transform_m.m00 * vec.x + self.__transform_m.m10 * vec.y) / scl.x / scl.x,

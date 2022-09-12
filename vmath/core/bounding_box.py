@@ -1,5 +1,5 @@
 from core.transforms.transform import Transform
-from vectors import Vec3
+from core.vectors import Vec3
 
 
 class BoundingBox:
@@ -12,7 +12,7 @@ class BoundingBox:
 
     def __str__(self):
         return f"{{\n" \
-               f"\t\"min\": {self.min}," \
+               f"\t\"min\": {self.min},\n" \
                f"\t\"max\": {self.max}" \
                f"\n}}"
 
@@ -47,13 +47,13 @@ class BoundingBox:
 
     def transform_bbox(self, transform: Transform):
         bounds = BoundingBox()
-        for pt in self.points():
+        for pt in self.points:
             bounds.encapsulate(transform.transform_vect(pt))
         return bounds
 
     def inv_transform_bbox(self, transform: Transform):
         bounds = BoundingBox()
-        for pt in self.points():
+        for pt in self.points:
             bounds.encapsulate(transform.inv_transform_vect(pt))
         return bounds
 

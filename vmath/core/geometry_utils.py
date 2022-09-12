@@ -1,8 +1,44 @@
-from matrices import Mat4, Mat3
-from vectors import Vec3, Vec2
-import matrices
-import vectors
+from core.matrices import Mat4, Mat3
+from core.vectors import Vec3, Vec2
+import core.matrices as matrices
+import core.vectors as vectors
 import math
+
+
+def square_equation(a: float, b: float, c: float) -> (bool, float, float):
+    det: float = b * b - 4.0 * a * c
+    if det < 0.0:
+        return False, 0.0, 0.0
+    det = math.sqrt(det)
+    return True, (-b + det) / 2.0 / a, (-b - det) / 2.0 / a
+
+
+def cube_equation(a: float, b: float, c: float, d: float) -> (bool, float, float, float):
+    if a == 0 and b == 0 and c == 0 and d == 0:
+        print('Ошибка')
+        exit()
+    p = (3.0 * a * c - b ** 2.0) / (3.0 * a ** 2.0)
+    q = (2.0 * b ** 3.0 - 9.0 * a * b * c + 27.0 * a ** 2.0 * d) / (27.0 * a ** 3.0)
+    det = (p / 3.0) ** 3.0 + (q / 2.0) ** 2.0
+    if det < 0:
+        return False, 0.0, 0.0, 0.0
+    elif det == 0:
+        return True, 2.0 * (-q / 2.0) ** (1.0 / 3.0) - b / (3.0 * a),\
+                           (-q / 2.0) ** (-1.0 / 3.0) - b / (3.0 * a),\
+                           (-q / 2.0) ** (-1.0 / 3.0) - b / (3.0 * a)
+    elif det > 0:
+        alfa = (-q / 2 + det ** 0.5) ** (1 / 3)
+        beta = -abs((-q / 2 - det ** 0.5) ** (1 / 3))
+        y1 = alfa + beta
+        y2 = complex(-((alfa + beta) / 2), (alfa - beta) / 2 * 3 ** 0.5)
+        y3 = complex(-((alfa + beta) / 2), -(alfa - beta) / 2 * 3 ** 0.5)
+        x1 = y1 - b / (3 * a)
+        x1 = round(x1, 5)
+        x2 = y2 - b / (3 * a)
+        x2 = round(x2.real, 5) + round(x2.imag, 5) * 1j
+        x3 = y3 - b / (3 * a)
+        x3 = round(x3.real, 5) + round(x3.imag, 5) * 1j
+        print('\nalfa =', alfa, '\nbeta =', beta, '\n\nx1 =', x1, '\nx2 =', x2, '\nx3 =', x3)
 
 
 def rotate_x(angle: float) -> Mat4:
@@ -451,7 +487,7 @@ def cubic_bezier_patch(p1: Vec3, p2: Vec3, p3: Vec3, p4: Vec3,
                 p9  * phi3 * d1 + p10 * phi3 * d2 + p11 * phi3 * d3 + p12 * phi3 * d4 + \
                 p13 * phi4 * d1 + p14 * phi4 * d2 + p15 * phi4 * d3 + p16 * phi4 * d4
 
-    return [p, vectors.cross(dpv, dpu).normalize()]
+    return [p, Vec3.cross(dpv, dpu).normalize()]
 
 
 def point_to_line_dist(point: Vec3, origin: Vec3, direction: Vec3) -> float:

@@ -3,7 +3,7 @@ from core import geometry_utils
 from core.vectors import Vec2
 
 
-class BezierCurve2(object):
+class BezierCurve2:
     def __init__(self):
         self.__sections_per_seg: int = 8
         self.__points: [BezierPoint2] = []
@@ -38,23 +38,18 @@ class BezierCurve2(object):
         return geometry_utils.bezier_2_cubic(self.__iter_p1.point, self.__iter_p1.anchor_1,
                                              self.__iter_p2.anchor_2, self.__iter_p2.point, t)
 
-    def __repr__(self):
-        res: str = "BezierCurve2:\n"
-        res += "[\n closed : %s\n" % self.closed
-        res += " points :\n"
-        for i in range(0, len(self.__points)):
-            res += "%s\n" % self.__points[i]
-        res += "]\n"
-        return res
-
     def __str__(self):
-        res: str = ""
-        res += "[\n closed : %s\n" % self.closed
-        res += " points :\n"
-        for i in range(0, len(self.__points)):
-            res += "%s\n" % self.__points[i]
-        res += "]\n"
-        return res
+        nl = ",\n"
+        return f"{{\n" \
+               f"\t\"unique_id\"    : {self.unique_id},\n" \
+               f"\t\"closed\"       : {self.closed},\n" \
+               f"\t\"sects_per_seg\": {self.__sections_per_seg},\n" \
+               f"\t\"points\"       : [\n{nl.join(str(pt) for pt in self.__points)}]\n" \
+               f"}}"
+
+    @property
+    def unique_id(self) -> int:
+        return id(self)
 
     @property
     def n_control_points(self) -> int:

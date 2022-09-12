@@ -12,10 +12,11 @@ class CubicPatch:
     __slots__ = "__width_points", "__height_points", "__transform", "__mesh", "__controllers"
 
     def __init__(self):
-        self.__width_points: int = 64
-        self.__height_points: int = 64
+        self.__width_points: int = 8
+        self.__height_points: int = 8
         self.__transform: Transform = Transform()
         self.__mesh: TrisMesh = create_plane(1.0, 1.0, self.__height_points, self.__width_points)
+        print(self.__mesh)
         self.__controllers: [Vec3] = \
             [Vec3(-0.5, 0,   -0.5),    Vec3(-0.1666, 0.1, -0.5),    Vec3(0.1666, 0.1, -0.5),    Vec3(0.5, 0,   -0.5),
              Vec3(-0.5, 0.1, -0.1666), Vec3(-0.1666, 1,   -0.1666), Vec3(0.1666, 1,   -0.1666), Vec3(0.5, 0.1, -0.1666),
@@ -24,27 +25,11 @@ class CubicPatch:
         self.__update_mesh()
 
     def __str__(self):
-        return f"{{\n\t\"width_points\":  {self.__width_points}," \
-                   f"\t\"height_points\": {self.__height_points}," \
-                   f"\t\"transform\":     {self.transform}," \
-                   f"\t\"controllers\": [" \
-                   f"\t{self.p1},\n" \
-                   f"\t{self.p2},\n" \
-                   f"\t{self.p3},\n" \
-                   f"\t{self.p4},\n" \
-                   f"\t{self.p5},\n" \
-                   f"\t{self.p6},\n" \
-                   f"\t{self.p7},\n" \
-                   f"\t{self.p8},\n" \
-                   f"\t{self.p9},\n" \
-                   f"\t{self.p10},\n" \
-                   f"\t{self.p11},\n" \
-                   f"\t{self.p12},\n" \
-                   f"\t{self.p13},\n" \
-                   f"\t{self.p14},\n" \
-                   f"\t{self.p15},\n" \
-                   f"\t{self.p16}\n]" \
-               f"}}"
+        nl = ",\n\t\t"
+        return f"{{\n\t\"width_points\":  {self.__width_points},\n" \
+                   f"\t\"height_points\": {self.__height_points},\n" \
+                   f"\t\"transform\":     {self.transform},\n" \
+                   f"\t\"controllers\":\n\t[\n\t\t{nl.join(str(v) for v in self.__controllers)}\n\t]\n}}"
 
     def __update_mesh(self) -> None:
         u: float

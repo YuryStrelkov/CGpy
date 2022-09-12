@@ -5,7 +5,7 @@ from core.camera import Camera
 from core import geometry_utils
 
 
-class Triangle(object):
+class Triangle:
 
     __slots__ = "__p1", "__p2", "__p3", "__n1", "__n2", "__n3", "__uv1", "__uv2", "__uv3"
 
