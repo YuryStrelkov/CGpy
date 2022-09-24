@@ -1,7 +1,6 @@
 from core.matrices import Mat4, Mat3
 from core.vectors import Vec3, Vec2
 import core.matrices as matrices
-import core.vectors as vectors
 import math
 
 
@@ -138,9 +137,9 @@ def look_at(target: Vec3, eye: Vec3, up: Vec3 = Vec3(0, 1, 0)) -> Mat4:
     """
     zaxis = target - eye  # The "forward" vector.
     zaxis.normalize()
-    xaxis = vectors.cross(up, zaxis)  # The "right" vector.
+    xaxis = Vec3.cross(up, zaxis)  # The "right" vector.
     xaxis.normalize()
-    yaxis = vectors.cross(zaxis, xaxis)  # The "up" vector.
+    yaxis = Vec3.cross(zaxis, xaxis)  # The "up" vector.
 
     return Mat4(xaxis.x, -yaxis.x, zaxis.x, eye.x,
                 -xaxis.y, -yaxis.y, zaxis.y, eye.y,
@@ -423,7 +422,7 @@ def quadratic_bezier_patch(p1: Vec3, p2: Vec3, p3: Vec3,
                p4 * phi2 * dp1 + p5 * phi2 * dp2 + p6 * phi2 * dp3 + \
                p7 * phi3 * dp1 + p8 * phi3 * dp2 + p9 * phi3 * dp3
 
-    return [p, vectors.cross(dv, du).normalize()]
+    return [p, Vec3.cross(dv, du).normalize()]
 
 
 def cubic_bezier_patch(p1: Vec3, p2: Vec3, p3: Vec3, p4: Vec3,

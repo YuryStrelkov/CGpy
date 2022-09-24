@@ -84,8 +84,8 @@ class Transform:
         if length_ < 1e-9:
             raise ArithmeticError("Error transform front set")
         front_dir_ = front_ / length_
-        right_ = vectors. cross(front_dir_, Vec3(0, 1, 0)).normalized()
-        up_ = vectors. cross(right_, front_dir_).normalized()
+        right_ = Vec3.cross(front_dir_, Vec3(0, 1, 0)).normalized()
+        up_ = Vec3.cross(right_, front_dir_).normalized()
         self.__build_basis(right_ * self.sx, up_ * self.sy, front_)
 
     @property
@@ -100,8 +100,8 @@ class Transform:
         if length_ < 1e-9:
             raise ArithmeticError("Error transform up set")
         up_dir_ = up_ / length_
-        front_ = vectors.cross(up_dir_, Vec3(1, 0, 0)).normalized()
-        right_ = vectors.cross(up_dir_, front_).normalized()
+        front_ = Vec3.cross(up_dir_, Vec3(1, 0, 0)).normalized()
+        right_ = Vec3.cross(up_dir_, front_).normalized()
         self.__build_basis(right_ * self.sx, up_, front_ * self.sz)
 
     @property
@@ -116,8 +116,8 @@ class Transform:
         if length_ < 1e-9:
             raise ArithmeticError("Error transform up set")
         right_dir_ = right_ / length_
-        front_ = vectors.cross(right_dir_, Vec3(0, 1, 0)).normalized()
-        up_ = vectors.cross(front_, right_dir_).normalized()
+        front_ = Vec3.cross(right_dir_, Vec3(0, 1, 0)).normalized()
+        up_ = Vec3.cross(front_, right_dir_).normalized()
         self.__build_basis(right_, up_ * self.sy, front_ * self.sz)
 
     # масштаб по Х
