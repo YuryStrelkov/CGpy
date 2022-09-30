@@ -2,7 +2,14 @@ import numpy as np
 import ctypes
 import math
 
+# from numba import float32    # import the types
+# from numba.experimental import jitclass
 
+
+# spec = [('__xy', float32[:]), ]  # an array field]
+
+
+# @jitclass(spec)
 class Vec2:
 
     @staticmethod

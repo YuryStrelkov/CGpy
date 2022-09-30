@@ -414,8 +414,8 @@ def create_plane(height: float = 1.0, width: float = 1.0, rows: int = 10,
     for index in range(0, points_n):
         col = index % cols
         row = int(index / cols)
-        x = width * ((cols - 1) / 2.0 - col) / (cols - 1.0)
-        z = height * ((cols - 1) / 2.0 - row) / (cols - 1.0)
+        x = width * ((cols - 1) * 0.5 - col) / (cols - 1.0)
+        z = height * ((cols - 1) * 0.5 - row) / (cols - 1.0)
         mesh.append_vertex(Vec3(x, 0, z))
         mesh.append_uv(Vec2(1.0 - col * 1.0 / (cols - 1), row * 1.0 / (cols - 1)))
         mesh.append_normal(normal)

@@ -1,9 +1,12 @@
+import numba
+
 from core.matrices import Mat4, Mat3
 from core.vectors import Vec3, Vec2
 import core.matrices as matrices
 import math
 
 
+@numba.njit(fastmath=True)
 def square_equation(a: float, b: float, c: float) -> (bool, float, float):
     det: float = b * b - 4.0 * a * c
     if det < 0.0:
@@ -12,6 +15,7 @@ def square_equation(a: float, b: float, c: float) -> (bool, float, float):
     return True, (-b + det) / 2.0 / a, (-b - det) / 2.0 / a
 
 
+@numba.njit(fastmath=True)
 def cube_equation(a: float, b: float, c: float, d: float) -> (bool, float, float, float):
     if a == 0 and b == 0 and c == 0 and d == 0:
         print('Ошибка')
@@ -89,6 +93,7 @@ def rotate(angle_x: float, angle_y: float, angle_z: float) -> Mat4:
     return rotate_x(angle_x) * rotate_y(angle_y) * rotate_z(angle_z)
 
 
+@numba.njit(fastmath=True)
 def deg_to_rad(deg: float) -> float:
     """
     :param deg: угол в градусах
@@ -97,6 +102,7 @@ def deg_to_rad(deg: float) -> float:
     return deg / 180.0 * math.pi
 
 
+@numba.njit(fastmath=True)
 def rad_to_deg(deg: float) -> float:
     """
     :param deg: угол в радианах
@@ -147,6 +153,7 @@ def look_at(target: Vec3, eye: Vec3, up: Vec3 = Vec3(0, 1, 0)) -> Mat4:
                 0, 0, 0, 1)
 
 
+@numba.njit(fastmath=True)
 def clamp(min_: float, max_: float, val: float) -> float:
     """
     :param min_: минимальная граница
@@ -491,12 +498,13 @@ def cubic_bezier_patch(p1: Vec3, p2: Vec3, p3: Vec3, p4: Vec3,
 
 def point_to_line_dist(point: Vec3, origin: Vec3, direction: Vec3) -> float:
     """
+    Расстояние от точки до прямой.
     :arg point точка до которой ищем расстоняие
     :arg origin начало луча
     :arg direction направление луча (единичный вектор)
     :return расстояние между точкой и прямой
     """
-    pass
+    return Vec3.cross(direction, (origin - point)).magnitude
 
 
 def line_to_line_dist(origin_1: Vec3, direction_1: Vec3, origin_2: Vec3, direction_2: Vec3) -> float:
@@ -507,18 +515,20 @@ def line_to_line_dist(origin_1: Vec3, direction_1: Vec3, origin_2: Vec3, directi
     :arg direction_2 направление второго луча (единичный вектор)
     :return расстояние между первой и второй прямой
     """
-    pass
+    temp = Vec3.cross(direction_1, direction_2) * (origin_2 - origin_1)
+    temp1 = Vec3.cross(direction_1, direction_2)
+    return math.sqrt(Vec3.dot(temp, temp)) / math.sqrt(Vec3.dot(temp1, temp1))
 
 
 def plane_to_point_dist(r_0: Vec3, n: Vec3, point: Vec3) -> float:
-    # (r - r_0, n) = 0
     """
+    Уравнение плоскости (r - r_0, n) = 0
     :arg r_0 точка через которую проходит плоскость
     :arg n нормаль к плоскости (единичный вектор)
     :arg point точка для которой ищем расстояние
     :return расстояние между точкой и плоскостью
     """
-    pass
+    return (Vec3.dot(n, point) - Vec3.dot(n, r_0)) / math.sqrt(n[0] ** 2 + n[1] ** 2 + n[2] ** 2)
 
 
 def ray_plane_intersect(r_0: Vec3, n: Vec3, origin: Vec3, direction: Vec3) -> (bool, float):
