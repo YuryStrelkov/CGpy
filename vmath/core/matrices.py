@@ -5,6 +5,7 @@ class Mat3:
 
     @staticmethod
     def __unpack_values(*args) -> tuple:
+
         args = args[0]
 
         number_of_args = len(args)
@@ -18,14 +19,14 @@ class Mat3:
                        args[0].m20, args[0].m21, args[0].m22
 
             if arg_type is float or arg_type is int:  # single int or float argument
-                return args[0], 0, 0, \
-                       0, args[0], 0, \
-                       0, 0, args[0]
+                return args[0], 0.0, 0.0, \
+                       0.0, args[0], 0.0, \
+                       0.0, 0.0, args[0]
 
         if number_of_args == 0:
-            return 0, 0, 0, \
-                   0, 0, 0, \
-                   0, 0, 0  # no arguments
+            return 0.0, 0.0, 0.0, \
+                   0.0, 0.0, 0.0, \
+                   0.0, 0.0, 0.0  # no arguments
 
         if number_of_args == 9:
             return args[0], args[1], args[2], \
@@ -38,7 +39,7 @@ class Mat3:
     def from_np_array(data: np.ndarray):
         m = Mat3()
         i: int = 0
-        for element in data.ravel():
+        for element in data.flat:
             m[i] = element
             i += 1
             if i == 9:
@@ -158,15 +159,15 @@ class Mat3:
     __slots__ = "__data"
 
     def __init__(self,
-                 m0: float = 0, m1: float = 0, m2: float = 0,
-                 m3: float = 0, m4: float = 0, m5: float = 0,
-                 m6: float = 0, m7: float = 0, m8: float = 0):
+                 m0: float = 0.0, m1: float = 0.0, m2: float = 0.0,
+                 m3: float = 0.0, m4: float = 0.0, m5: float = 0.0,
+                 m6: float = 0.0, m7: float = 0.0, m8: float = 0.0):
         self.__data: [float] = [m0, m1, m2, m3, m4, m5, m6, m7, m8]
 
     def __eq__(self, other) -> bool:
         if not isinstance(other, Mat3):
             return False
-        for i in range(0, 9):
+        for i in range(9):
             if not (self.__data[i] == other.__data[i]):
                 return False
         return True
@@ -316,16 +317,16 @@ class Mat4:
                        args[0].m30, args[0].m31, args[0].m32, args[0].m33
 
             if arg_type is float or arg_type is int:  # single int or float argument
-                return args[0], 0, 0, 0, \
-                       0, args[0], 0, 0, \
-                       0, 0, args[0], 0, \
-                       0, 0, 0, args[0]
+                return args[0], 0.0, 0.0, 0.0, \
+                       0.0, args[0], 0.0, 0.0, \
+                       0.0, 0.0, args[0], 0.0, \
+                       0.0, 0.0, 0.0, args[0]
 
         if number_of_args == 0:
-            return 0, 0, 0, 0, \
-                   0, 0, 0, 0, \
-                   0, 0, 0, 0, \
-                   0, 0, 0, 0  # no arguments
+            return 0.0, 0.0, 0.0, 0.0, \
+                   0.0, 0.0, 0.0, 0.0, \
+                   0.0, 0.0, 0.0, 0.0, \
+                   0.0, 0.0, 0.0, 0.0  # no arguments
 
         if number_of_args == 9:
             return args[0], args[1], args[2], args[3], \
@@ -546,10 +547,10 @@ class Mat4:
     __slots__ = "__data"
 
     def __init__(self,
-                 m0: float = 0, m1: float = 0, m2: float = 0, m3: float = 0,
-                 m4: float = 0, m5: float = 0, m6: float = 0, m7: float = 0,
-                 m8: float = 0, m9: float = 0, m10: float = 0, m11: float = 0,
-                 m12: float = 0, m13: float = 0, m14: float = 0, m15: float = 0):
+                 m0: float = 0.0, m1: float = 0.0, m2: float = 0.0, m3: float = 0.0,
+                 m4: float = 0.0, m5: float = 0.0, m6: float = 0.0, m7: float = 0.0,
+                 m8: float = 0.0, m9: float = 0.0, m10: float = 0.0, m11: float = 0.0,
+                 m12: float = 0.0, m13: float = 0.0, m14: float = 0.0, m15: float = 0.0):
         self.__data: [float] = [m0, m1, m2, m3,
                                 m4, m5, m6, m7,
                                 m8, m9, m10, m11,
@@ -765,39 +766,39 @@ class Mat4:
 
 
 def identity_3() -> Mat3:
-    return Mat3(1, 0, 0,
-                0, 1, 0,
-                0, 0, 1)
+    return Mat3(1.0, 0.0, 0.0,
+                0.0, 1.0, 0.0,
+                0.0, 0.0, 1.0)
 
 
 def identity_4() -> Mat4:
-    return Mat4(1, 0, 0, 0,
-                0, 1, 0, 0,
-                0, 0, 1, 0,
-                0, 0, 0, 1)
+    return Mat4(1.0, 0.0, 0.0, 0.0,
+                0.0, 1.0, 0.0, 0.0,
+                0.0, 0.0, 1.0, 0.0,
+                0.0, 0.0, 0.0, 1.0)
 
 
 def zeros_3() -> Mat3:
-    return Mat3(0, 0, 0,
-                0, 0, 0,
-                0, 0, 0)
+    return Mat3(0.0, 0.0, 0.0,
+                0.0, 0.0, 0.0,
+                0.0, 0.0, 0.0)
 
 
 def zeros_4() -> Mat4:
-    return Mat4(0, 0, 0, 0,
-                0, 0, 0, 0,
-                0, 0, 0, 0,
-                0, 0, 0, 0)
+    return Mat4(0.0, 0.0, 0.0, 0.0,
+                0.0, 0.0, 0.0, 0.0,
+                0.0, 0.0, 0.0, 0.0,
+                0.0, 0.0, 0.0, 0.0)
 
 
 def eye_3() -> Mat3:
-    return Mat3(1, 1, 1,
-                1, 1, 1,
-                1, 1, 1)
+    return Mat3(1.0, 1.0, 1.0,
+                1.0, 1.0, 1.0,
+                1.0, 1.0, 1.0)
 
 
 def eye_4() -> Mat4:
-    return Mat4(1, 1, 1, 1,
-                1, 1, 1, 1,
-                1, 1, 1, 1,
-                1, 1, 1, 1)
+    return Mat4(1.0, 1.0, 1.0, 1.0,
+                1.0, 1.0, 1.0, 1.0,
+                1.0, 1.0, 1.0, 1.0,
+                1.0, 1.0, 1.0, 1.0)

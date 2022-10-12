@@ -26,7 +26,7 @@ class Vec2:
                 return args[0], args[0]
 
         if number_of_args == 0:
-            return 0, 0  # no arguments
+            return 0.0, 0.0  # no arguments
 
         if number_of_args == 2:
             return args[0], args[1]  # x, y and z passed in
@@ -112,7 +112,7 @@ class Vec2:
 
     __slots__ = "__xy"
 
-    def __init__(self, x: float = 0, y: float = 0):
+    def __init__(self, x: float = 0.0, y: float = 0.0):
         self.__xy: [float] = [x, y]
 
     def __eq__(self, other):
@@ -232,7 +232,7 @@ class Vec3:
                 return args[0], args[0], args[0]
 
         if number_of_args == 0:
-            return 0, 0, 0  # no arguments
+            return 0.0, 0.0, 0.0  # no arguments
 
         if number_of_args == 3:
             return args[0], args[1], args[2]  # x, y and z passed in
@@ -317,7 +317,7 @@ class Vec3:
 
     __slots__ = "__xyz"
 
-    def __init__(self, x: float = 0, y: float = 0, z: float = 0):
+    def __init__(self, x: float = 0.0, y: float = 0.0, z: float = 0.0):
         self.__xyz: [float] = [x, y, z]
 
     def __sizeof__(self):

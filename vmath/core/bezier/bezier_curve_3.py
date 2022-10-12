@@ -1,3 +1,5 @@
+from typing import List
+
 from core.bezier.bezier_point_3 import BezierPoint3
 from core import geometry_utils
 from core.vectors import Vec3
@@ -56,7 +58,7 @@ class BezierCurve3:
         return len(self.__points)
 
     @property
-    def points(self) -> [BezierPoint3]:
+    def points(self) -> List[BezierPoint3]:
         return self.__points
 
     @property
