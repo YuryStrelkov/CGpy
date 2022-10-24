@@ -5,6 +5,7 @@ from core.tris_mesh.tris_mesh import TrisMesh
 from core.tris_mesh.triangle import Triangle
 from core.bounding_box import BoundingBox
 from core.vectors import Vec3
+from typing import List
 
 
 class CubicPatch:
@@ -17,7 +18,7 @@ class CubicPatch:
         self.__transform: Transform = Transform()
         self.__mesh: TrisMesh = create_plane(1.0, 1.0, self.__height_points, self.__width_points)
         print(self.__mesh)
-        self.__controllers: [Vec3] = \
+        self.__controllers: List[Vec3] = \
             [Vec3(-0.5, 0,   -0.5),    Vec3(-0.1666, 0.1, -0.5),    Vec3(0.1666, 0.1, -0.5),    Vec3(0.5, 0,   -0.5),
              Vec3(-0.5, 0.1, -0.1666), Vec3(-0.1666, 1,   -0.1666), Vec3(0.1666, 1,   -0.1666), Vec3(0.5, 0.1, -0.1666),
              Vec3(-0.5, 0.1,  0.1666), Vec3(-0.1666, 1,    0.1666), Vec3(0.1666, 1,    0.1666), Vec3(0.5, 0.1,  0.1666),
@@ -34,7 +35,7 @@ class CubicPatch:
     def __update_mesh(self) -> None:
         u: float
         v: float
-        for i in range(0, self.__mesh.vertices_count):
+        for i in range(self.__mesh.vertices_count):
             u = (i / self.__width_points) / float(self.__width_points - 1)
             v = (i % self.__width_points) / float(self.__width_points - 1)
             v_, n_ = cubic_bezier_patch(self.__controllers[0],  self.__controllers[1],
@@ -58,7 +59,7 @@ class CubicPatch:
         return self.__mesh
 
     @property
-    def control_points(self) -> [Vec3]:
+    def control_points(self) -> List[Vec3]:
         return self.__controllers
 
     @property
@@ -67,19 +68,19 @@ class CubicPatch:
 
     @property
     def center_world_space(self) -> Vec3:
-        return self.__transform.transform_vect(self.bbox.center, 1)
+        return self.__transform.transform_vect(self.bbox.center, 1.0)
 
     @property
     def min_world_space(self) -> Vec3:
-        return self.__transform.transform_vect(self.bbox.min, 1)
+        return self.__transform.transform_vect(self.bbox.min, 1.0)
 
     @property
     def max_world_space(self) -> Vec3:
-        return self.__transform.transform_vect(self.bbox.max, 1)
+        return self.__transform.transform_vect(self.bbox.max, 1.0)
 
     @property
     def size_world_space(self) -> Vec3:
-        return self.__transform.transform_vect(self.bbox.size, 1)
+        return self.__transform.transform_vect(self.bbox.size, 1.0)
 
     def triangles_local_space(self):
         tris_id: int = 0

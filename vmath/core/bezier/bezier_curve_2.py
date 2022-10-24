@@ -1,6 +1,7 @@
 from core.bezier.bezier_point_2 import BezierPoint2
 from core import geometry_utils
 from core.vectors import Vec2
+from typing import List
 
 
 class BezierCurve2:
@@ -56,7 +57,7 @@ class BezierCurve2:
         return len(self.__points)
 
     @property
-    def points(self) -> [BezierPoint2]:
+    def points(self) -> List[BezierPoint2]:
         return self.__points
 
     @property

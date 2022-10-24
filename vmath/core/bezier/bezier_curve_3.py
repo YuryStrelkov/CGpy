@@ -1,3 +1,5 @@
+from typing import List
+
 from core.bezier.bezier_point_3 import BezierPoint3
 from core import geometry_utils
 from core.vectors import Vec3

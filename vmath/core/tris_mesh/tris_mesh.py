@@ -1,3 +1,5 @@
+from typing import Tuple, List
+
 from core.transforms.transform import Transform
 from core.tris_mesh.triangle import Triangle
 from core.bounding_box import BoundingBox
@@ -36,15 +38,15 @@ class Face:
         yield self.pt_3
 
     @property
-    def pt_1(self) -> (int, int, int):
+    def pt_1(self) -> Tuple[int, int, int]:
         return self.__p_1, self.__n_1, self.__uv1
 
     @property
-    def pt_2(self) -> (int, int, int):
+    def pt_2(self) -> Tuple[int, int, int]:
         return self.__p_2, self.__n_2, self.__uv2
 
     @property
-    def pt_3(self) -> (int, int, int):
+    def pt_3(self) -> Tuple[int, int, int]:
         return self.__p_3, self.__n_3, self.__uv3
 
     @property
@@ -415,8 +417,8 @@ def create_plane(height: float = 1.0, width: float = 1.0, rows: int = 10,
     for index in range(0, points_n):
         col = index % cols
         row = int(index / cols)
-        x = width * ((cols - 1) / 2.0 - col) / (cols - 1.0)
-        z = height * ((cols - 1) / 2.0 - row) / (cols - 1.0)
+        x = width * ((cols - 1) * 0.5 - col) / (cols - 1.0)
+        z = height * ((cols - 1) * 0.5 - row) / (cols - 1.0)
         mesh.append_vertex(Vec3(x, 0, z))
         mesh.append_uv(Vec2(1.0 - col * 1.0 / (cols - 1), row * 1.0 / (cols - 1)))
         mesh.append_normal(normal)

@@ -1,3 +1,6 @@
+import time
+
+import numpy as np
 
 
 def transforms_3_test():
@@ -59,9 +62,21 @@ def bezier_test():
     print(curve)
 
 
+def time_test():
+    t = time.time()
+    for i in range(100000):
+        arr = [3.0, 3.0, 3.0]
+    print(f"list time {time.time() - t}")
+
+    for i in range(100000):
+        arr = np.zeros((3,), dtype=float)
+    print(f"np time {time.time() - t}")
+
+
 if __name__ == '__main__':
-    transforms_2_test()
-    transforms_3_test()
-    surface_test()
-    bezier_test()
+    time_test()
+    # transforms_2_test()
+    # transforms_3_test()
+    # surface_test()
+    # bezier_test()
 
