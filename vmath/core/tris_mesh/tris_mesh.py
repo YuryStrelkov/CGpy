@@ -2,6 +2,7 @@ from core.transforms.transform import Transform
 from core.tris_mesh.triangle import Triangle
 from core.bounding_box import BoundingBox
 from core.vectors import Vec3, Vec2
+from typing import List
 import numpy as np
 import re
 
@@ -140,10 +141,10 @@ class TrisMesh:
 
     def __init__(self):
         self.name: str = "no name"
-        self._vertices: [Vec3] = []
-        self._normals: [Vec3] = []
-        self._uvs: [Vec2] = []
-        self._faces: [Face] = []
+        self._vertices: List[Vec3] = []
+        self._normals: List[Vec3] = []
+        self._uvs: List[Vec2] = []
+        self._faces: List[Face] = []
         self._bbox: BoundingBox = BoundingBox()
 
     def __str__(self):
@@ -205,19 +206,19 @@ class TrisMesh:
         return i_data
 
     @property
-    def vertices(self) -> [Vec3]:
+    def vertices(self) -> List[Vec3]:
         return self._vertices
 
     @property
-    def normals(self) -> [Vec3]:
+    def normals(self) -> List[Vec3]:
         return self._normals
 
     @property
-    def uvs(self) -> [Vec2]:
+    def uvs(self) -> List[Vec2]:
         return self._uvs
 
     @property
-    def faces(self) -> [Face]:
+    def faces(self) -> List[Face]:
         return self._faces
 
     def set_vertex(self, i_id: int, v: Vec3) -> None:
@@ -283,10 +284,10 @@ class TrisMesh:
         del self._normals
         del self._faces
 
-        self._uvs: [Vec2] = []
-        self._vertices: [Vec3] = []
-        self._normals: [Vec3] = []
-        self._faces: [Face] = []
+        self._uvs: List[Vec2] = []
+        self._vertices: List[Vec3] = []
+        self._normals: List[Vec3] = []
+        self._faces: List[Face] = []
 
     def transform_mesh(self, transform: Transform = None) -> None:
         for i in range(len(self._vertices)):
@@ -307,15 +308,15 @@ class TrisMesh:
                         self._uvs[f.uv1], self._uvs[f.uv2], self._uvs[f.uv3])
 
 
-def read_obj_mesh(path: str) -> [TrisMesh]:
+def read_obj_mesh(path: str) -> List[TrisMesh]:
     try:
         with open(path, mode='r') as file:
 
-            tmp: [str]
-            tmp2: [str]
+            tmp: List[str]
+            tmp2: List[str]
             id_: int
 
-            meshes: [TrisMesh] = []
+            meshes: List[TrisMesh] = []
             uv_shift: int = 0
             v__shift: int = 0
             n__shift: int = 0

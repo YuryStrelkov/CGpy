@@ -1,12 +1,13 @@
 from core.bezier.bezier_point_3 import BezierPoint3
 from core import geometry_utils
 from core.vectors import Vec3
+from typing import List
 
 
 class BezierCurve3:
     def __init__(self):
         self.__sections_per_seg: int = 32
-        self.__points: [BezierPoint3] = []
+        self.__points: List[BezierPoint3] = []
         self.closed: bool = False
 
     def __iter__(self):
@@ -56,7 +57,7 @@ class BezierCurve3:
         return len(self.__points)
 
     @property
-    def points(self) -> [BezierPoint3]:
+    def points(self) -> List[BezierPoint3]:
         return self.__points
 
     @property
@@ -158,7 +159,7 @@ class BezierCurve3:
     def align_anchors(self, pid: int, pos: Vec3, weight: float = 1) -> None:
         if not self.__in_range(pid):
             return
-        self.__points[pid].align_anchors(pos, weight)
+        self.__points[pid].align_anchors(pos)
 
     def curve_value(self, pid: int, t: float) -> Vec3:
         if not self.__in_range(pid):
