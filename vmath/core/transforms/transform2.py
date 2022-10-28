@@ -20,9 +20,9 @@ class Transform2:
                    f"\t\"transform_m\" :\n{self.__transform_m}\n}}"
 
     def __eq__(self, other) -> bool:
-        if not(type(other) is Transform2):
+        if not isinstance(other, Transform2):
             return False
-        if not(self.__transform_m == other.__m_transform):
+        if not(self.__transform_m == other.__transform_m):
             return False
         return True
 

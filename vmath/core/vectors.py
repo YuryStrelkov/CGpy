@@ -1,19 +1,13 @@
+from typing import List, Tuple
 import numpy as np
 import ctypes
 import math
 
-# from numba import float32    # import the types
-# from numba.experimental import jitclass
 
-
-# spec = [('__xy', float32[:]), ]  # an array field]
-
-
-# @jitclass(spec)
 class Vec2:
 
     @staticmethod
-    def __unpack_values(*args) -> tuple:
+    def __unpack_args(*args) -> tuple:
         args = args[0]
         number_of_args = len(args)
         if number_of_args == 1:  # one argument
@@ -24,6 +18,9 @@ class Vec2:
 
             if arg_type is float or arg_type is int:  # single int or float argument
                 return args[0], args[0]
+
+        if number_of_args == 2:
+            return args
 
         if number_of_args == 0:
             return 0.0, 0.0  # no arguments
@@ -59,7 +56,7 @@ class Vec2:
 
     @staticmethod
     def reflect(n, e):
-        pass
+        return e - 2.0 * (Vec2.dot(n, e)) * n
 
     @staticmethod
     def refract(n, e, ri_ratio: float):
@@ -91,8 +88,12 @@ class Vec2:
         return np.array(self.__xy, dtype=np.float32)
 
     @property
-    def as_array(self):
+    def as_list(self) -> List[float]:
         return self.__xy
+
+    @property
+    def as_tuple(self) -> Tuple[float, float]:
+        return self.__xy[0], self.__xy[1]
 
     @property
     def x(self) -> float: return self.__xy[0]
@@ -112,8 +113,11 @@ class Vec2:
 
     __slots__ = "__xy"
 
-    def __init__(self, x: float = 0.0, y: float = 0.0):
-        self.__xy: [float] = [x, y]
+    def __sizeof__(self):
+        return ctypes.c_float * 2
+
+    def __init__(self, *args):
+        self.__xy: List[float] = list(Vec2.__unpack_args(args))
 
     def __eq__(self, other):
         if not isinstance(other, Vec2):
@@ -143,11 +147,11 @@ class Vec2:
     ##########################
 
     def __add__(self, *args):
-        other = self.__unpack_values(args)
+        other = self.__unpack_args(args)
         return Vec2(self.x + other[0], self.y + other[1])
 
     def __iadd__(self, *args):
-        other = self.__unpack_values(args)
+        other = self.__unpack_args(args)
         self.x += other[0]
         self.y += other[1]
         return self
@@ -158,28 +162,28 @@ class Vec2:
     ##########################
 
     def __sub__(self, *args):
-        other = self.__unpack_values(args)
+        other = self.__unpack_args(args)
         return Vec2(self.x - other[0], self.y - other[1])
 
     def __isub__(self, *args):
-        other = self.__unpack_values(args)
+        other = self.__unpack_args(args)
         self.x -= other[0]
         self.y -= other[1]
         return self
 
     def __rsub__(self, *args):
-        other = self.__unpack_values(args)
+        other = self.__unpack_args(args)
         return Vec2(other[0] - self.x, other[1] - self.y)
     ##########################
     #####  * operetor   ######
     ##########################
 
     def __mul__(self, *args):
-        other = self.__unpack_values(args)
+        other = self.__unpack_args(args)
         return Vec2(self.x * other[0], self.y * other[1])
 
     def __imul__(self, *args):
-        other = self.__unpack_values(args)
+        other = self.__unpack_args(args)
         self.x *= other[0]
         self.y *= other[1]
         return self
@@ -190,15 +194,15 @@ class Vec2:
     ##########################
 
     def __truediv__(self, *args):
-        other = self.__unpack_values(args)
+        other = self.__unpack_args(args)
         return Vec2(self.x / other[0], self.y / other[1])
 
     def __rtruediv__(self,  *args):
-        other = self.__unpack_values(args)
+        other = self.__unpack_args(args)
         return Vec2(other[0] / self.x, other[1] / self.y)
 
     def __itruediv__(self, *args):
-        other = self.__unpack_values(args)
+        other = self.__unpack_args(args)
         self.x /= other[0]
         self.y /= other[1]
         return self
@@ -217,7 +221,7 @@ class Vec2:
 class Vec3:
 
     @staticmethod
-    def __unpack_values(*args) -> tuple:
+    def __unpack_args(*args) -> tuple:
         args = args[0]
 
         number_of_args = len(args)
@@ -235,7 +239,7 @@ class Vec3:
             return 0.0, 0.0, 0.0  # no arguments
 
         if number_of_args == 3:
-            return args[0], args[1], args[2]  # x, y and z passed in
+            return args  # x, y and z passed in
 
         raise TypeError(f'Invalid Input: {args}')
 
@@ -290,8 +294,12 @@ class Vec3:
         return np.array(self.__xyz, dtype=np.float32)
 
     @property
-    def as_array(self):
+    def as_list(self) -> List[float]:
         return self.__xyz
+
+    @property
+    def as_tuple(self) -> Tuple[float, float, float]:
+        return self.__xyz[0], self.__xyz[1], self.__xyz[2]
 
     @property
     def x(self) -> float: return self.__xyz[0]
@@ -317,8 +325,8 @@ class Vec3:
 
     __slots__ = "__xyz"
 
-    def __init__(self, x: float = 0.0, y: float = 0.0, z: float = 0.0):
-        self.__xyz: [float] = [x, y, z]
+    def __init__(self, *args):
+        self.__xyz: List[float] = list(Vec3.__unpack_args(args))
 
     def __sizeof__(self):
         return ctypes.c_float * 3
@@ -353,11 +361,11 @@ class Vec3:
     ##########################
 
     def __add__(self, *args):
-        other = self.__unpack_values(args)
+        other = self.__unpack_args(args)
         return Vec3(self.x + other[0], self.y + other[1], self.z + other[2])
 
     def __iadd__(self, *args):
-        other = self.__unpack_values(args)
+        other = self.__unpack_args(args)
         self.x += other[0]
         self.y += other[1]
         self.z += other[2]
@@ -369,29 +377,29 @@ class Vec3:
     ##########################
 
     def __sub__(self, *args):
-        other = self.__unpack_values(args)
+        other = self.__unpack_args(args)
         return Vec3(self.x - other[0], self.y - other[1], self.z - other[2])
 
     def __isub__(self, *args):
-        other = self.__unpack_values(args)
+        other = self.__unpack_args(args)
         self.x -= other[0]
         self.y -= other[1]
         self.z -= other[2]
         return self
 
     def __rsub__(self, *args):
-        other = self.__unpack_values(args)
+        other = self.__unpack_args(args)
         return Vec3(other[0] - self.x, other[1] - self.y, other[2] - self.z)
     ##########################
     #####  * operetor   ######
     ##########################
 
     def __mul__(self, *args):
-        other = self.__unpack_values(args)
+        other = self.__unpack_args(args)
         return Vec3(self.x * other[0], self.y * other[1], self.z * other[2])
 
     def __imul__(self, *args):
-        other = self.__unpack_values(args)
+        other = self.__unpack_args(args)
         self.x *= other[0]
         self.y *= other[1]
         self.z *= other[2]
@@ -403,15 +411,15 @@ class Vec3:
     ##########################
 
     def __truediv__(self, *args):
-        other = self.__unpack_values(args)
+        other = self.__unpack_args(args)
         return Vec3(self.x / other[0], self.y / other[1], self.z / other[2])
 
     def __rtruediv__(self,  *args):
-        other = self.__unpack_values(args)
+        other = self.__unpack_args(args)
         return Vec3(other[0] / self.x, other[1] / self.y, other[2] / self.z)
 
     def __itruediv__(self, *args):
-        other = self.__unpack_values(args)
+        other = self.__unpack_args(args)
         self.x /= other[0]
         self.y /= other[1]
         self.z /= other[2]

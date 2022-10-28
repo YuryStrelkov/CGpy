@@ -1,6 +1,6 @@
 from core.vectors import Vec3, Vec2
-from core.camera import Camera
 from core import geometry_utils
+from core.camera import Camera
 
 
 class Vertex:
@@ -40,27 +40,27 @@ class Vertex:
 
     def __add__(self, *args):
         other = self.__unpack_values(args)
-        return Vertex(self.v + Vec3(other[0], other[1], other[2]),
-                      self.n + Vec3(other[3], other[4], other[5]),
-                      self.uv + Vec2(other[6], other[7]))
+        return Vertex(Vec3(self.v.x + other[0], self.v.y + other[1], self.v.z + other[2]),
+                      Vec3(self.n.x + other[3], self.n.y + other[4], self.n.z + other[5]),
+                      Vec2(self.uv.x + other[6], self.uv.y + other[7]))
 
     def __sub__(self, *args):
         other = self.__unpack_values(args)
-        return Vertex(self.v - Vec3(other[0], other[1], other[2]),
-                      self.n - Vec3(other[3], other[4], other[5]),
-                      self.uv - Vec2(other[6], other[7]))
+        return Vertex(Vec3(self.v.x - other[0], self.v.y - other[1], self.v.z - other[2]),
+                      Vec3(self.n.x - other[3], self.n.y - other[4], self.n.z - other[5]),
+                      Vec2(self.uv.x - other[6], self.uv.y - other[7]))
 
     def __mul__(self, *args):
         other = self.__unpack_values(args)
-        return Vertex(self.v * Vec3(other[0], other[1], other[2]),
-                      self.n * Vec3(other[3], other[4], other[5]),
-                      self.uv * Vec2(other[6], other[7]))
+        return Vertex(Vec3(self.v.x * other[0], self.v.y * other[1], self.v.z * other[2]),
+                      Vec3(self.n.x * other[3], self.n.y * other[4], self.n.z * other[5]),
+                      Vec2(self.uv.x * other[6], self.uv.y * other[7]))
 
     def __truediv__(self, *args):
         other = self.__unpack_values(args)
-        return Vertex(self.v / Vec3(other[0], other[1], other[2]),
-                      self.n / Vec3(other[3], other[4], other[5]),
-                      self.uv / Vec2(other[6], other[7]))
+        return Vertex(Vec3(self.v.x / other[0], self.v.y / other[1], self.v.z / other[2]),
+                      Vec3(self.n.x / other[3], self.n.y / other[4], self.n.z / other[5]),
+                      Vec2(self.uv.x / other[6], self.uv.y / other[7]))
 
     @property
     def v(self) -> Vec3:
@@ -87,5 +87,5 @@ class Vertex:
         self.to_screen_space(scr_size)
 
 
-def lerp_vertex(a: Vertex, b: Vertex, val: float) -> Vertex:
+def lin_interp_vertex(a: Vertex, b: Vertex, val: float) -> Vertex:
     return a + (b - a) * val

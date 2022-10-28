@@ -17,7 +17,7 @@ class BezierPoint2:
                    f"\t\"anchor_1\":  {self.__anchor_1},\n" \
                    f"\t\"anchor_2\":  {self.__anchor_2}\n}}"
 
-    def align_anchors(self, dir_: Vec2, weight: float = 1) -> None:
+    def align_anchors(self, dir_: Vec2, weight: float = 1.0) -> None:
         w_1: float = self.anchor_1_weight * weight
         w_2: float = self.anchor_2_weight * weight
         dir_.normalize()

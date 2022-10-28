@@ -7,7 +7,7 @@ from typing import List
 class BezierCurve2:
     def __init__(self):
         self.__sections_per_seg: int = 8
-        self.__points: [BezierPoint2] = []
+        self.__points: List[BezierPoint2] = []
         self.closed: bool = False
 
     def __iter__(self):

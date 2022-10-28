@@ -1,15 +1,15 @@
+from core import geometry_utils
 from core.matrices import Mat4
 from core.vectors import Vec3
-from core import geometry_utils
 import math
 
 
 class Transform:
 
-    __slots__ = "__m_transform"
+    __slots__ = "__transform_m"
 
     def __init__(self):
-        self.__m_transform = Mat4(1.0, 0.0, 0.0, 0.0,
+        self.__transform_m = Mat4(1.0, 0.0, 0.0, 0.0,
                                   0.0, 1.0, 0.0, 0.0,
                                   0.0, 0.0, 1.0, 0.0,
                                   0.0, 0.0, 0.0, 1.0)
@@ -19,30 +19,30 @@ class Transform:
                    f"\t\"origin\"      :{self.origin},\n" \
                    f"\t\"scale\"       :{self.scale},\n" \
                    f"\t\"rotate\"      :{self.angles / math.pi * 180},\n" \
-                   f"\t\"transform_m\" :\n{self.__m_transform}\n}}"
+                   f"\t\"transform_m\" :\n{self.__transform_m}\n}}"
 
     def __eq__(self, other) -> bool:
-        if not(type(other) is Transform):
+        if not isinstance(other, Transform):
             return False
-        if not(self.__m_transform == other.__m_transform):
+        if not(self.__transform_m == other.__transform_m):
             return False
         return True
 
     def __hash__(self) -> int:
-        return hash(self.__m_transform)
+        return hash(self.__transform_m)
 
     def __build_basis(self, ex: Vec3, ey: Vec3, ez: Vec3) -> None:
-        self.__m_transform.m00 = ex.x
-        self.__m_transform.m10 = ex.y
-        self.__m_transform.m20 = ex.z
+        self.__transform_m.m00 = ex.x
+        self.__transform_m.m10 = ex.y
+        self.__transform_m.m20 = ex.z
 
-        self.__m_transform.m01 = ey.x
-        self.__m_transform.m11 = ey.y
-        self.__m_transform.m21 = ey.z
+        self.__transform_m.m01 = ey.x
+        self.__transform_m.m11 = ey.y
+        self.__transform_m.m21 = ey.z
 
-        self.__m_transform.m02 = ez.x
-        self.__m_transform.m12 = ez.y
-        self.__m_transform.m22 = ez.z
+        self.__transform_m.m02 = ez.x
+        self.__transform_m.m12 = ez.y
+        self.__transform_m.m22 = ez.z
 
         # self.eulerAngles = mathUtils.rot_m_to_euler_angles(self.rotation_mat())
     @property
@@ -51,31 +51,31 @@ class Transform:
 
     @property
     def transform_matrix(self) -> Mat4:
-        return self.__m_transform
+        return self.__transform_m
 
     @transform_matrix.setter
     def transform_matrix(self, t: Mat4) -> None:
-        self.__m_transform.m00 = t.m00
-        self.__m_transform.m10 = t.m10
-        self.__m_transform.m20 = t.m20
+        self.__transform_m.m00 = t.m00
+        self.__transform_m.m10 = t.m10
+        self.__transform_m.m20 = t.m20
 
-        self.__m_transform.m01 = t.m01
-        self.__m_transform.m11 = t.m11
-        self.__m_transform.m21 = t.m21
+        self.__transform_m.m01 = t.m01
+        self.__transform_m.m11 = t.m11
+        self.__transform_m.m21 = t.m21
 
-        self.__m_transform.m02 = t.m02
-        self.__m_transform.m12 = t.m12
-        self.__m_transform.m22 = t.m22
+        self.__transform_m.m02 = t.m02
+        self.__transform_m.m12 = t.m12
+        self.__transform_m.m22 = t.m22
 
-        self.__m_transform.m03 = t.m03
-        self.__m_transform.m13 = t.m13
-        self.__m_transform.m23 = t.m23
+        self.__transform_m.m03 = t.m03
+        self.__transform_m.m13 = t.m13
+        self.__transform_m.m23 = t.m23
 
     @property
     def front(self) -> Vec3:
-        return Vec3(self.__m_transform.m02,
-                    self.__m_transform.m12,
-                    self.__m_transform.m22).normalize()
+        return Vec3(self.__transform_m.m02,
+                    self.__transform_m.m12,
+                    self.__transform_m.m22).normalize()
 
     @front.setter
     def front(self, front_: Vec3) -> None:
@@ -89,9 +89,9 @@ class Transform:
 
     @property
     def up(self) -> Vec3:
-        return Vec3(self.__m_transform.m01,
-                    self.__m_transform.m11,
-                    self.__m_transform.m21).normalize()
+        return Vec3(self.__transform_m.m01,
+                    self.__transform_m.m11,
+                    self.__transform_m.m21).normalize()
 
     @up.setter
     def up(self, up_: Vec3) -> None:
@@ -105,9 +105,9 @@ class Transform:
 
     @property
     def right(self) -> Vec3:
-        return Vec3(self.__m_transform.m00,
-                    self.__m_transform.m10,
-                    self.__m_transform.m20).normalize()
+        return Vec3(self.__transform_m.m00,
+                    self.__transform_m.m10,
+                    self.__transform_m.m20).normalize()
 
     @right.setter
     def right(self, right_: Vec3) -> None:
@@ -122,25 +122,25 @@ class Transform:
     # масштаб по Х
     @property
     def sx(self) -> float:
-        x = self.__m_transform.m00
-        y = self.__m_transform.m10
-        z = self.__m_transform.m20
+        x = self.__transform_m.m00
+        y = self.__transform_m.m10
+        z = self.__transform_m.m20
         return math.sqrt(x * x + y * y + z * z)
 
     # масштаб по Y
     @property
     def sy(self) -> float:
-        x = self.__m_transform.m01
-        y = self.__m_transform.m11
-        z = self.__m_transform.m21
+        x = self.__transform_m.m01
+        y = self.__transform_m.m11
+        z = self.__transform_m.m21
         return math.sqrt(x * x + y * y + z * z)
         # масштаб по Z
 
     @property
     def sz(self) -> float:
-        x = self.__m_transform.m02
-        y = self.__m_transform.m12
-        z = self.__m_transform.m22
+        x = self.__transform_m.m02
+        y = self.__transform_m.m12
+        z = self.__transform_m.m22
         return math.sqrt(x * x + y * y + z * z)
         # установить масштаб по Х
 
@@ -149,9 +149,9 @@ class Transform:
         if s_x == 0:
             return
         scl = self.sx
-        self.__m_transform.m00 *= s_x / scl
-        self.__m_transform.m10 *= s_x / scl
-        self.__m_transform.m20 *= s_x / scl
+        self.__transform_m.m00 *= s_x / scl
+        self.__transform_m.m10 *= s_x / scl
+        self.__transform_m.m20 *= s_x / scl
 
     # установить масштаб по Y
     @sy.setter
@@ -159,9 +159,9 @@ class Transform:
         if s_y == 0:
             return
         scl = self.sy
-        self.__m_transform.m01 *= s_y / scl
-        self.__m_transform.m11 *= s_y / scl
-        self.__m_transform.m21 *= s_y / scl
+        self.__transform_m.m01 *= s_y / scl
+        self.__transform_m.m11 *= s_y / scl
+        self.__transform_m.m21 *= s_y / scl
 
     # установить масштаб по Z
     @sz.setter
@@ -169,9 +169,9 @@ class Transform:
         if s_z == 0:
             return
         scl = self.sz
-        self.__m_transform.m02 *= s_z / scl
-        self.__m_transform.m12 *= s_z / scl
-        self.__m_transform.m22 *= s_z / scl
+        self.__transform_m.m02 *= s_z / scl
+        self.__transform_m.m12 *= s_z / scl
+        self.__transform_m.m22 *= s_z / scl
 
     @property
     def scale(self) -> Vec3:
@@ -185,27 +185,27 @@ class Transform:
 
     @property
     def x(self) -> float:
-        return self.__m_transform.m03
+        return self.__transform_m.m03
 
     @property
     def y(self) -> float:
-        return self.__m_transform.m13
+        return self.__transform_m.m13
 
     @property
     def z(self) -> float:
-        return self.__m_transform.m23
+        return self.__transform_m.m23
 
     @x.setter
     def x(self, x: float) -> None:
-        self.__m_transform.m03 = x
+        self.__transform_m.m03 = x
 
     @y.setter
     def y(self, y: float) -> None:
-        self.__m_transform.m13 = y
+        self.__transform_m.m13 = y
 
     @z.setter
     def z(self, z: float) -> None:
-        self.__m_transform.m23 = z
+        self.__transform_m.m23 = z
 
     @property
     def origin(self) -> Vec3:
@@ -219,6 +219,7 @@ class Transform:
 
     @property
     def angles(self) -> Vec3:
+        # TODO check rot_m_to_euler_angles
         return geometry_utils.rot_m_to_euler_angles(self.rotation_mat())
 
     @angles.setter
@@ -228,7 +229,7 @@ class Transform:
         i = geometry_utils.rotate_z(xyz.z) * i
         scl = self.scale
         orig = self.origin
-        self.__m_transform = i
+        self.__transform_m = i
         self.scale = scl
         self.origin = orig
 
@@ -261,36 +262,36 @@ class Transform:
 
     def rotation_mat(self) -> Mat4:
         scl = self.scale
-        return Mat4(self.__m_transform.m00 / scl.x, self.__m_transform.m01 / scl.y, self.__m_transform.m02 / scl.z, 0,
-                    self.__m_transform.m10 / scl.x, self.__m_transform.m11 / scl.y, self.__m_transform.m12 / scl.z, 0,
-                    self.__m_transform.m20 / scl.x, self.__m_transform.m21 / scl.y, self.__m_transform.m22 / scl.z, 0,
+        return Mat4(self.__transform_m.m00 / scl.x, self.__transform_m.m01 / scl.y, self.__transform_m.m02 / scl.z, 0,
+                    self.__transform_m.m10 / scl.x, self.__transform_m.m11 / scl.y, self.__transform_m.m12 / scl.z, 0,
+                    self.__transform_m.m20 / scl.x, self.__transform_m.m21 / scl.y, self.__transform_m.m22 / scl.z, 0,
                     0, 0, 0, 1)
 
     def look_at(self, target: Vec3, eye: Vec3, up: Vec3 = Vec3(0, 1, 0)) -> None:
-        self.__m_transform = geometry_utils.look_at(target, eye, up)
+        self.__transform_m = geometry_utils.look_at(target, eye, up)
 
     # переводит вектор в собственное пространство координат
     def transform_vect(self, vec: Vec3, w=1.0) -> Vec3:
         if w == 0:
-            return Vec3(self.__m_transform.m00 * vec.x + self.__m_transform.m01 * vec.y + self.__m_transform.m02 * vec.z,
-                        self.__m_transform.m10 * vec.x + self.__m_transform.m11 * vec.y + self.__m_transform.m12 * vec.z,
-                        self.__m_transform.m20 * vec.x + self.__m_transform.m21 * vec.y + self.__m_transform.m22 * vec.z)
+            return Vec3(self.__transform_m.m00 * vec.x + self.__transform_m.m01 * vec.y + self.__transform_m.m02 * vec.z,
+                        self.__transform_m.m10 * vec.x + self.__transform_m.m11 * vec.y + self.__transform_m.m12 * vec.z,
+                        self.__transform_m.m20 * vec.x + self.__transform_m.m21 * vec.y + self.__transform_m.m22 * vec.z)
 
         return Vec3(
-            self.__m_transform.m00 * vec.x + self.__m_transform.m01 * vec.y + self.__m_transform.m02 * vec.z + self.__m_transform.m03,
-            self.__m_transform.m10 * vec.x + self.__m_transform.m11 * vec.y + self.__m_transform.m12 * vec.z + self.__m_transform.m13,
-            self.__m_transform.m20 * vec.x + self.__m_transform.m21 * vec.y + self.__m_transform.m22 * vec.z + self.__m_transform.m23)
+            self.__transform_m.m00 * vec.x + self.__transform_m.m01 * vec.y + self.__transform_m.m02 * vec.z + self.__transform_m.m03,
+            self.__transform_m.m10 * vec.x + self.__transform_m.m11 * vec.y + self.__transform_m.m12 * vec.z + self.__transform_m.m13,
+            self.__transform_m.m20 * vec.x + self.__transform_m.m21 * vec.y + self.__transform_m.m22 * vec.z + self.__transform_m.m23)
 
     # не переводит вектор в собственное пространство координат =)
     def inv_transform_vect(self, vec: Vec3, w=1.0) -> Vec3:
         scl: Vec3 = self.scale
         if w == 0:
-            return Vec3((self.__m_transform.m00 * vec.x + self.__m_transform.m10 * vec.y + self.__m_transform.m20 * vec.z) / scl.x / scl.x,
-                        (self.__m_transform.m01 * vec.x + self.__m_transform.m11 * vec.y + self.__m_transform.m21 * vec.z) / scl.y / scl.y,
-                        (self.__m_transform.m02 * vec.x + self.__m_transform.m12 * vec.y + self.__m_transform.m22 * vec.z) / scl.z / scl.z)
+            return Vec3((self.__transform_m.m00 * vec.x + self.__transform_m.m10 * vec.y + self.__transform_m.m20 * vec.z) / scl.x / scl.x,
+                        (self.__transform_m.m01 * vec.x + self.__transform_m.m11 * vec.y + self.__transform_m.m21 * vec.z) / scl.y / scl.y,
+                        (self.__transform_m.m02 * vec.x + self.__transform_m.m12 * vec.y + self.__transform_m.m22 * vec.z) / scl.z / scl.z)
 
         vec_ = Vec3(vec.x - self.x, vec.y - self.y, vec.z - self.z)
-        return Vec3((self.__m_transform.m00 * vec_.x + self.__m_transform.m10 * vec_.y + self.__m_transform.m20 * vec_.z) / scl.x / scl.x,
-                    (self.__m_transform.m01 * vec_.x + self.__m_transform.m11 * vec_.y + self.__m_transform.m21 * vec_.z) / scl.y / scl.y,
-                    (self.__m_transform.m02 * vec_.x + self.__m_transform.m12 * vec_.y + self.__m_transform.m22 * vec_.z) / scl.z / scl.z)
+        return Vec3((self.__transform_m.m00 * vec_.x + self.__transform_m.m10 * vec_.y + self.__transform_m.m20 * vec_.z) / scl.x / scl.x,
+                    (self.__transform_m.m01 * vec_.x + self.__transform_m.m11 * vec_.y + self.__transform_m.m21 * vec_.z) / scl.y / scl.y,
+                    (self.__transform_m.m02 * vec_.x + self.__transform_m.m12 * vec_.y + self.__transform_m.m22 * vec_.z) / scl.z / scl.z)
 

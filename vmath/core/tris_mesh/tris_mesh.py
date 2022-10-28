@@ -285,10 +285,10 @@ class TrisMesh:
         del self._normals
         del self._faces
 
-        self._uvs: [Vec2] = []
-        self._vertices: [Vec3] = []
-        self._normals: [Vec3] = []
-        self._faces: [Face] = []
+        self._uvs: List[Vec2] = []
+        self._vertices: List[Vec3] = []
+        self._normals: List[Vec3] = []
+        self._faces: List[Face] = []
 
     def transform_mesh(self, transform: Transform = None) -> None:
         for i in range(len(self._vertices)):
@@ -317,7 +317,7 @@ def read_obj_mesh(path: str) -> List[TrisMesh]:
             tmp2: List[str]
             id_: int
 
-            meshes: [TrisMesh] = []
+            meshes: List[TrisMesh] = []
             uv_shift: int = 0
             v__shift: int = 0
             n__shift: int = 0

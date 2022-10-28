@@ -1,5 +1,5 @@
-from core.bounding_box import BoundingBox
 from core.transforms.transform import Transform
+from core.bounding_box import BoundingBox
 from core.matrices import Mat4
 from core.vectors import Vec3
 import math
@@ -37,7 +37,7 @@ class Camera:
                    f"\t\"transform\" :\n{self.__transform}\n}}"
 
     def __eq__(self, other) -> bool:
-        if not (type(other) is Camera):
+        if not isinstance(other, Camera):
             return False
         if not (self.__transform == other.__transform):
             return False

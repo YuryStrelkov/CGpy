@@ -1,10 +1,29 @@
+from typing import List, Tuple
 import numpy as np
 
 
 class Mat3:
 
     @staticmethod
-    def __unpack_values(*args) -> tuple:
+    def identity():
+        return Mat3(1.0, 0.0, 0.0,
+                    0.0, 1.0, 0.0,
+                    0.0, 0.0, 1.0)
+
+    @staticmethod
+    def zeros():
+        return Mat3(0.0, 0.0, 0.0,
+                    0.0, 0.0, 0.0,
+                    0.0, 0.0, 0.0)
+
+    @staticmethod
+    def ones():
+        return Mat3(1.0, 1.0, 1.0,
+                    1.0, 1.0, 1.0,
+                    1.0, 1.0, 1.0)
+
+    @staticmethod
+    def __unpack_args(*args) -> tuple:
 
         args = args[0]
 
@@ -22,6 +41,9 @@ class Mat3:
                 return args[0], 0.0, 0.0, \
                        0.0, args[0], 0.0, \
                        0.0, 0.0, args[0]
+
+        if number_of_args == 9:
+            return args
 
         if number_of_args == 0:
             return 0.0, 0.0, 0.0, \
@@ -51,7 +73,7 @@ class Mat3:
         return id(self)
 
     @property
-    def as_array(self):
+    def as_list(self) -> List[float]:
         return self.__data
 
     @property
@@ -61,6 +83,14 @@ class Mat3:
     @property
     def np_array_3x3(self) -> np.ndarray:
         return self.np_array.reshape(3, 3)
+
+    @property
+    def as_tuple(self) -> Tuple[float, float, float,
+                                float, float, float,
+                                float, float, float]:
+        return self.__data[0], self.__data[1], self.__data[2],\
+               self.__data[3], self.__data[4], self.__data[5],\
+               self.__data[6], self.__data[7], self.__data[8]
 
     # row 1 set/get
     @property
@@ -158,11 +188,8 @@ class Mat3:
 
     __slots__ = "__data"
 
-    def __init__(self,
-                 m0: float = 0.0, m1: float = 0.0, m2: float = 0.0,
-                 m3: float = 0.0, m4: float = 0.0, m5: float = 0.0,
-                 m6: float = 0.0, m7: float = 0.0, m8: float = 0.0):
-        self.__data: [float] = [m0, m1, m2, m3, m4, m5, m6, m7, m8]
+    def __init__(self, *args):
+        self.__data: List[float] = list(Mat3.__unpack_args(args))
 
     def __eq__(self, other) -> bool:
         if not isinstance(other, Mat3):
@@ -191,7 +218,7 @@ class Mat3:
                    f"\t\"m20\": {self.m20:20}, \"m21\": {self.m21:20}, \"m22\": {self.m22:20}\n}}\n"
 
     def __add__(self, *args):
-        other = self.__unpack_values(args)
+        other = self.__unpack_args(args)
         return Mat3(self.__data[0] + other[0],
                     self.__data[1] + other[1],
                     self.__data[2] + other[2],
@@ -203,7 +230,7 @@ class Mat3:
                     self.__data[8] + other[8])
 
     def __iadd__(self, *args):
-        other = self.__unpack_values(args)
+        other = self.__unpack_args(args)
         self.__data[0] += other[0]
         self.__data[1] += other[1]
         self.__data[2] += other[2]
@@ -218,7 +245,7 @@ class Mat3:
     __radd__ = __add__
 
     def __sub__(self, *args):
-        other = self.__unpack_values(args)
+        other = self.__unpack_args(args)
         return Mat3(self.__data[0] - other[0],
                     self.__data[1] - other[1],
                     self.__data[2] - other[2],
@@ -230,7 +257,7 @@ class Mat3:
                     self.__data[8] - other[8])
 
     def __isub__(self, *args):
-        other = self.__unpack_values(args)
+        other = self.__unpack_args(args)
         self.__data[0] -= other[0]
         self.__data[1] -= other[1]
         self.__data[2] -= other[2]
@@ -243,7 +270,7 @@ class Mat3:
         return self
 
     def __rsub__(self, *args):
-        other = self.__unpack_values(args)
+        other = self.__unpack_args(args)
         return Mat3(other[0] - self.__data[0],
                     other[1] - self.__data[1],
                     other[2] - self.__data[2],
@@ -255,7 +282,7 @@ class Mat3:
                     other[8] - self.__data[8])
 
     def __mul__(self, *args):
-        b = self.__unpack_values(args)
+        b = self.__unpack_args(args)
         return Mat3(self.__data[0] * b[0] + self.__data[1] * b[3] + self.__data[2] * b[6],
                     self.__data[0] * b[1] + self.__data[1] * b[4] + self.__data[2] * b[7],
                     self.__data[0] * b[2] + self.__data[1] * b[5] + self.__data[2] * b[8],
@@ -269,7 +296,7 @@ class Mat3:
                     self.__data[6] * b[2] + self.__data[7] * b[5] + self.__data[8] * b[8])
 
     def __imul__(self, *args):
-        b = self.__unpack_values(args)
+        b = self.__unpack_args(args)
         res: [float] = \
             [self.__data[0] * b[0] + self.__data[1] * b[3] + self.__data[2] * b[6],
              self.__data[0] * b[1] + self.__data[1] * b[4] + self.__data[2] * b[7],
@@ -286,7 +313,7 @@ class Mat3:
         return self
 
     def __rmul__(self, *args):
-        b = self.__unpack_values(args)
+        b = self.__unpack_args(args)
         return Mat3(b[0] * self.__data[0] + b[1] * self.__data[3] + b[2] * self.__data[6],
                     b[0] * self.__data[1] + b[1] * self.__data[4] + b[2] * self.__data[7],
                     b[0] * self.__data[2] + b[1] * self.__data[5] + b[2] * self.__data[8],
@@ -301,8 +328,30 @@ class Mat3:
 
 
 class Mat4:
+
     @staticmethod
-    def __unpack_values(*args) -> tuple:
+    def identity():
+        return Mat4(1.0, 0.0, 0.0, 0.0,
+                    0.0, 1.0, 0.0, 0.0,
+                    0.0, 0.0, 1.0, 0.0,
+                    0.0, 0.0, 0.0, 1.0)
+
+    @staticmethod
+    def zeros():
+        return Mat4(0.0, 0.0, 0.0, 0.0,
+                    0.0, 0.0, 0.0, 0.0,
+                    0.0, 0.0, 0.0, 0.0,
+                    0.0, 0.0, 0.0, 0.0)
+
+    @staticmethod
+    def ones():
+        return Mat4(1.0, 1.0, 1.0, 1.0,
+                    1.0, 1.0, 1.0, 1.0,
+                    1.0, 1.0, 1.0, 1.0,
+                    1.0, 1.0, 1.0, 1.0)
+
+    @staticmethod
+    def __unpack_args(*args) -> tuple:
         args = args[0]
 
         number_of_args = len(args)
@@ -322,6 +371,9 @@ class Mat4:
                        0.0, 0.0, args[0], 0.0, \
                        0.0, 0.0, 0.0, args[0]
 
+        if number_of_args == 16:
+            return args
+
         if number_of_args == 0:
             return 0.0, 0.0, 0.0, 0.0, \
                    0.0, 0.0, 0.0, 0.0, \
@@ -340,7 +392,7 @@ class Mat4:
     def from_np_array(data: np.ndarray):
         m = Mat4()
         i: int = 0
-        for element in data.ravel():
+        for element in data.flat:
             m[i] = element
             i += 1
             if i == 16:
@@ -348,7 +400,7 @@ class Mat4:
         return m
 
     @property
-    def as_array(self):
+    def as_list(self) -> List[float]:
         return self.__data
 
     @property
@@ -362,6 +414,16 @@ class Mat4:
     @property
     def np_array_4x4(self) -> np.ndarray:
         return self.np_array.reshape(4, 4)
+
+    @property
+    def as_tuple(self) -> Tuple[float, float, float, float,
+                                float, float, float, float,
+                                float, float, float, float,
+                                float, float, float, float]:
+        return self.__data[0], self.__data[1], self.__data[2], self.__data[3],\
+               self.__data[4], self.__data[5], self.__data[6], self.__data[7],\
+               self.__data[8], self.__data[9], self.__data[10], self.__data[11],\
+               self.__data[12], self.__data[13], self.__data[14], self.__data[15]
 
     @property
     def m00(self) -> float:
@@ -495,29 +557,29 @@ class Mat4:
         self.__data[15] = val
 
     def invert(self):
-        A2323: float = self.m22 * self.m33 - self.m23 * self.m32
-        A1323: float = self.m21 * self.m33 - self.m23 * self.m31
-        A1223: float = self.m21 * self.m32 - self.m22 * self.m31
-        A0323: float = self.m20 * self.m33 - self.m23 * self.m30
-        A0223: float = self.m20 * self.m32 - self.m22 * self.m30
-        A0123: float = self.m20 * self.m31 - self.m21 * self.m30
-        A2313: float = self.m12 * self.m33 - self.m13 * self.m32
-        A1313: float = self.m11 * self.m33 - self.m13 * self.m31
-        A1213: float = self.m11 * self.m32 - self.m12 * self.m31
-        A2312: float = self.m12 * self.m23 - self.m13 * self.m22
-        A1312: float = self.m11 * self.m23 - self.m13 * self.m21
-        A1212: float = self.m11 * self.m22 - self.m12 * self.m21
-        A0313: float = self.m10 * self.m33 - self.m13 * self.m30
-        A0213: float = self.m10 * self.m32 - self.m12 * self.m30
-        A0312: float = self.m10 * self.m23 - self.m13 * self.m20
-        A0212: float = self.m10 * self.m22 - self.m12 * self.m20
-        A0113: float = self.m10 * self.m31 - self.m11 * self.m30
-        A0112: float = self.m10 * self.m21 - self.m11 * self.m20
+        a2323: float = self.m22 * self.m33 - self.m23 * self.m32
+        a1323: float = self.m21 * self.m33 - self.m23 * self.m31
+        a1223: float = self.m21 * self.m32 - self.m22 * self.m31
+        a0323: float = self.m20 * self.m33 - self.m23 * self.m30
+        a0223: float = self.m20 * self.m32 - self.m22 * self.m30
+        a0123: float = self.m20 * self.m31 - self.m21 * self.m30
+        a2313: float = self.m12 * self.m33 - self.m13 * self.m32
+        a1313: float = self.m11 * self.m33 - self.m13 * self.m31
+        a1213: float = self.m11 * self.m32 - self.m12 * self.m31
+        a2312: float = self.m12 * self.m23 - self.m13 * self.m22
+        a1312: float = self.m11 * self.m23 - self.m13 * self.m21
+        a1212: float = self.m11 * self.m22 - self.m12 * self.m21
+        a0313: float = self.m10 * self.m33 - self.m13 * self.m30
+        a0213: float = self.m10 * self.m32 - self.m12 * self.m30
+        a0312: float = self.m10 * self.m23 - self.m13 * self.m20
+        a0212: float = self.m10 * self.m22 - self.m12 * self.m20
+        a0113: float = self.m10 * self.m31 - self.m11 * self.m30
+        a0112: float = self.m10 * self.m21 - self.m11 * self.m20
 
-        det: float = self.m00 * (self.m11 * A2323 - self.m12 * A1323 + self.m13 * A1223) \
-                     - self.m01 * (self.m10 * A2323 - self.m12 * A0323 + self.m13 * A0223) \
-                     + self.m02 * (self.m10 * A1323 - self.m11 * A0323 + self.m13 * A0123) \
-                     - self.m03 * (self.m10 * A1223 - self.m11 * A0223 + self.m12 * A0123)
+        det: float = self.m00 * (self.m11 * a2323 - self.m12 * a1323 + self.m13 * a1223) \
+                     - self.m01 * (self.m10 * a2323 - self.m12 * a0323 + self.m13 * a0223) \
+                     + self.m02 * (self.m10 * a1323 - self.m11 * a0323 + self.m13 * a0123) \
+                     - self.m03 * (self.m10 * a1223 - self.m11 * a0223 + self.m12 * a0123)
 
         if abs(det) < 1e-12:
             raise ArithmeticError("Mat4 :: singular matrix")
@@ -526,35 +588,28 @@ class Mat4:
 
         # computes the inverse of a matrix m
 
-        self.__data = var = [det * (self.m11 * A2323 - self.m12 * A1323 + self.m13 * A1223),
-                             det * -(self.m01 * A2323 - self.m02 * A1323 + self.m03 * A1223),
-                             det * (self.m01 * A2313 - self.m02 * A1313 + self.m03 * A1213),
-                             det * -(self.m01 * A2312 - self.m02 * A1312 + self.m03 * A1212),
-                             det * -(self.m10 * A2323 - self.m12 * A0323 + self.m13 * A0223),
-                             det * (self.m00 * A2323 - self.m02 * A0323 + self.m03 * A0223),
-                             det * -(self.m00 * A2313 - self.m02 * A0313 + self.m03 * A0213),
-                             det * (self.m00 * A2312 - self.m02 * A0312 + self.m03 * A0212),
-                             det * (self.m10 * A1323 - self.m11 * A0323 + self.m13 * A0123),
-                             det * -(self.m00 * A1323 - self.m01 * A0323 + self.m03 * A0123),
-                             det * (self.m00 * A1313 - self.m01 * A0313 + self.m03 * A0113),
-                             det * -(self.m00 * A1312 - self.m01 * A0312 + self.m03 * A0112),
-                             det * -(self.m10 * A1223 - self.m11 * A0223 + self.m12 * A0123),
-                             det * (self.m00 * A1223 - self.m01 * A0223 + self.m02 * A0123),
-                             det * -(self.m00 * A1213 - self.m01 * A0213 + self.m02 * A0113),
-                             det * (self.m00 * A1212 - self.m01 * A0212 + self.m02 * A0112)]
+        self.__data = var = [det * (self.m11 * a2323 - self.m12 * a1323 + self.m13 * a1223),
+                             det * -(self.m01 * a2323 - self.m02 * a1323 + self.m03 * a1223),
+                             det * (self.m01 * a2313 - self.m02 * a1313 + self.m03 * a1213),
+                             det * -(self.m01 * a2312 - self.m02 * a1312 + self.m03 * a1212),
+                             det * -(self.m10 * a2323 - self.m12 * a0323 + self.m13 * a0223),
+                             det * (self.m00 * a2323 - self.m02 * a0323 + self.m03 * a0223),
+                             det * -(self.m00 * a2313 - self.m02 * a0313 + self.m03 * a0213),
+                             det * (self.m00 * a2312 - self.m02 * a0312 + self.m03 * a0212),
+                             det * (self.m10 * a1323 - self.m11 * a0323 + self.m13 * a0123),
+                             det * -(self.m00 * a1323 - self.m01 * a0323 + self.m03 * a0123),
+                             det * (self.m00 * a1313 - self.m01 * a0313 + self.m03 * a0113),
+                             det * -(self.m00 * a1312 - self.m01 * a0312 + self.m03 * a0112),
+                             det * -(self.m10 * a1223 - self.m11 * a0223 + self.m12 * a0123),
+                             det * (self.m00 * a1223 - self.m01 * a0223 + self.m02 * a0123),
+                             det * -(self.m00 * a1213 - self.m01 * a0213 + self.m02 * a0113),
+                             det * (self.m00 * a1212 - self.m01 * a0212 + self.m02 * a0112)]
         return self
 
     __slots__ = "__data"
 
-    def __init__(self,
-                 m0: float = 0.0, m1: float = 0.0, m2: float = 0.0, m3: float = 0.0,
-                 m4: float = 0.0, m5: float = 0.0, m6: float = 0.0, m7: float = 0.0,
-                 m8: float = 0.0, m9: float = 0.0, m10: float = 0.0, m11: float = 0.0,
-                 m12: float = 0.0, m13: float = 0.0, m14: float = 0.0, m15: float = 0.0):
-        self.__data: [float] = [m0, m1, m2, m3,
-                                m4, m5, m6, m7,
-                                m8, m9, m10, m11,
-                                m12, m13, m14, m15]
+    def __init__(self, *args):
+        self.__data: List[float] = list(Mat4.__unpack_args(args))
 
     def __eq__(self, other) -> bool:
         if not isinstance(other, Mat4):
@@ -599,7 +654,7 @@ class Mat4:
                f"\t\"m30\": {self.m30:20}, \"m31\": {self.m31:20}, \"m32\": {self.m32:20}, \"m33\": {self.m33:20}\n}}"
 
     def __add__(self, *args):
-        other = self.__unpack_values(args)
+        other = self.__unpack_args(args)
         return Mat4(self.__data[0] + other[0],
                     self.__data[1] + other[1],
                     self.__data[2] + other[2],
@@ -620,7 +675,7 @@ class Mat4:
     __radd__ = __add__
 
     def __iadd__(self, *args):
-        other = self.__unpack_values(args)
+        other = self.__unpack_args(args)
         self.__data[0] += other[0]
         self.__data[1] += other[1]
         self.__data[2] += other[2]
@@ -639,7 +694,7 @@ class Mat4:
         self.__data[15] += other[15]
 
     def __sub__(self, *args):
-        other = self.__unpack_values(args)
+        other = self.__unpack_args(args)
         return Mat4(self.__data[0] - other[0],
                     self.__data[1] - other[1],
                     self.__data[2] - other[2],
@@ -658,7 +713,7 @@ class Mat4:
                     self.__data[15] - other[15])
 
     def __rsub__(self, *args):
-        other = self.__unpack_values(args)
+        other = self.__unpack_args(args)
         return Mat4(other[0] - self.__data[0],
                     other[1] - self.__data[1],
                     other[2] - self.__data[2],
@@ -677,7 +732,7 @@ class Mat4:
                     other[15] - self.__data[15])
 
     def __isub__(self, *args):
-        other = self.__unpack_values(args)
+        other = self.__unpack_args(args)
         self.__data[0] -= other[0]
         self.__data[1] -= other[1]
         self.__data[2] -= other[2]
@@ -696,7 +751,7 @@ class Mat4:
         self.__data[15] -= other[15]
 
     def __mul__(self, *args):
-        b = self.__unpack_values(args)
+        b = self.__unpack_args(args)
         return Mat4(self.__data[0] * b[0] + self.__data[1] * b[4] + self.__data[2] * b[8] + self.__data[3] * b[12],
                     self.__data[0] * b[1] + self.__data[1] * b[5] + self.__data[2] * b[9] + self.__data[3] * b[13],
                     self.__data[0] * b[2] + self.__data[1] * b[6] + self.__data[2] * b[10] + self.__data[3] * b[14],
@@ -718,7 +773,7 @@ class Mat4:
                     self.__data[12] * b[3] + self.__data[13] * b[7] + self.__data[14] * b[11] + self.__data[15] * b[15])
 
     def __rmul__(self, *args):
-        b = self.__unpack_values(args)
+        b = self.__unpack_args(args)
         return Mat4(b[0] * self.__data[0] + b[1] * self.__data[4] + b[2] * self.__data[8] + b[3] * self.__data[12],
                     b[0] * self.__data[1] + b[1] * self.__data[5] + b[2] * self.__data[9] + b[3] * self.__data[13],
                     b[0] * self.__data[2] + b[1] * self.__data[6] + b[2] * self.__data[10] + b[3] * self.__data[14],
@@ -740,7 +795,7 @@ class Mat4:
                     b[12] * self.__data[3] + b[13] * self.__data[7] + b[14] * self.__data[11] + b[15] * self.__data[15])
 
     def __imul__(self, *args):
-        b = self.__unpack_values(args)
+        b = self.__unpack_args(args)
         res: [float] = \
             [self.__data[0] * b[0] + self.__data[1] * b[4] + self.__data[2] * b[8] + self.__data[3] * b[12],
              self.__data[0] * b[1] + self.__data[1] * b[5] + self.__data[2] * b[9] + self.__data[3] * b[13],
@@ -763,42 +818,3 @@ class Mat4:
              self.__data[12] * b[3] + self.__data[13] * b[7] + self.__data[14] * b[11] + self.__data[15] * b[15]]
         self.__data = res
         return self
-
-
-def identity_3() -> Mat3:
-    return Mat3(1.0, 0.0, 0.0,
-                0.0, 1.0, 0.0,
-                0.0, 0.0, 1.0)
-
-
-def identity_4() -> Mat4:
-    return Mat4(1.0, 0.0, 0.0, 0.0,
-                0.0, 1.0, 0.0, 0.0,
-                0.0, 0.0, 1.0, 0.0,
-                0.0, 0.0, 0.0, 1.0)
-
-
-def zeros_3() -> Mat3:
-    return Mat3(0.0, 0.0, 0.0,
-                0.0, 0.0, 0.0,
-                0.0, 0.0, 0.0)
-
-
-def zeros_4() -> Mat4:
-    return Mat4(0.0, 0.0, 0.0, 0.0,
-                0.0, 0.0, 0.0, 0.0,
-                0.0, 0.0, 0.0, 0.0,
-                0.0, 0.0, 0.0, 0.0)
-
-
-def eye_3() -> Mat3:
-    return Mat3(1.0, 1.0, 1.0,
-                1.0, 1.0, 1.0,
-                1.0, 1.0, 1.0)
-
-
-def eye_4() -> Mat4:
-    return Mat4(1.0, 1.0, 1.0, 1.0,
-                1.0, 1.0, 1.0, 1.0,
-                1.0, 1.0, 1.0, 1.0,
-                1.0, 1.0, 1.0, 1.0)

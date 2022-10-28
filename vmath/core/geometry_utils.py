@@ -1,47 +1,17 @@
-import numba
-
 from core.matrices import Mat4, Mat3
 from core.vectors import Vec3, Vec2
-import core.matrices as matrices
+from typing import Tuple
+import numba
 import math
 
 
 @numba.njit(fastmath=True)
-def square_equation(a: float, b: float, c: float) -> (bool, float, float):
+def square_equation(a: float, b: float, c: float) -> Tuple[bool, float, float]:
     det: float = b * b - 4.0 * a * c
     if det < 0.0:
         return False, 0.0, 0.0
     det = math.sqrt(det)
     return True, (-b + det) / 2.0 / a, (-b - det) / 2.0 / a
-
-
-@numba.njit(fastmath=True)
-def cube_equation(a: float, b: float, c: float, d: float) -> (bool, float, float, float):
-    if a == 0 and b == 0 and c == 0 and d == 0:
-        print('Ошибка')
-        exit()
-    p = (3.0 * a * c - b ** 2.0) / (3.0 * a ** 2.0)
-    q = (2.0 * b ** 3.0 - 9.0 * a * b * c + 27.0 * a ** 2.0 * d) / (27.0 * a ** 3.0)
-    det = (p / 3.0) ** 3.0 + (q / 2.0) ** 2.0
-    if det < 0:
-        return False, 0.0, 0.0, 0.0
-    elif det == 0:
-        return True, 2.0 * (-q / 2.0) ** (1.0 / 3.0) - b / (3.0 * a),\
-                           (-q / 2.0) ** (-1.0 / 3.0) - b / (3.0 * a),\
-                           (-q / 2.0) ** (-1.0 / 3.0) - b / (3.0 * a)
-    elif det > 0:
-        alfa = (-q / 2 + det ** 0.5) ** (1 / 3)
-        beta = -abs((-q / 2 - det ** 0.5) ** (1 / 3))
-        y1 = alfa + beta
-        y2 = complex(-((alfa + beta) / 2), (alfa - beta) / 2 * 3 ** 0.5)
-        y3 = complex(-((alfa + beta) / 2), -(alfa - beta) / 2 * 3 ** 0.5)
-        x1 = y1 - b / (3 * a)
-        x1 = round(x1, 5)
-        x2 = y2 - b / (3 * a)
-        x2 = round(x2.real, 5) + round(x2.imag, 5) * 1j
-        x3 = y3 - b / (3 * a)
-        x3 = round(x3.real, 5) + round(x3.imag, 5) * 1j
-        print('\nalfa =', alfa, '\nbeta =', beta, '\n\nx1 =', x1, '\nx2 =', x2, '\nx3 =', x3)
 
 
 def rotate_x(angle: float) -> Mat4:
@@ -168,7 +138,7 @@ def clamp(min_: float, max_: float, val: float) -> float:
     return val
 
 
-def lerp_vec_2(a: Vec2, b: Vec2, t: float) -> Vec2:
+def lin_interp_vec2(a: Vec2, b: Vec2, t: float) -> Vec2:
     """
     :param a: вектор начала
     :param b: вектор конца
@@ -178,7 +148,7 @@ def lerp_vec_2(a: Vec2, b: Vec2, t: float) -> Vec2:
     return Vec2(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t)
 
 
-def lerp_vec_3(a: Vec3, b: Vec3, t: float) -> Vec3:
+def lin_interp_vec3(a: Vec3, b: Vec3, t: float) -> Vec3:
     """
     :param a: вектор начала
     :param b: вектор конца
@@ -188,7 +158,7 @@ def lerp_vec_3(a: Vec3, b: Vec3, t: float) -> Vec3:
     return Vec3(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t, a.z + (b.z - a.z) * t)
 
 
-def lerp_mat_3(a: Mat3, b: Mat3, t: float) -> Mat3:
+def lin_interp_mat3(a: Mat3, b: Mat3, t: float) -> Mat3:
     """
     :param a: матрица начала
     :param b: матрица конца
@@ -200,7 +170,7 @@ def lerp_mat_3(a: Mat3, b: Mat3, t: float) -> Mat3:
                 a.m20 + (b.m20 - a.m20) * t, a.m21 + (b.m21 - a.m21) * t, a.m22 + (b.m22 - a.m22) * t)
 
 
-def lerp_mat_4(a: Mat4, b: Mat4, t: float) -> Mat4:
+def lin_interp_mat4(a: Mat4, b: Mat4, t: float) -> Mat4:
     """
     :param a: матрица начала
     :param b: матрица конца
@@ -218,6 +188,7 @@ def lerp_mat_4(a: Mat4, b: Mat4, t: float) -> Mat4:
         a.m33 + (b.m33 - a.m33) * t)
 
 
+@numba.njit(fastmath=True)
 def signum(value) -> float:
     """
     :param value:
@@ -263,7 +234,7 @@ def build_projection_matrix(fov: float = 70, aspect: float = 1, znear: float = 0
     :param zfar: дальняя плоскость отсечения
     :return: матрица перспективной проекции
     """
-    projection = matrices.identity_4()
+    projection = Mat4.identity()
     scale = 1.0 / math.tan(fov * 0.5 * math.pi / 180)
     projection.m00 = scale * aspect  # scale the x coordinates of the projected point
     projection.m11 = scale  # scale the y coordinates of the projected point
@@ -386,7 +357,7 @@ def bezier_3_tangent(p1: Vec3, p2: Vec3, p3: Vec3, p4: Vec3, t: float) -> Vec3:
 
 def quadratic_bezier_patch(p1: Vec3, p2: Vec3, p3: Vec3,
                            p4: Vec3, p5: Vec3, p6: Vec3,
-                           p7: Vec3, p8: Vec3, p9: Vec3, u: float, v: float) -> (Vec3, Vec3):
+                           p7: Vec3, p8: Vec3, p9: Vec3, u: float, v: float) -> Tuple[Vec3, Vec3]:
     """
     :param p1:
     :param p2:
@@ -429,13 +400,13 @@ def quadratic_bezier_patch(p1: Vec3, p2: Vec3, p3: Vec3,
                p4 * phi2 * dp1 + p5 * phi2 * dp2 + p6 * phi2 * dp3 + \
                p7 * phi3 * dp1 + p8 * phi3 * dp2 + p9 * phi3 * dp3
 
-    return [p, Vec3.cross(dv, du).normalize()]
+    return p, Vec3.cross(dv, du).normalize()
 
 
 def cubic_bezier_patch(p1: Vec3, p2: Vec3, p3: Vec3, p4: Vec3,
                        p5: Vec3, p6: Vec3, p7: Vec3, p8: Vec3,
                        p9: Vec3, p10: Vec3, p11: Vec3, p12: Vec3,
-                       p13: Vec3, p14: Vec3, p15: Vec3, p16: Vec3, u: float, v: float) -> (Vec3, Vec3):
+                       p13: Vec3, p14: Vec3, p15: Vec3, p16: Vec3, u: float, v: float) -> Tuple[Vec3, Vec3]:
     """
     :param p1:
     :param p2:
@@ -493,7 +464,7 @@ def cubic_bezier_patch(p1: Vec3, p2: Vec3, p3: Vec3, p4: Vec3,
                 p9  * phi3 * d1 + p10 * phi3 * d2 + p11 * phi3 * d3 + p12 * phi3 * d4 + \
                 p13 * phi4 * d1 + p14 * phi4 * d2 + p15 * phi4 * d3 + p16 * phi4 * d4
 
-    return [p, Vec3.cross(dpv, dpu).normalize()]
+    return p, Vec3.cross(dpv, dpu).normalize()
 
 
 def point_to_line_dist(point: Vec3, origin: Vec3, direction: Vec3) -> float:
@@ -528,10 +499,10 @@ def plane_to_point_dist(r_0: Vec3, n: Vec3, point: Vec3) -> float:
     :arg point точка для которой ищем расстояние
     :return расстояние между точкой и плоскостью
     """
-    return (Vec3.dot(n, point) - Vec3.dot(n, r_0)) / math.sqrt(n[0] ** 2 + n[1] ** 2 + n[2] ** 2)
+    return Vec3.dot(point - r_0, n)
 
 
-def ray_plane_intersect(r_0: Vec3, n: Vec3, origin: Vec3, direction: Vec3) -> (bool, float):
+def ray_plane_intersect(r_0: Vec3, n: Vec3, origin: Vec3, direction: Vec3) -> Tuple[bool, float]:
     # (r - r_0, n) = 0
     """
     :arg r_0 точка через которую проходит плоскость
@@ -543,7 +514,7 @@ def ray_plane_intersect(r_0: Vec3, n: Vec3, origin: Vec3, direction: Vec3) -> (b
     pass
 
 
-def ray_sphere_intersect(r_0: Vec3, r: float, origin: Vec3, direction: Vec3) -> (bool, float, float):
+def ray_sphere_intersect(r_0: Vec3, r: float, origin: Vec3, direction: Vec3) -> Tuple[bool, float, float]:
     """
     :arg r_0 точка центра сферы
     :arg r радиус сферы
@@ -554,7 +525,7 @@ def ray_sphere_intersect(r_0: Vec3, r: float, origin: Vec3, direction: Vec3) -> 
     pass
 
 
-def ray_box_intersect(box_min: Vec3, box_max: Vec3, origin: Vec3, direction: Vec3) -> (bool, float, float):
+def ray_box_intersect(box_min: Vec3, box_max: Vec3, origin: Vec3, direction: Vec3) -> Tuple[bool, float, float]:
     # r = r_0 + e * t
     """
     :arg box_min минимальная точка бокса
@@ -566,7 +537,7 @@ def ray_box_intersect(box_min: Vec3, box_max: Vec3, origin: Vec3, direction: Vec
     pass
 
 
-def ray_triangle_intersect(p1: Vec3, p2: Vec3, p3: Vec3, origin: Vec3, direction: Vec3) -> (bool, float):
+def ray_triangle_intersect(p1: Vec3, p2: Vec3, p3: Vec3, origin: Vec3, direction: Vec3) -> Tuple[bool, float]:
     """
        :arg p1 первая вершина трекугольника
        :arg p2 вторая вершина трекугольника
