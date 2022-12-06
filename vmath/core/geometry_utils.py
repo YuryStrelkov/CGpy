@@ -1,11 +1,11 @@
 from core.matrices import Mat4, Mat3
 from core.vectors import Vec3, Vec2
 from typing import Tuple
-import numba
+# import numba
 import math
 
 
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def square_equation(a: float, b: float, c: float) -> Tuple[bool, float, float]:
     det: float = b * b - 4.0 * a * c
     if det < 0.0:
@@ -63,7 +63,7 @@ def rotate(angle_x: float, angle_y: float, angle_z: float) -> Mat4:
     return rotate_x(angle_x) * rotate_y(angle_y) * rotate_z(angle_z)
 
 
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def deg_to_rad(deg: float) -> float:
     """
     :param deg: угол в градусах
@@ -72,7 +72,7 @@ def deg_to_rad(deg: float) -> float:
     return deg / 180.0 * math.pi
 
 
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def rad_to_deg(deg: float) -> float:
     """
     :param deg: угол в радианах
@@ -123,7 +123,7 @@ def look_at(target: Vec3, eye: Vec3, up: Vec3 = Vec3(0, 1, 0)) -> Mat4:
                 0, 0, 0, 1)
 
 
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def clamp(min_: float, max_: float, val: float) -> float:
     """
     :param min_: минимальная граница
@@ -188,7 +188,7 @@ def lin_interp_mat4(a: Mat4, b: Mat4, t: float) -> Mat4:
         a.m33 + (b.m33 - a.m33) * t)
 
 
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def signum(value) -> float:
     """
     :param value:
@@ -283,6 +283,44 @@ def build_orthogonal_basis(right: Vec3, up: Vec3, front: Vec3, main_axes=3) -> M
     return m
 
 
+def _bezier_coordinate(t: float, x1: float, x2: float, x3: float, x4: float) -> float:
+    one_min_t: float = 1.0 - t
+    return x1 * one_min_t * one_min_t * one_min_t +\
+           x2 * 3.0 * one_min_t * one_min_t * t +\
+           x3 * 3.0 * one_min_t * t * t + x4 * t * t * t
+
+
+def _section_bounds_1d(x1: float, x2: float, x3: float, x4: float) -> Tuple[float, float]:
+    a: float = -3 * x1 + 9 * x2 - 9 * x3 + 3 * x4
+    b: float = 6 * x1 - 12 * x2 + 6 * x3
+    c: float = -3 * x1 + 3 * x2
+    if abs(a) < 1e-6:
+        if abs(b) < 1e-6:
+            return min(x1, x4), max(x1, x4)
+        t = _bezier_coordinate(-c / b, x1, x2, x3, x4)
+        return min(min(t, x1), x4), max(max(t, x1), x4)
+    det: float = b * b - 4.0 * a * c
+    if det < 0:
+        return min(min(min(x1, x2), x3), x4), max(max(max(x1, x2), x3), x4)
+    det = math.sqrt(det)
+    x_1: float = _bezier_coordinate(clamp(0.0, 1.0, (-b + det) * 0.5 / a), x1, x2, x3, x4)
+    x_2: float = _bezier_coordinate(clamp(0.0, 1.0, (-b - det) * 0.5 / a), x1, x2, x3, x4)
+    return min(min(min(x_1, x_2), x1), x4), max(max(max(x_1, x_2), x1), x4)
+
+
+def bezier_2_section_bounds(p1: Vec2, p2: Vec2, p3: Vec2, p4: Vec2) -> Tuple[Vec2, Vec2]:
+    x_0, x_1 = _section_bounds_1d(p1.x, p2.x, p3.x, p4.x)
+    y_0, y_1 = _section_bounds_1d(p1.y, p2.y, p3.y, p4.y)
+    return Vec2(min(x_0, x_1), min(y_0, y_1)), Vec2(max(x_0, x_1), max(y_0, y_1))
+
+
+def bezier_3_section_bounds(p1: Vec3, p2: Vec3, p3: Vec3, p4: Vec3) -> Tuple[Vec3, Vec3]:
+    x_0, x_1 = _section_bounds_1d(p1.x, p2.x, p3.x, p4.x)
+    y_0, y_1 = _section_bounds_1d(p1.y, p2.y, p3.y, p4.y)
+    z_0, z_1 = _section_bounds_1d(p1.z, p2.z, p3.z, p4.z)
+    return Vec3(min(x_0, x_1), min(y_0, y_1), min(z_0, z_1)), Vec3(max(x_0, x_1), max(y_0, y_1), max(z_0, z_1))
+
+
 def bezier_2_cubic(p1: Vec2, p2: Vec2, p3: Vec2, p4: Vec2, t: float) -> Vec2:
     """
     :param p1:
@@ -310,10 +348,10 @@ def bezier_2_tangent(p1: Vec2, p2: Vec2, p3: Vec2, p4: Vec2, t: float) -> Vec2:
     :param t:
     :return: касательная для точки на кривой
     """
-    d: float = 3 * t * t
-    a: float = -3 + 6 * t - d
-    b: float = 3 - 12 * t + 3 * d
-    c: float = 6 * t - 3 * d
+    d: float = 3.0 * t * t
+    a: float = -3.0 + 6.0 * t - d
+    b: float = 3.0 - 12.0 * t + 3.0 * d
+    c: float = 6.0 * t - 3.0 * d
     return Vec2(p1.x * a + p2.x * b + p3.x * c + p4.x * d,
                 p1.y * a + p2.y * b + p3.y * c + p4.y * d)
 
@@ -346,13 +384,113 @@ def bezier_3_tangent(p1: Vec3, p2: Vec3, p3: Vec3, p4: Vec3, t: float) -> Vec3:
     :param t:
     :return: касательная для точки на кривой
     """
-    d: float = 3 * t * t
-    a: float = -3 + 6 * t - d
-    b: float = 3 - 12 * t + 3 * d
-    c: float = 6 * t - 3 * d
+    d: float = 3.0 * t * t
+    a: float = -3.0 + 6.0 * t - d
+    b: float = 3.0 - 12.0 * t + 3.0 * d
+    c: float = 6.0 * t - 3.0 * d
     return Vec3(p1.x * a + p2.x * b + p3.x * c + p4.x * d,
                 p1.y * a + p2.y * b + p3.y * c + p4.y * d,
                 p1.z * a + p2.z * b + p3.z * c + p4.z * d)
+
+
+def distance_to_bezier_3(point: Vec3, p1: Vec3, p2: Vec3, p3: Vec3, p4: Vec3, iterations: int = 2, slices: int = 32):
+    t: float
+    dt: float
+    best_t: float = 0.0
+    min_dist: float = 0.0
+    curr_dist: float = 0.0
+    _start: float = 0.0
+    _end: float = 1.0
+    while iterations >= 0:
+        dt = (_end - _start) * 1.0 / slices
+        t = _start
+        best_t = 0.0
+        min_dist = 1e12
+        while t <= _end:
+            curr_dist = (bezier_3_cubic(p1, p2, p3, p4, t) - point).magnitude
+            if curr_dist < min_dist:
+                min_dist = curr_dist
+                best_t = t
+            t += dt
+        iterations -= 1
+        _start = max(best_t - dt, 0.0)
+        _end = min(best_t + dt, 1.0)
+    return Vec2((_start + _end) * 0.5, math.sqrt(min_dist))
+
+
+def distance_to_bezier_2(point: Vec2, p1: Vec2, p2: Vec2, p3: Vec2, p4: Vec2, iterations: int = 2, slices: int = 32):
+    t: float
+    dt: float
+    best_t: float = 0.0
+    min_dist: float = 0.0
+    curr_dist: float = 0.0
+    _start: float = 0.0
+    _end: float = 1.0
+    while iterations >= 0:
+        dt = (_end - _start) * 1.0 / slices
+        t = _start
+        best_t = 0.0
+        min_dist = 1e12
+        while t <= _end:
+            curr_dist = (bezier_2_cubic(p1, p2, p3, p4, t) - point).magnitude
+            if curr_dist < min_dist:
+                min_dist = curr_dist
+                best_t = t
+            t += dt
+        iterations -= 1
+        _start = max(best_t - dt, 0.0)
+        _end = min(best_t + dt, 1.0)
+    return Vec2((_start + _end) * 0.5, math.sqrt(min_dist))
+
+
+def split_bezier_section_2(p1: Vec2, p2: Vec2, p3: Vec2, p4: Vec2, t: float) -> Tuple[Vec2, Vec2, Vec2, Vec2]:
+    x12 = (p2.x - p1.x) * t + p1.x
+    y12 = (p2.y - p1.y) * t + p1.y
+
+    x23 = (p3.x - p2.x) * t + p2.x
+    y23 = (p3.y - p2.y) * t + p2.y
+
+    x34 = (p4.x - p3.x) * t + p3.x
+    y34 = (p4.y - p3.y) * t + p3.y
+
+    x123 = (x23 - x12) * t + x12
+    y123 = (y23 - y12) * t + y12
+
+    x234 = (x34 - x23) * t + x23
+    y234 = (y34 - y23) * t + y23
+
+    x1234 = (x234 - x123) * t + x123
+    y1234 = (y234 - y123) * t + y123
+
+    return Vec2(p1.x, p1.y), Vec2(x12, y12), Vec2(x123, y123), Vec2(x1234, y1234)
+
+
+def split_bezier_section_3(p1: Vec3, p2: Vec3, p3: Vec3, p4: Vec3, t: float) -> Tuple[Vec3, Vec3, Vec3, Vec3]:
+    x12 = (p2.x - p1.x) * t + p1.x
+    y12 = (p2.y - p1.y) * t + p1.y
+    z12 = (p2.z - p1.z) * t + p1.z
+
+    x23 = (p3.x - p2.x) * t + p2.x
+    y23 = (p3.y - p2.y) * t + p2.y
+    z23 = (p3.z - p2.z) * t + p2.z
+
+    x34 = (p4.x - p3.x) * t + p3.x
+    y34 = (p4.y - p3.y) * t + p3.y
+    z34 = (p4.z - p3.z) * t + p3.z
+
+    x123 = (x23 - x12) * t + x12
+    y123 = (y23 - y12) * t + y12
+    z123 = (z23 - z12) * t + z12
+
+    x234 = (x34 - x23) * t + x23
+    y234 = (y34 - y23) * t + y23
+    z234 = (z34 - z23) * t + z23
+
+    x1234 = (x234 - x123) * t + x123
+    y1234 = (y234 - y123) * t + y123
+    z1234 = (z234 - z123) * t + z123
+
+    return Vec3(p1.x, p1.y, p1.z), Vec3(x12, y12, z12), Vec3(x123, y123, z123), Vec3(x1234, y1234, z1234)
 
 
 def quadratic_bezier_patch(p1: Vec3, p2: Vec3, p3: Vec3,
@@ -372,29 +510,29 @@ def quadratic_bezier_patch(p1: Vec3, p2: Vec3, p3: Vec3,
     :param v:
     :return:
     """
-    phi1: float = (1 - u) * (1 - u)
+    phi1: float = (1.0 - u) * (1.0 - u)
     phi3: float = u * u
-    phi2: float = -2 * phi3 + 2 * u
+    phi2: float = -2.0 * phi3 + 2.0 * u
 
-    psi1: float = (1 - v) * (1 - v)
+    psi1: float = (1.0 - v) * (1.0 - v)
     psi3: float = v * v
-    psi2: float = -2 * psi3 + 2 * v
+    psi2: float = -2.0 * psi3 + 2.0 * v
 
     p: Vec3 = p1 * phi1 * psi1 + p2 * phi1 * psi2 + p3 * phi1 * psi3 + \
               p4 * phi2 * psi1 + p5 * phi2 * psi2 + p6 * phi2 * psi3 + \
               p7 * phi3 * psi1 + p8 * phi3 * psi2 + p9 * phi3 * psi3
 
-    dp1: float = -2 + u * 2
-    dp2: float =  2 * u
-    dp3: float = -2 * psi3 + 2
+    dp1: float = -2.0 + u * 2.0
+    dp2: float =  2.0 * u
+    dp3: float = -2.0 * psi3 + 2.0
 
     du: Vec3 = p1 * dp1 * psi1 + p2 * dp1 * psi2 + p3 * dp1 * psi3 + \
                p4 * dp2 * psi1 + p5 * dp2 * psi2 + p6 * dp2 * psi3 + \
                p7 * dp3 * psi1 + p8 * dp3 * psi2 + p9 * dp3 * psi3
 
-    dp1 = -2 + v * 2
-    dp2 =  2 * v
-    dp3 = -2 * psi3 + 2
+    dp1 = -2.0 + v * 2.0
+    dp2 =  2.0 * v
+    dp3 = -2.0 * psi3 + 2.0
 
     dv: Vec3 = p1 * phi1 * dp1 + p2 * phi1 * dp2 + p3 * phi1 * dp3 + \
                p4 * phi2 * dp1 + p5 * phi2 * dp2 + p6 * phi2 * dp3 + \
@@ -429,35 +567,35 @@ def cubic_bezier_patch(p1: Vec3, p2: Vec3, p3: Vec3, p4: Vec3,
     :return:
     """
 
-    phi1: float = (1 - u) * (1 - u) * (1 - u)
+    phi1: float = (1.0 - u) * (1.0 - u) * (1.0 - u)
     phi4: float =  u * u * u
-    phi2: float =  3 * phi4 - 6 * u * u + 3 * u
-    phi3: float = -3 * phi4 + 3 * u * u
+    phi2: float =  3.0 * phi4 - 6.0 * u * u + 3.0 * u
+    phi3: float = -3.0 * phi4 + 3.0 * u * u
 
-    psi1: float = (1 - v) * (1 - v) * (1 - v)
+    psi1: float = (1.0 - v) * (1.0 - v) * (1.0 - v)
     psi4: float =  v * v * v
-    psi2: float =  3 * psi4 - 6 * v * v + 3 * v
-    psi3: float = -3 * psi4 + 3 * v * v
+    psi2: float =  3.0 * psi4 - 6.0 * v * v + 3.0 * v
+    psi3: float = -3.0 * psi4 + 3.0 * v * v
 
     p: Vec3 = p1 * phi1 * psi1 + p2 * phi1 * psi2 + p3 * phi1 * psi3 + p4 * phi1 * psi4 + \
               p5 * phi2 * psi1 + p6 * phi2 * psi2 + p7 * phi2 * psi3 + p8 * phi2 * psi4 + \
               p9 * phi3 * psi1 + p10 * phi3 * psi2 + p11 * phi3 * psi3 + p12 * phi3 * psi4 + \
               p13 * phi4 * psi1 + p14 * phi4 * psi2 + p15 * phi4 * psi3 + p16 * phi4 * psi4
 
-    d4: float =  3 * u * u
-    d1: float = -3 + 6 * u - d4
-    d2: float =  3 * phi4 - 12 * u + 3
-    d3: float = -3 * phi4 + 6 * u
+    d4: float =  3.0 * u * u
+    d1: float = -3.0 + 6.0 * u - d4
+    d2: float =  3.0 * phi4 - 12.0 * u + 3.0
+    d3: float = -3.0 * phi4 + 6.0 * u
 
     dpu: Vec3 = p1  * d1 * psi1 + p2  * d1 * psi2 + p3  * d1 * psi3 + p4  * d1 * psi4 + \
                 p5  * d2 * psi1 + p6  * d2 * psi2 + p7  * d2 * psi3 + p8  * d2 * psi4 + \
                 p9  * d3 * psi1 + p10 * d3 * psi2 + p11 * d3 * psi3 + p12 * d3 * psi4 + \
                 p13 * d4 * psi1 + p14 * d4 * psi2 + p15 * d4 * psi3 + p16 * d4 * psi4
 
-    d4 =  3 * v * v
-    d1 = -3 + 6 * v - d4
-    d2 =  3 * phi4 - 12 * v + 3
-    d3 = -3 * phi4 + 6 * v
+    d4 =  3.0 * v * v
+    d1 = -3.0 + 6.0 * v - d4
+    d2 =  3.0 * phi4 - 12.0 * v + 3.0
+    d3 = -3.0 * phi4 + 6.0 * v
 
     dpv: Vec3 = p1  * phi1 * d1 + p2  * phi1 * d2 + p3  * phi1 * d3 + p4  * phi1 * d4 + \
                 p5  * phi2 * d1 + p6  * phi2 * d2 + p7  * phi2 * d3 + p8  * phi2 * d4 + \

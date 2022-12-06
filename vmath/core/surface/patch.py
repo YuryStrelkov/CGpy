@@ -3,7 +3,7 @@ from core.tris_mesh.tris_mesh import create_plane
 from core.transforms.transform import Transform
 from core.tris_mesh.tris_mesh import TrisMesh
 from core.tris_mesh.triangle import Triangle
-from core.bounding_box import BoundingBox
+from core.bounds.bounding_box import BoundingBox
 from core.vectors import Vec3
 from typing import List
 
@@ -17,7 +17,7 @@ class CubicPatch:
         self.__height_points: int = 8
         self.__transform: Transform = Transform()
         self.__mesh: TrisMesh = create_plane(1.0, 1.0, self.__height_points, self.__width_points)
-        print(self.__mesh)
+        # print(self.__mesh)
         self.__controllers: List[Vec3] = \
             [Vec3(-0.5, 0,   -0.5),    Vec3(-0.1666, 0.1, -0.5),    Vec3(0.1666, 0.1, -0.5),    Vec3(0.5, 0,   -0.5),
              Vec3(-0.5, 0.1, -0.1666), Vec3(-0.1666, 1,   -0.1666), Vec3(0.1666, 1,   -0.1666), Vec3(0.5, 0.1, -0.1666),

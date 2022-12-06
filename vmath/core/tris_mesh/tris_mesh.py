@@ -2,7 +2,7 @@ from typing import Tuple, List
 
 from core.transforms.transform import Transform
 from core.tris_mesh.triangle import Triangle
-from core.bounding_box import BoundingBox
+from core.bounds.bounding_box import BoundingBox
 from core.vectors import Vec3, Vec2
 import numpy as np
 import re
@@ -222,6 +222,26 @@ class TrisMesh:
     def faces(self) -> List[Face]:
         return self._faces
 
+    @property
+    def faces_count(self) -> int:
+        return len(self._faces)
+
+    @property
+    def vertices_count(self) -> int:
+        return len(self._vertices)
+
+    @property
+    def uvs_count(self) -> int:
+        return len(self._uvs)
+
+    @property
+    def normals_count(self) -> int:
+        return len(self._normals)
+
+    @property
+    def bbox(self) -> BoundingBox:
+        return self._bbox
+
     def set_vertex(self, i_id: int, v: Vec3) -> None:
         if i_id < 0:
             return
@@ -243,26 +263,6 @@ class TrisMesh:
         if i_id >= self.uvs_count:
             return
         self._uvs[i_id] = v
-
-    @property
-    def faces_count(self) -> int:
-        return len(self._faces)
-
-    @property
-    def vertices_count(self) -> int:
-        return len(self._vertices)
-
-    @property
-    def uvs_count(self) -> int:
-        return len(self._uvs)
-
-    @property
-    def normals_count(self) -> int:
-        return len(self._normals)
-
-    @property
-    def bbox(self) -> BoundingBox:
-        return self._bbox
 
     def append_vertex(self, v: Vec3) -> None:
         self._bbox.encapsulate(v)

@@ -1,11 +1,13 @@
 from core.bezier.bezier_point_2 import BezierPoint2
 from core import geometry_utils
+from core.bounds.bounding_rect import BoundingRect
 from core.vectors import Vec2
 from typing import List
 
 
 class BezierCurve2:
     def __init__(self):
+        self.__bounds: BoundingRect = BoundingRect()
         self.__sections_per_seg: int = 8
         self.__points: List[BezierPoint2] = []
         self.closed: bool = False
@@ -78,8 +80,23 @@ class BezierCurve2:
             return False
         return True
 
-    def add_point(self, p: Vec2, smooth: bool = True) -> None:
+    def __compute_and_update_sect_bbox(self, p1: BezierPoint2, p2: BezierPoint2):
+        _min, _max = geometry_utils.bezier_2_section_bounds(p1.point, p1.anchor_1, p2.anchor_2, p2.point)
+        self.__bounds.encapsulate(_min)
+        self.__bounds.encapsulate(_max)
 
+    def compute_bbox(self):
+        self.__bounds.reset()
+        if self.n_control_points <= 1:
+            return
+
+        for i in range(self.n_control_points - 1):
+            self.__compute_and_update_sect_bbox(self.__points[i], self.__points[i + 1])
+
+        if self.closed:
+            self.__compute_and_update_sect_bbox(self.__points[self.n_control_points - 1], self.__points[0])
+
+    def add_point(self, p: Vec2, smooth: bool = True) -> None:
         point: BezierPoint2 = BezierPoint2(p)
         point.smooth = smooth
         self.__points.append(BezierPoint2(p))
@@ -91,6 +108,7 @@ class BezierCurve2:
             dir_: Vec2 = self.__points[1].point - self.__points[0].point
             self.__points[0].align_anchors(dir_)
             self.__points[1].align_anchors(dir_)
+            self.__compute_and_update_sect_bbox(self.__points[0], self.__points[1])
             return
 
         pid = len(self.__points) - 1
@@ -98,6 +116,7 @@ class BezierCurve2:
         dir_21: Vec2 = self.__points[pid].point - self.__points[pid - 1].point
         self.__points[pid - 1].align_anchors(dir_31)
         self.__points[pid].align_anchors(dir_21)
+        self.__compute_and_update_sect_bbox(self.__points[pid - 1], self.__points[pid])
 
     def insert_point(self, p: Vec2, pid: int) -> None:
         if pid < 0:
@@ -106,20 +125,27 @@ class BezierCurve2:
            self.n_control_points == 1 or \
            self.n_control_points == pid:
             self.add_point(p)
+            self.compute_bbox()
             return
-
         _dir: Vec2
-
         if pid == 0:
             _dir = self.__points[pid].point - self.__points[self.n_control_points - 1].point
         else:
             _dir = self.__points[pid].point - self.__points[pid - 1].point
-
         pt: BezierPoint2 = BezierPoint2(p)
-
         pt.align_anchors(_dir)
-
         self.__points.insert(pid, pt)
+        self.compute_bbox()
+
+    """
+       def split_section(self, sect_id, t: float):
+        if not self.__in_range(sect_id):
+            return
+        pt1: BezierPoint2 = self.__points[sect_id]
+        pt2: BezierPoint2 = self.__points[(sect_id + 1) % self.n_control_points]
+        p1, an1, an2, p2 = geometry_utils.split_bezier_section_2(pt1.point, pt1.anchor_1, pt2.anchor_2, pt2.point, t)
+        pt1.point = p1
+    """
 
     def set_flow(self) -> None:
         if self.n_control_points < 3:
@@ -132,11 +158,13 @@ class BezierCurve2:
             p_next = self.__points[(i + 1) % self.n_control_points]
             p_curr.align_anchors(p_next.point - p_prev.point)
             p_prev = p_curr
+        self.compute_bbox()
 
     def rem_point(self, pid: int) -> None:
         if not self.__in_range(pid):
             return
         del self.__points[pid]
+        self.compute_bbox()
 
     def move_point(self, pid: int, pos: Vec2) -> None:
         if not self.__in_range(pid):

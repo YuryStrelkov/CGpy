@@ -1,5 +1,5 @@
 from core.transforms.transform import Transform
-from core.bounding_box import BoundingBox
+from core.bounds.bounding_box import BoundingBox
 from core.matrices import Mat4
 from core.vectors import Vec3
 import math

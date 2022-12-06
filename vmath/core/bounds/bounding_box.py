@@ -30,6 +30,10 @@ class BoundingBox:
         yield Vec3(c.x - s.x, c.y - s.y, c.z + s.z)
         yield Vec3(c.x + s.x, c.y + s.y, c.z + s.z)
 
+    def reset(self):
+        self.__max: Vec3 = Vec3(-1e12, -1e12, -1e12)
+        self.__min: Vec3 = Vec3(1e12, 1e12, 1e12)
+
     def encapsulate(self, v: Vec3) -> None:
         if v.x > self.__max.x:
             self.__max.x = v.x
