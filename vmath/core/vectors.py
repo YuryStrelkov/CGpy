@@ -30,87 +30,6 @@ class Vec2:
 
         raise TypeError(f'Invalid Input: {args}')
 
-    def from_np_array(self, data: np.ndarray) -> None:
-        i: int = 0
-        for element in data.ravel():
-            self.__xy[i] = element
-            i += 1
-            if i == 2:
-                break
-
-    @staticmethod
-    def dot(a, b) -> float:
-        return a.x * b.x + a.y * b.y
-
-    @staticmethod
-    def cross(a, b) -> float:
-        return a.y * b.x - a.x * b.y
-
-    @staticmethod
-    def max(a,  b):
-        return Vec2(max(a.x, b.x), max(a.y, b.y))
-
-    @staticmethod
-    def min(a, b):
-        return Vec2(min(a.x, b.x), min(a.y, b.y))
-
-    @staticmethod
-    def reflect(n, e):
-        return e - 2.0 * (Vec2.dot(n, e)) * n
-
-    @staticmethod
-    def refract(n, e, ri_ratio: float):
-        pass
-
-    def unique_id(self) -> int:
-        return id(self)
-
-    def normalize(self):
-        nrm = self.magnitude
-        if abs(nrm) < 1e-12:
-            raise ArithmeticError("zero length vector")
-        self.__xy[0] /= nrm
-        self.__xy[1] /= nrm
-        return self
-
-    def normalized(self):
-        nrm = self.magnitude
-        if abs(nrm) < 1e-12:
-            raise ArithmeticError("zero length vector")
-        return Vec2(self.__xy[0] / nrm, self.__xy[1] / nrm)
-
-    @property
-    def magnitude(self) -> float:
-        return math.sqrt(self.__xy[0] * self.__xy[0] + self.__xy[1] * self.__xy[1])
-
-    @property
-    def np_array(self) -> np.ndarray:
-        return np.array(self.__xy, dtype=np.float32)
-
-    @property
-    def as_list(self) -> List[float]:
-        return self.__xy
-
-    @property
-    def as_tuple(self) -> Tuple[float, float]:
-        return self.__xy[0], self.__xy[1]
-
-    @property
-    def x(self) -> float: return self.__xy[0]
-
-    @property
-    def y(self) -> float: return self.__xy[1]
-
-    @x.setter
-    def x(self, x: float): self.__xy[0] = x
-
-    @y.setter
-    def y(self, y: float): self.__xy[1] = y
-
-    @property
-    def magnitude_sqr(self) -> float:
-        return self.__xy[0] * self.__xy[0] + self.__xy[1] * self.__xy[1]
-
     __slots__ = "__xy"
 
     def __sizeof__(self):
@@ -217,6 +136,88 @@ class Vec2:
             raise IndexError(f"Vec2 :: trying to access index: {index}")
         self.__xy[index] = value
 
+    @staticmethod
+    def dot(a, b) -> float:
+        return a.x * b.x + a.y * b.y
+
+    @staticmethod
+    def cross(a, b) -> float:
+        return a.y * b.x - a.x * b.y
+
+    @staticmethod
+    def max(a,  b):
+        return Vec2(max(a.x, b.x), max(a.y, b.y))
+
+    @staticmethod
+    def min(a, b):
+        return Vec2(min(a.x, b.x), min(a.y, b.y))
+
+    @staticmethod
+    def reflect(n, e):
+        return e - 2.0 * (Vec2.dot(n, e)) * n
+
+    @staticmethod
+    def refract(n, e, ri_ratio: float):
+        pass
+
+    @property
+    def unique_id(self) -> int:
+        return id(self)
+
+    @property
+    def magnitude(self) -> float:
+        return math.sqrt(self.__xy[0] * self.__xy[0] + self.__xy[1] * self.__xy[1])
+
+    @property
+    def np_array(self) -> np.ndarray:
+        return np.array(self.__xy, dtype=np.float32)
+
+    @property
+    def as_list(self) -> List[float]:
+        return self.__xy
+
+    @property
+    def as_tuple(self) -> Tuple[float, float]:
+        return self.__xy[0], self.__xy[1]
+
+    @property
+    def x(self) -> float: return self.__xy[0]
+
+    @property
+    def y(self) -> float: return self.__xy[1]
+
+    @x.setter
+    def x(self, x: float): self.__xy[0] = x
+
+    @y.setter
+    def y(self, y: float): self.__xy[1] = y
+
+    @property
+    def magnitude_sqr(self) -> float:
+        return self.__xy[0] * self.__xy[0] + self.__xy[1] * self.__xy[1]
+
+    def from_np_array(self, data: np.ndarray) -> None:
+        for element_id, element in enumerate(data.flat):
+            self.__xy[element_id] = element
+            if element_id == 2:
+                break
+
+    def normalize(self):
+        nrm = self.magnitude
+        if abs(nrm) < 1e-12:
+            raise ArithmeticError("zero length vector")
+        nrm = 1.0 / nrm
+        self.__xy[0] *= nrm
+        self.__xy[1] *= nrm
+        return self
+
+    def normalized(self):
+        nrm = self.magnitude
+        if abs(nrm) < 1e-12:
+            raise ArithmeticError("zero length vector")
+        nrm = 1.0 / nrm
+        return Vec2(self.__xy[0] * nrm, self.__xy[1] * nrm)
+
 
 class Vec3:
 
@@ -242,86 +243,6 @@ class Vec3:
             return args  # x, y and z passed in
 
         raise TypeError(f'Invalid Input: {args}')
-
-    def from_np_array(self, data: np.ndarray) -> None:
-        i: int = 0
-        for element in data.ravel():
-            self.__xyz[i] = element
-            i += 1
-            if i == 3:
-                break
-
-    @staticmethod
-    def dot(a, b) -> float:
-        return a.x * b.x + a.y * b.y + a.z * b.z
-
-    @staticmethod
-    def cross(a, b):
-        return Vec3(a.z * b.y - a.y * b.z, a.x * b.z - a.z * b.x, a.y * b.x - a.x * b.y)
-
-    @staticmethod
-    def max(a, b):
-        return Vec3(max(a.x, b.x), max(a.y, b.y), min(a.z, b.z))
-
-    @staticmethod
-    def min(a, b):
-        return Vec3(min(a.x, b.x), min(a.y, b.y), min(a.z, b.z))
-
-    def unique_id(self) -> int:
-        return id(self)
-
-    def normalize(self):
-        nrm = self.magnitude
-        if abs(nrm) < 1e-12:
-            raise ArithmeticError("zero length vector")
-        self.__xyz[0] /= nrm
-        self.__xyz[1] /= nrm
-        self.__xyz[2] /= nrm
-        return self
-
-    def normalized(self):
-        nrm = self.magnitude
-        if abs(nrm) < 1e-12:
-            raise ArithmeticError("zero length vector")
-        return Vec3(self.__xyz[0] / nrm, self.__xyz[1] / nrm, self.__xyz[2] / nrm)
-
-    @property
-    def magnitude(self) -> float:
-        return math.sqrt(self.__xyz[0] * self.__xyz[0] + self.__xyz[1] * self.__xyz[1] + self.__xyz[2] * self.__xyz[2])
-
-    @property
-    def np_array(self) -> np.ndarray:
-        return np.array(self.__xyz, dtype=np.float32)
-
-    @property
-    def as_list(self) -> List[float]:
-        return self.__xyz
-
-    @property
-    def as_tuple(self) -> Tuple[float, float, float]:
-        return self.__xyz[0], self.__xyz[1], self.__xyz[2]
-
-    @property
-    def x(self) -> float: return self.__xyz[0]
-
-    @property
-    def y(self) -> float: return self.__xyz[1]
-
-    @property
-    def z(self) -> float: return self.__xyz[2]
-
-    @x.setter
-    def x(self, x: float): self.__xyz[0] = x
-
-    @y.setter
-    def y(self, y: float): self.__xyz[1] = y
-
-    @z.setter
-    def z(self, z: float): self.__xyz[2] = z
-
-    @property
-    def magnitude_sqr(self) -> float:
-        return self.__xyz[0] * self.__xyz[0] + self.__xyz[1] * self.__xyz[1] + self.__xyz[2] * self.__xyz[2]
 
     __slots__ = "__xyz"
 
@@ -434,3 +355,84 @@ class Vec3:
         if index < 0 or index >= 3:
             raise IndexError(f"Vec3 :: trying to access index: {index}")
         self.__xyz[index] = value
+
+    @staticmethod
+    def dot(a, b) -> float:
+        return a.x * b.x + a.y * b.y + a.z * b.z
+
+    @staticmethod
+    def cross(a, b):
+        return Vec3(a.z * b.y - a.y * b.z, a.x * b.z - a.z * b.x, a.y * b.x - a.x * b.y)
+
+    @staticmethod
+    def max(a, b):
+        return Vec3(max(a.x, b.x), max(a.y, b.y), min(a.z, b.z))
+
+    @staticmethod
+    def min(a, b):
+        return Vec3(min(a.x, b.x), min(a.y, b.y), min(a.z, b.z))
+
+    @property
+    def unique_id(self) -> int:
+        return id(self)
+
+    @property
+    def magnitude(self) -> float:
+        return math.sqrt(self.__xyz[0] * self.__xyz[0] + self.__xyz[1] * self.__xyz[1] + self.__xyz[2] * self.__xyz[2])
+
+    @property
+    def np_array(self) -> np.ndarray:
+        return np.array(self.__xyz, dtype=np.float32)
+
+    @property
+    def as_list(self) -> List[float]:
+        return self.__xyz
+
+    @property
+    def as_tuple(self) -> Tuple[float, float, float]:
+        return self.__xyz[0], self.__xyz[1], self.__xyz[2]
+
+    @property
+    def x(self) -> float: return self.__xyz[0]
+
+    @property
+    def y(self) -> float: return self.__xyz[1]
+
+    @property
+    def z(self) -> float: return self.__xyz[2]
+
+    @x.setter
+    def x(self, x: float): self.__xyz[0] = x
+
+    @y.setter
+    def y(self, y: float): self.__xyz[1] = y
+
+    @z.setter
+    def z(self, z: float): self.__xyz[2] = z
+
+    @property
+    def magnitude_sqr(self) -> float:
+        return self.__xyz[0] * self.__xyz[0] + self.__xyz[1] * self.__xyz[1] + self.__xyz[2] * self.__xyz[2]
+
+    def normalize(self):
+        nrm = self.magnitude
+        if abs(nrm) < 1e-12:
+            raise ArithmeticError("zero length vector")
+        nrm = 1.0 / nrm
+        self.__xyz[0] *= nrm
+        self.__xyz[1] *= nrm
+        self.__xyz[2] *= nrm
+        return self
+
+    def normalized(self):
+        nrm = self.magnitude
+        if abs(nrm) < 1e-12:
+            raise ArithmeticError("zero length vector")
+        nrm = 1.0 / nrm
+        return Vec3(self.__xyz[0] * nrm, self.__xyz[1] * nrm, self.__xyz[2] * nrm)
+
+    def from_np_array(self, data: np.ndarray) -> None:
+        for element_id, element in enumerate(data.flat):
+            self.__xyz[element_id] = element
+            if element_id == 3:
+                break
