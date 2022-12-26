@@ -5,26 +5,31 @@ import numpy as np
 import ctypes
 import math
 
+from core.vectors import Vec3
+
 
 class Quaternion:
     @staticmethod
     def __unpack_args(*args) -> tuple:
+
         args = args[0]
+
         number_of_args = len(args)
+
         if number_of_args == 1:  # one argument
             arg_type = type(args[0])
 
             if arg_type is Quaternion:
                 return args[0].ex, args[0].ey, args[0].ey, args[0].ew
 
+            if arg_type is Vec3:
+                return args[0].x, args[0].y, args[0].y, 0.0
+
             if arg_type is float or arg_type is int:  # single int or float argument
-                return 1, 0, 0, args[0]
+                return 0.0, 0.0, 0.0, args[0]
 
         if number_of_args == 4:
             return args
-
-        if number_of_args == 0:
-            return 1.0, 0.0, 0.0, 0.0  # no arguments
 
         raise TypeError(f'Invalid Input: {args}')
 
@@ -38,9 +43,9 @@ class Quaternion:
             self.ey = (m.m20 - m.m02) * s
             self.ez = (m.m01 - m.m10) * s
             return
-        i: int = 0
-        j: int = 0
-        k: int = 0
+        i: int
+        j: int
+        k: int
         if m.m11 > m.m00:
             if m.m22 > m.m11:
                 i = 2
