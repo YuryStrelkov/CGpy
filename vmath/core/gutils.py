@@ -1,17 +1,12 @@
 from core.matrices import Mat4, Mat3
 from core.vectors import Vec3, Vec2
-from typing import Tuple
-# import numba
+from typing import Tuple, List
+import numba
 import math
 
 
-# @numba.njit(fastmath=True)
-def square_equation(a: float, b: float, c: float) -> Tuple[bool, float, float]:
-    det: float = b * b - 4.0 * a * c
-    if det < 0.0:
-        return False, 0.0, 0.0
-    det = math.sqrt(det)
-    return True, (-b + det) / 2.0 / a, (-b - det) / 2.0 / a
+numerical_precision: float = 1e-9
+Vector2 = Tuple[float, float]
 
 
 def rotate_x(angle: float) -> Mat4:
@@ -63,7 +58,7 @@ def rotate(angle_x: float, angle_y: float, angle_z: float) -> Mat4:
     return rotate_x(angle_x) * rotate_y(angle_y) * rotate_z(angle_z)
 
 
-# @numba.njit(fastmath=True)
+@numba.njit(fastmath=True)
 def deg_to_rad(deg: float) -> float:
     """
     :param deg: угол в градусах
@@ -72,7 +67,7 @@ def deg_to_rad(deg: float) -> float:
     return deg / 180.0 * math.pi
 
 
-# @numba.njit(fastmath=True)
+@numba.njit(fastmath=True)
 def rad_to_deg(deg: float) -> float:
     """
     :param deg: угол в радианах
@@ -121,21 +116,6 @@ def look_at(target: Vec3, eye: Vec3, up: Vec3 = Vec3(0, 1, 0)) -> Mat4:
                 -xaxis.y, -yaxis.y, zaxis.y, eye.y,
                 xaxis.z, -yaxis.z, zaxis.z, eye.z,
                 0, 0, 0, 1)
-
-
-# @numba.njit(fastmath=True)
-def clamp(min_: float, max_: float, val: float) -> float:
-    """
-    :param min_: минимальная граница
-    :param max_: максимальная граница
-    :param val: значение
-    :return: возвращает указанное значение val в границах от min до max
-    """
-    if val < min_:
-        return min_
-    if val > max_:
-        return max_
-    return val
 
 
 def lin_interp_vec2(a: Vec2, b: Vec2, t: float) -> Vec2:
@@ -188,7 +168,7 @@ def lin_interp_mat4(a: Mat4, b: Mat4, t: float) -> Mat4:
         a.m33 + (b.m33 - a.m33) * t)
 
 
-# @numba.njit(fastmath=True)
+@numba.njit(fastmath=True)
 def signum(value) -> float:
     """
     :param value:
@@ -303,8 +283,8 @@ def _section_bounds_1d(x1: float, x2: float, x3: float, x4: float) -> Tuple[floa
     if det < 0:
         return min(min(min(x1, x2), x3), x4), max(max(max(x1, x2), x3), x4)
     det = math.sqrt(det)
-    x_1: float = _bezier_coordinate(clamp(0.0, 1.0, (-b + det) * 0.5 / a), x1, x2, x3, x4)
-    x_2: float = _bezier_coordinate(clamp(0.0, 1.0, (-b - det) * 0.5 / a), x1, x2, x3, x4)
+    x_1: float = _bezier_coordinate(max(0.0, min(1.0, (-b + det) * 0.5 / a)), x1, x2, x3, x4)
+    x_2: float = _bezier_coordinate(max(0.0, min(1.0, (-b - det) * 0.5 / a)), x1, x2, x3, x4)
     return min(min(min(x_1, x_2), x1), x4), max(max(max(x_1, x_2), x1), x4)
 
 
@@ -627,6 +607,211 @@ def line_to_line_dist(origin_1: Vec3, direction_1: Vec3, origin_2: Vec3, directi
     temp = Vec3.cross(direction_1, direction_2) * (origin_2 - origin_1)
     temp1 = Vec3.cross(direction_1, direction_2)
     return math.sqrt(Vec3.dot(temp, temp)) / math.sqrt(Vec3.dot(temp1, temp1))
+
+
+@numba.njit(fastmath=True)
+def _rect_intersection(min_1: Vector2, max_1: Vector2,
+                       min_2: Vector2, max_2: Vector2) -> Tuple[bool, Vector2, Vector2]:
+    """
+    AABB rectangles intersection test
+    :param min_1: rect 1 min bound
+    :param max_1: rect 1 max bound
+    :param min_2: rect 2 min bound
+    :param max_2: rect 2 max bound
+    :return: true if intersection occurs / min max bound of overlap area
+    """
+    if min_1[0] > max_1[0]:
+        t = min_1[0]
+        min_1 = (max_1[0], min_1[1])
+        max_1 = (t, max_1[1])
+
+    if min_1[1] > max_1[1]:
+        t = min_1[1]
+        min_1 = (min_1[0], max_1[1])
+        max_1 = (max_1[1], t)
+
+    if min_2[0] > max_2[0]:
+        t = min_2[0]
+        min_2 = (max_2[0], min_2[1])
+        max_2 = (t, max_2[1])
+
+    if min_2[1] > max_2[1]:
+        t = min_2[1]
+        min_2 = (min_2[0], max_2[1])
+        max_2 = (max_2[1], t)
+
+    pt_max = (min(max_1[0], max_2[0]), min(max_1[1], max_2[1]))
+
+    pt_min = (max(min_1[0], min_2[0]), max(min_1[1], min_2[1]))
+
+    if pt_max[0] - pt_min[0] <= 0:
+        return False, (0.0, 0.0), (0.0, 0.0)
+
+    if pt_max[1] - pt_min[1] <= 0:
+        return False, (0.0, 0.0), (0.0, 0.0)
+
+    return True, pt_min, pt_max
+
+
+def rect_intersection(min_1: Vec2, max_1: Vec2,
+                      min_2: Vec2, max_2: Vec2) -> Tuple[bool, Vec2, Vec2]:
+    """
+    AABB rectangles intersection test
+    :param min_1: rect 1 min bound
+    :param max_1: rect 1 max bound
+    :param min_2: rect 2 min bound
+    :param max_2: rect 2 max bound
+    :return: true if intersection occurs / min max bound of overlap area
+    """
+    flag, p1, p2 = _rect_intersection((min_1.x, min_1.y), (max_1.x, max_1.y),
+                                      (min_2.x, min_2.y), (max_2.x, max_2.y))
+    return flag, Vec2(p1[0], p1[1]), Vec2(p2[0], p2[0])
+
+
+@numba.njit(fastmath=True)
+def _in_between(pt: Vector2, _min: Vector2, _max: Vector2) -> bool:
+    """
+    Определяет принадлежность точки прямоугольной области, ограниченнной точками _min и _max.\n
+    :param pt: вектор - пара (x, y), точка для которой ищем принадлежность к области
+    :param _min: вектор - пара (x, y), минимальная граница области
+    :param _max: вектор - пара (x, y), максимальная граница области
+    :return:
+    """
+    if abs((_min[0] + _max[0]) * 0.5 - pt[0]) > abs(_max[0] - _min[0]) * 0.5:
+        return False
+    if abs((_min[1] + _max[1]) * 0.5 - pt[1]) > abs(_max[1] - _min[1]) * 0.5:
+        return False
+    return True
+
+
+def in_between(pt: Vec2, _min: Vec2, _max: Vec2) -> bool:
+    """
+    Определяет принадлежность точки прямоугольной области, ограниченнной точками _min и _max.\n
+    :param pt: вектор - пара (x, y), точка для которой ищем принадлежность к области
+    :param _min: вектор - пара (x, y), минимальная граница области
+    :param _max: вектор - пара (x, y), максимальная граница области
+    :return:
+    """
+    return _in_between((pt.x, pt.y), (_min.x, _min.y), (_max.x, _max.y))
+
+
+@numba.njit(fastmath=True)
+def _cross(a: Vector2, b: Vector2) -> float:
+    """
+    Косое векторное произведение.\n
+    :param a: первый вектор - пара (x, y)
+    :param b: второй вектор - пара (x, y)
+    :return:
+    """
+    return a[0] * b[1] - a[1] * b[0]
+
+
+@numba.njit(fastmath=True)
+def _intersect_lines(pt1: Vector2, pt2: Vector2, pt3: Vector2, pt4: Vector2) -> Tuple[bool, Vector2]:
+    """
+    Определяет точку пересечения двух линий, проходящих через точки pt1, pt2 и pt3, pt4 для первой и второй\n
+    соответственно.\n
+    :param pt1: вектор - пара (x, y), первая точка первой линии
+    :param pt2: вектор - пара (x, y), вторая точка первой линии
+    :param pt3: вектор - пара (x, y), первая точка второй линии
+    :param pt4: вектор - пара (x, y), вторая точка второй линии
+    :return: переселись или нет, вектор - пара (x, y)
+    """
+    da = (pt2[0] - pt1[0], pt2[1] - pt1[1])
+
+    db = (pt4[0] - pt3[0], pt4[1] - pt3[1])
+
+    det = _cross(da, db)
+
+    if abs(det) < numerical_precision:
+        return False, (0, 0)
+
+    det = 1.0 / det
+
+    x = _cross(pt1, da)
+
+    y = _cross(pt3, db)
+
+    return True, ((y * da[0] - x * db[0]) * det, (y * da[1] - x * db[1]) * det)
+
+
+def intersect_lines(pt1: Vec2, pt2: Vec2, pt3: Vec2, pt4: Vec2) -> Tuple[bool, Vec2]:
+    """
+    Определяет точку пересечения двух линий, проходящих через точки pt1, pt2 и pt3, pt4 для первой и второй\n
+    соответственно.\n
+    :param pt1: вектор - пара (x, y), первая точка первой линии
+    :param pt2: вектор - пара (x, y), вторая точка первой линии
+    :param pt3: вектор - пара (x, y), первая точка второй линии
+    :param pt4: вектор - пара (x, y), вторая точка второй линии
+    :return: переселись или нет, вектор - пара (x, y)
+    """
+    flag, (x, y) = _intersect_lines((pt1.x, pt1.y),
+                                    (pt2.x, pt2.y),
+                                    (pt3.x, pt3.y),
+                                    (pt4.x, pt4.y))
+    return flag, Vec2(x, y)
+
+
+def intersect_sects(pt1: Vec2, pt2: Vec2, pt3: Vec2, pt4: Vec2) -> Tuple[bool, Vec2]:
+    """
+    Определяет точку пересечения двух отрезков, проходящих через точки pt1, pt2 и pt3, pt4 для первого и второго\n
+    соответственно.\n
+    :param pt1: вектор - пара (x, y), первая точка первого отрезка
+    :param pt2: вектор - пара (x, y), вторая точка первого отрезка
+    :param pt3: вектор - пара (x, y), первая точка второго отрезка
+    :param pt4: вектор - пара (x, y), вторая точка второго отрезка
+    :return: переселись или нет, вектор - пара (x, y)
+    """
+    flag, int_point = intersect_lines(pt1, pt2, pt3, pt4)
+    if not flag:
+        return flag, int_point
+
+    if not in_between(int_point, pt1, pt2):
+        return False, int_point
+
+    if not in_between(int_point, pt3, pt4):
+        return False, int_point
+
+    return flag, int_point
+
+
+@numba.njit(fastmath=True)
+def _ccw(a: Vector2, b: Vector2, c: Vector2) -> bool:
+    return ((b[0] - a[0]) * (c[1] - a[1])) > ((b[1] - a[1]) * (c[0] - a[0]))
+
+
+def ccw(a: Vec2, b: Vec2, c: Vec2) -> bool:
+    return _ccw((a.x, a.y), (b.x, b.y), (c.x, c.y))
+
+
+def cw(a: Vec2, b: Vec2, c: Vec2) -> bool:
+    return not ccw(a, b, c)
+
+
+def bin_search(points: List[Vec2], x_val: float) -> int:
+    """
+    Бинарный поиск вхождения позиции x_val внутри points.\n
+    :param points: список точек среди которых ищем вхождение
+    :param x_val: значение координаты по х для которой ищем вхождение
+    :return: индекс точки из points слева от x_val
+    """
+    left_id = 0
+
+    right_id = len(points) - 1
+
+    if points[right_id][0] < x_val:
+        return right_id
+
+    if points[left_id][0] > x_val:
+        return left_id
+
+    while right_id - left_id != 1:
+        mid = (right_id + left_id) // 2
+        if points[mid][0] < x_val:
+            left_id = mid
+            continue
+        right_id = mid
+    return right_id
 
 
 def plane_to_point_dist(r_0: Vec3, n: Vec3, point: Vec3) -> float:

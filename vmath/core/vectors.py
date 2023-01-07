@@ -7,27 +7,19 @@ import math
 class Vec2:
 
     @staticmethod
-    def __unpack_args(*args) -> tuple:
+    def __unpack_args(*args) -> Tuple[float, float]:
         args = args[0]
-        number_of_args = len(args)
-        if number_of_args == 1:  # one argument
-            arg_type = type(args[0])
-
-            if arg_type is Vec2:
-                return args[0].x, args[0].y
-
-            if arg_type is float or arg_type is int:  # single int or float argument
-                return args[0], args[0]
-
-        if number_of_args == 2:
-            return args
-
-        if number_of_args == 0:
-            return 0.0, 0.0  # no arguments
-
-        if number_of_args == 2:
+        n_args = len(args)
+        if n_args == 1:  # one argument
+            args = args[0]
+            if isinstance(args, Vec2):
+                return args.x, args.y
+            if isinstance(args, float) or isinstance(args, int):
+                return args, args
+        if n_args == 2:
             return args[0], args[1]  # x, y and z passed in
-
+        if n_args == 0:
+            return 0.0, 0.0
         raise TypeError(f'Invalid Input: {args}')
 
     __slots__ = "__xy"
@@ -222,26 +214,19 @@ class Vec2:
 class Vec3:
 
     @staticmethod
-    def __unpack_args(*args) -> tuple:
+    def __unpack_args(*args) -> Tuple[float, float, float]:
         args = args[0]
-
-        number_of_args = len(args)
-
-        if number_of_args == 1:  # one argument
-            arg_type = type(args[0])
-
-            if arg_type is Vec3:
-                return args[0].x, args[0].y, args[0].z
-
-            if arg_type is float or arg_type is int:  # single int or float argument
-                return args[0], args[0], args[0]
-
-        if number_of_args == 0:
-            return 0.0, 0.0, 0.0  # no arguments
-
-        if number_of_args == 3:
-            return args  # x, y and z passed in
-
+        n_args = len(args)
+        if n_args == 1:  # one argument
+            args = args[0]
+            if isinstance(args, Vec3):
+                return args.x, args.y, args.z
+            if isinstance(args, float) or isinstance(args, int):
+                return args, args, args
+        if n_args == 3:
+            return args[0], args[1], args[2]  # x, y and z passed in
+        if n_args == 0:
+            return 0.0, 0.0, 0.0
         raise TypeError(f'Invalid Input: {args}')
 
     __slots__ = "__xyz"
