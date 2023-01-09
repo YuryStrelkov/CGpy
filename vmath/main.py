@@ -1,9 +1,22 @@
-from core.bezier.bezier_curve_3 import BezierCurve3
-from core.transforms.transform import Transform
-from core.surface.patch import CubicPatch
-from core.vectors import Vec3
+from computational_geometry.bezier.bezier_curve_3 import BezierCurve3
+from computational_geometry.transforms.transform import Transform
+from computational_geometry.surface.patch import CubicPatch
+from computational_geometry.vectors import Vec3, Vec2
 import numpy as np
 import time
+
+
+def vec2_test():
+    print("=================vec2_test================")
+    v1 = Vec2(1, 3)
+    v2 = Vec2(3, 1)
+    print(f"v1 + v2:  {v1 + v2}")
+    print(f"v1 - v2:  {v1 - v2}")
+    print(f"v1 * v2:  {v1 * v2}")
+    print(f"v1 / v2:  {v1 / v2}")
+    print(f"(v1,v2):  {Vec2.dot(v1, v2)}")
+    print(f"[v1;v2]:  {Vec2.cross(v1, v2)}")
+
 
 
 def transforms_3_test():
@@ -27,8 +40,8 @@ def transforms_3_test():
 
 
 def transforms_2_test():
-    from core.transforms.transform2 import Transform2
-    from core.vectors import Vec2
+    from computational_geometry.transforms.transform2 import Transform2
+    from computational_geometry.vectors import Vec2
     print("=============transforms_2_test=============")
     t = Transform2()
     v = Vec2(1, 2)
@@ -72,6 +85,7 @@ def time_test():
 
 
 if __name__ == '__main__':
+    vec2_test()
     time_test()
     transforms_2_test()
     transforms_3_test()
