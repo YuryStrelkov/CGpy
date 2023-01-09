@@ -1,7 +1,7 @@
-from computational_geometry.bezier.bezier_curve_3 import BezierCurve3
-from computational_geometry.transforms.transform import Transform
-from computational_geometry.surface.patch import CubicPatch
-from computational_geometry.vectors import Vec3, Vec2
+from cgeo.bezier.bezier_curve_3 import BezierCurve3
+from cgeo.transforms.transform import Transform
+from cgeo.surface.patch import CubicPatch
+from cgeo.vectors import Vec3, Vec2
 import numpy as np
 import time
 
@@ -40,8 +40,8 @@ def transforms_3_test():
 
 
 def transforms_2_test():
-    from computational_geometry.transforms.transform2 import Transform2
-    from computational_geometry.vectors import Vec2
+    from cgeo.transforms.transform2 import Transform2
+    from cgeo.vectors import Vec2
     print("=============transforms_2_test=============")
     t = Transform2()
     v = Vec2(1, 2)

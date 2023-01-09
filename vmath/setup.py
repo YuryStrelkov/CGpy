@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 import codecs
 import os
 
@@ -14,7 +14,7 @@ LONG_DESCRIPTION = 'A set of vector mathematics tools, consisting of 2d and 3d v
 
 # Setting up
 setup(
-    name="vmath",
+    name="cgeo",
     version=VERSION,
     author="YuryStrelkov (Yury Strelkov)",
     author_email="<ghost_strelkov@mail.ru>",
