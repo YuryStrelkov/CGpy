@@ -87,8 +87,8 @@ class Integrator:
         return self.curr_val
 
     def reset(self) -> None:
-        self._last_val = Vec3(0.0)
-        self._curr_val = Vec3(0.0)
+        self._last_val = 0.0
+        self._curr_val = 0.0
         self._time_val = 0.0
         self._time_delta = 0.0
 
@@ -173,8 +173,8 @@ class Integrator2d:
         return self.curr_val
 
     def reset(self) -> None:
-        self._last_val = Vec3(0.0)
-        self._curr_val = Vec3(0.0)
+        self._last_val = Vec2(0.0)
+        self._curr_val = Vec2(0.0)
         self._time_val = 0.0
         self._time_delta = 0.0
 

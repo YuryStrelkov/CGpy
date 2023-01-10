@@ -1,13 +1,22 @@
 from math import sqrt, pi, exp
-from typing import Tuple
+from typing import Tuple, Any
 from numba import prange
 import numpy as np
+import operator
 import numba
 
 _2pij = 2j * pi
 
 numerical_precision: float = 1e-9
 Vector2 = Tuple[float, float]
+
+
+def list_min(values: list) -> Tuple[int, Any]:
+    return min(enumerate(values), key=operator.itemgetter(1))
+
+
+def list_max(values: list) -> Tuple[int, Any]:
+    return max(enumerate(values), key=operator.itemgetter(1))
 
 
 @numba.njit(fastmath=True)

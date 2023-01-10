@@ -85,10 +85,14 @@ def time_test():
 
 
 if __name__ == '__main__':
-    vec2_test()
-    time_test()
-    transforms_2_test()
-    transforms_3_test()
-    surface_test()
-    bezier_test()
+    #vec2_test()
+    #time_test()
+    #transforms_2_test()
+    #transforms_3_test()
+    #surface_test()
+    #bezier_test()
+    from cgeo.mutils import list_max
+    _list = [1, 1, 2, 34, 5, 2, 3, 51, 12, 3, 12, 4, 33, 12, 6]
+    _id, _item = list_max(_list)
+    print(f"id: {_id}, item: {_item}")
 

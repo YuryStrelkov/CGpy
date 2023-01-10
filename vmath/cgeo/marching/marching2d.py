@@ -1,11 +1,14 @@
-from cgeo import gutils
+from cgeo.tris_mesh.ear_clipping import triangulate
 from cgeo.mutils import numerical_precision
 from typing import Tuple, Callable, List
 from matplotlib import pyplot as plt
+from cgeo.tris_mesh import TrisMesh
 from cgeo.vectors import Vec2
+from cgeo import tris_mesh
 import numpy as np
 import random
 import numba
+
 
 Vector2Int = Tuple[int, int]
 Circle = Tuple[Tuple[float, float], float]  # cx, cy, r
@@ -200,7 +203,19 @@ def _dist(a: Vec2, b: Vec2) -> float:
     return (a - b).magnitude
 
 
-def connect_sects(sects: List[Section]) -> List[List[Vec2]]:
+def _clean_up_shape(shape: List[Vec2], clean_up_threshold: float = 1e-12) -> List[Vec2]:
+    indices_to_delete = []
+    for i in range(len(shape) - 1):
+        if abs(Vec2.cross(shape[i] - shape[i - 1], shape[i] - shape[i + 1])) < clean_up_threshold:
+            indices_to_delete.insert(0, i)
+    for i in indices_to_delete:
+        del shape[i]
+    if _dist(shape[-1], shape[0]) > 1e-3:
+        shape.append(shape[0])
+    return shape
+
+
+def connect_sects(sects: List[Section], clean_up_threshold: float = 1e-12) -> List[List[Vec2]]:
     if len(sects) < 3:
         return [[Vec2(0.0, 0.0)]]
     sect_checked = {}
@@ -264,109 +279,11 @@ def connect_sects(sects: List[Section]) -> List[List[Vec2]]:
 
         shapes.append(shape)
 
+        for i in range(len(shapes)):
+            shapes[i] = _clean_up_shape(shapes[i], clean_up_threshold)
+
     return shapes
 
-
-"""
-         public static bool AreLinesIntersecting(Vector2 l1_p1, Vector2 l1_p2, Vector2 l2_p1, Vector2 l2_p2, bool shouldIncludeEndPoints)
-        {
-            bool isIntersecting = false;
-
-            float denominator = (l2_p2.y - l2_p1.y) * (l1_p2.x - l1_p1.x) - (l2_p2.x - l2_p1.x) * (l1_p2.y - l1_p1.y);
-
-            //Make sure the denominator is > 0, if not the lines are parallel
-            if (denominator != 0f)
-            {
-                float u_a = ((l2_p2.x - l2_p1.x) * (l1_p1.y - l2_p1.y) - (l2_p2.y - l2_p1.y) * (l1_p1.x - l2_p1.x)) / denominator;
-                float u_b = ((l1_p2.x - l1_p1.x) * (l1_p1.y - l2_p1.y) - (l1_p2.y - l1_p1.y) * (l1_p1.x - l2_p1.x)) / denominator;
-
-                //Are the line segments intersecting if the end points are the same
-                if (shouldIncludeEndPoints)
-                {
-                    //Is intersecting if u_a and u_b are between 0 and 1 or exactly 0 or 1
-                    if (u_a >= 0f && u_a <= 1f && u_b >= 0f && u_b <= 1f)
-                    {
-                        isIntersecting = true;
-                    }
-                }
-                else
-                {
-                    //Is intersecting if u_a and u_b are between 0 and 1
-                    if (u_a > 0f && u_a < 1f && u_b > 0f && u_b < 1f)
-                    {
-                        isIntersecting = true;
-                    }
-                }
-
-            }
-
-            return isIntersecting;
-        }
-
-        public static bool IsPointInSpline(List<Point2d> polygonPoints, Vector2 point)
-        {
-            //Step 1. Find a point outside of the polygon
-            //Pick a point with a x position larger than the polygons max x position, which is always outside
-            Vector2 maxXPosVertex = polygonPoints[0].point;
-
-            for (int i = 1; i < polygonPoints.Count; i++)
-            {
-                if (polygonPoints[i].point.x > maxXPosVertex.x)
-                {
-                    maxXPosVertex = polygonPoints[i].point;
-                }
-            }
-
-            //The point should be outside so just pick a number to make it outside
-            Vector2 pointOutside = maxXPosVertex + new Vector2(10f, 0f);
-
-            //Step 2. Create an edge between the point we want to test with the point thats outside
-            Vector2 l1_p1 = point;
-            Vector2 l1_p2 = pointOutside;
-
-            //Step 3. Find out how many edges of the polygon this edge is intersecting
-            int numberOfIntersections = 0;
-
-            for (int i = 0; i < polygonPoints.Count; i++)
-            {
-                //Line 2
-                Vector2 l2_p1 = polygonPoints[i].point;
-
-                int iPlusOne = (i + 1) % polygonPoints.Count;
-
-                Vector2 l2_p2 = polygonPoints[iPlusOne].point;
-
-                //Are the lines intersecting?
-                if (AreLinesIntersecting(l1_p1, l1_p2, l2_p1, l2_p2, true))
-                {
-                    numberOfIntersections += 1;
-                }
-            }
-
-            //Step 4. Is the point inside or outside?
-            bool isInside = true;
-
-            //The point is outside the polygon if number of intersections is even or 0
-            if (numberOfIntersections == 0 || numberOfIntersections % 2 == 0)
-            {
-                isInside = false;
-            }
-
-            return isInside;
-        }
-"""
-
-
-def _sort_sections_to_x_y(sects: List[Section]) -> List[Tuple[List[float], List[float]]]:
-    """
-
-    """
-    shapes = connect_sects(sects)
-    return [([xy[0] for xy in shape], [xy[1] for xy in shape]) for shape in shapes]
-
-
-#    shapes = connect_sects(sects)
-#    return [([xy[0] for xy in shapes], [xy[1] for xy in sects])]
 
 def isoline(f_map: np.ndarray, threshold: float = 1.0, resolution: Vector2Int = (128, 128)) -> \
         List[Tuple[List[float], List[float]]]:
@@ -382,31 +299,50 @@ def isoline_of_vect(f_map: np.ndarray, threshold: float = 1.0, resolution: Vecto
     return [[Vec2(xy[0], xy[1]) for xy in shape] for shape in shapes]
 
 
+def _triangulate_isoline(polygon: List[Vec2]) -> TrisMesh:
+    return triangulate(polygon)
+
+
+def triangulate_isolines(polygons: List[List[Vec2]]) -> TrisMesh:
+    mesh = triangulate(polygons[0])
+    print(mesh)
+    for i in range(1, len(polygons)):
+         mesh.merge(triangulate(polygons[i]))
+    return mesh
+
+
 if __name__ == "__main__":
 
-    x = np.linspace(-0.0, 1., 512)
-    y = np.linspace(-0.0, 1., 512)
+    x = np.linspace(-0.0, 1., 256)
+    y = np.linspace(-0.0, 1., 256)
 
     _threshold = 0.50
 
-    # _circles = [((random.uniform(0.0, 1.0), random.uniform(0.0, 1.0)), random.uniform(0.0, 0.333)) for _ in range(32)]
-    _circles = \
+    _circles_array = \
         [((random.uniform(0.0, 1.0), random.uniform(0.0, 1.0)), random.uniform(0.0, 0.333)) for _ in range(32)]
 
     f = _field_view(x, y, lambda _x, _y: _circles(_x, _y))
 
-    sections = march_squares_2d(f, threshold=_threshold)
+    xys = isoline(f, threshold=_threshold)
+
+    polygons = isoline_of_vect(f, threshold=_threshold)
+
+    mesh = triangulate_isolines(polygons)
+
+    tris_mesh.write_obj_mesh(mesh, "polygons.obj")
+
+    # area_map = _field_view(x, y, lambda _x, _y: 1.0 if gutils.point_within_polygons(Vec2(_x, _y), polygons) else 0.0)
 
     plt.imshow(np.flipud(f.T), extent=[np.amin(x), np.amax(x), np.amin(y), np.amax(y)])
 
-    xys = _sort_sections_to_x_y(sections)
-
-    print(f"len(sections): {len(sections)}")
-
-    print(f"len(xys): {len(xys)}")
     for index, (xi, yi) in enumerate(xys):
         plt.plot(xi, yi, 'r')
+    #for index, (xi, yi) in enumerate(xys):
+    #    plt.plot(xi, yi, '.g')
 
+   # for p in mesh.vertices:
+   #     plt.plot(p.x, p.z, '.g')
+    """
     for j in range(len(xys)):
         x, y = xys[j]
         for i in range(len(x) - 1):
@@ -416,6 +352,7 @@ if __name__ == "__main__":
             cy = (yi + yi1) * 0.5
             n = gutils.perpendicular_2(Vec2(xi1 - xi, yi1 - yi))
             plt.plot([cx, cx + 0.01 * n.x], [cy, cy + 0.01 * n.y], 'g')
+    """
 
     plt.xlabel("x")
     plt.ylabel("y")

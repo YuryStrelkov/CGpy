@@ -1,3 +1,7 @@
+import numpy as np
+
+from cgeo import trigonometry
+
 from cgeo.matrices import Mat4, Mat3
 from cgeo.vectors import Vec3, Vec2
 from typing import Tuple, List
@@ -775,16 +779,16 @@ def intersect_sects(pt1: Vec2, pt2: Vec2, pt3: Vec2, pt4: Vec2) -> Tuple[bool, V
 
 
 @numba.njit(fastmath=True)
-def _ccw(a: Vector2, b: Vector2, c: Vector2) -> bool:
-    return ((b[0] - a[0]) * (c[1] - a[1])) > ((b[1] - a[1]) * (c[0] - a[0]))
-
-
-def ccw(a: Vec2, b: Vec2, c: Vec2) -> bool:
-    return _ccw((a.x, a.y), (b.x, b.y), (c.x, c.y))
+def _cw(a: Vector2, b: Vector2, c: Vector2) -> bool:
+    return (b[0] - a[0]) * (c[1] - a[1]) - (c[0] - a[0]) * (b[1] - a[1]) < 0
 
 
 def cw(a: Vec2, b: Vec2, c: Vec2) -> bool:
-    return not ccw(a, b, c)
+    return _cw((a.x, a.y), (b.x, b.y), (c.x, c.y))
+
+
+def ccw(a: Vec2, b: Vec2, c: Vec2) -> bool:
+    return not cw(a, b, c)
 
 
 def bin_search(points: List[Vec2], x_val: float) -> int:
@@ -811,6 +815,134 @@ def bin_search(points: List[Vec2], x_val: float) -> int:
             continue
         right_id = mid
     return right_id
+
+
+def point_within_polygon(point: Vec2, polygon: List[Vec2]) -> bool:
+    """
+    https://stackoverflow.com/questions/36399381/whats-the-fastest-way-of-checking-if-a-point-is-inside-a-polygon-in-python
+    :param point:
+    :param polygon:
+    :return:
+    """
+    n = len(polygon)
+
+    inside = False
+
+    px: float
+    py: float
+
+    px, py = point.as_tuple
+
+    p1x: float
+    p1y: float
+
+    p2x: float
+    p2y: float
+
+    x_ints: float = 0.0
+
+    p1x, p1y = polygon[0].as_tuple
+    for i in range(n + 1):
+        p2x, p2y = polygon[i % n].as_tuple
+        if py > min(p1y, p2y):
+            if py <= max(p1y, p2y):
+                if px <= max(p1x, p2x):
+                    if p1y != p2y:
+                        x_ints = (py - p1y) * (p2x - p1x) / (p2y - p1y) + p1x
+                    if p1x == p2x or px <= x_ints:
+                        inside = not inside
+        p1x, p1y = p2x, p2y
+
+    return inside
+
+
+def point_within_polygons(point: Vec2, polygons: List[List[Vec2]]) -> bool:
+    intersections: int = sum(1 if point_within_polygon(point, polygon) else 0 for polygon in polygons)
+    return intersections % 2 != 0
+
+
+def polygon_perimeter(polygon: List[Vec2]) -> float:
+    perimeter: float = 0.0
+    for i in range(len(polygon) - 1):
+        perimeter += math.sqrt((polygon[i].x - polygon[i + 1].x) ** 2 + (polygon[i].y - polygon[i + 1].y) ** 2)
+    return perimeter
+
+
+def polygon_area(polygon: List[Vec2]) -> float:
+    area: float = 0.0
+    for i in range(len(polygon) - 1):
+        area += Vec2.cross(polygon[i], polygon[i + 1])
+    return area * 0.5
+
+
+def polygon_centroid(polygon: List[Vec2]) -> Vec2:
+    cx: float = 0.0
+    cy: float = 0.0
+    area = 1.0 / 6.0 / polygon_area(polygon)
+    for i in range(len(polygon) - 1):
+        xi, yi = polygon[i].as_tuple
+        xj, yj = polygon[i + 1].as_tuple
+        t = (xi * yj - xj * yi)
+        cx += (xi + xj) * t
+        cy += (yi + yj) * t
+    return Vec2(cx * area, cy * area)
+
+
+def polygon_bounds(polygon: List[Vec2]) -> Tuple[Vec2, Vec2]:
+    min_b = Vec2(1e12, 1e12)
+    max_b = Vec2(-1e12, -1e12)
+    for p in polygon:
+        if p.x > max_b.x:
+            max_b.x = p.x
+        if p.y > max_b.y:
+            max_b.y = p.y
+        if p.x < min_b.x:
+            min_b.x = p.x
+        if p.y < min_b.y:
+            min_b.y = p.y
+    return min_b, max_b
+
+
+def cw_polygon(polygon: List[Vec2]) -> bool:
+    return polygon_area(polygon) >= 0
+
+
+def ccw_polygon(polygon: List[Vec2]) -> bool:
+    return not cw_polygon(polygon)
+
+
+def angle2(a: Vec2, b: Vec2, c: Vec2) -> float:
+    v1 = (b.x - a.x, b.y - a.y)
+    v2 = (b.x - c.x, b.y - c.y)
+
+    rho1 = math.sqrt(v1[0]**2 + v1[1]**2)
+
+    if rho1 < numerical_precision:
+        return 0.0
+
+    rho2 = math.sqrt(v2[0]**2 + v2[1]**2)
+
+    if rho2 < numerical_precision:
+        return 0.0
+
+    return np.arccos((v1[0] * v2[0] + v1[1] * v2[1]) / rho1 / rho2)
+
+
+def angle3(a: Vec3, b: Vec3, c: Vec3) -> float:
+    v1 = (b.x - a.x, b.y - a.y, b.z - a.z)
+    v2 = (b.x - c.x, b.y - c.y, b.z - a.z)
+
+    rho1 = math.sqrt(v1[0] * v1[0] + v1[1] * v1[1] + v1[2] * v1[2])
+
+    if rho1 < numerical_precision:
+        return 0.0
+
+    rho2 = math.sqrt(v2[0] * v2[0] + v2[1] * v2[1] + v2[2] * v2[2])
+
+    if rho2 < numerical_precision:
+        return 0.0
+
+    return np.arccos((v1[0] * v2[0] + v1[1] * v2[1] +  v1[2] * v2[2]) / rho1 / rho2)
 
 
 def plane_to_point_dist(r_0: Vec3, n: Vec3, point: Vec3) -> float:

@@ -2,22 +2,23 @@ from cgeo.bounds.bounding_box import BoundingBox
 from cgeo.transforms.transform import Transform
 from cgeo.tris_mesh.triangle import Triangle
 from cgeo.vectors import Vec3, Vec2
-from typing import Tuple, List
+from typing import Tuple, List, Union
 import numpy as np
 import re
 
 
 class Face:
-
     __slots__ = "__p_1", "__p_2", "__p_3", "__uv1", "__uv2", "__uv3", "__n_1", "__n_2", "__n_3"
 
     def __init__(self):
         self.__p_1: int = -1
         self.__uv1: int = -1
         self.__n_1: int = -1
+
         self.__p_2: int = -1
         self.__uv2: int = -1
         self.__n_2: int = -1
+
         self.__p_3: int = -1
         self.__uv3: int = -1
         self.__n_3: int = -1
@@ -120,19 +121,19 @@ class Face:
         self.__uv3 = max(0, val)
 
     def index1(self, index) -> None:
-        self.__p_1: int = index
-        self.__uv1: int = index
-        self.__n_1: int = index
+        self.__p_1 = index
+        self.__uv1 = index
+        self.__n_1 = index
 
     def index2(self, index) -> None:
-        self.__p_2: int = index
-        self.__uv2: int = index
-        self.__n_2: int = index
+        self.__p_2 = index
+        self.__uv2 = index
+        self.__n_2 = index
 
     def index3(self, index) -> None:
-        self.__p_3: int = index
-        self.__uv3: int = index
-        self.__n_3: int = index
+        self.__p_3 = index
+        self.__uv3 = index
+        self.__n_3 = index
 
 
 class TrisMesh:
@@ -150,8 +151,8 @@ class TrisMesh:
     def __str__(self):
         new_l = ",\n\t\t"
         return f"{{\n" \
-               f"\t\"name\"     : \"{self.name}\",\n" \
-               f"\t\"unique_id\": {self.unique_id},\n" \
+               f"\t\"name\"     :\"{self.name}\",\n" \
+               f"\t\"unique_id\":{self.unique_id},\n" \
                f"\t\"bounds\"   :\n{self._bbox},\n" \
                f"\t\"vertices\" :\n\t[\n\t\t{new_l.join(str(v) for v in self._vertices)}\n\t],\n" \
                f"\t\"normals\"  :\n\t[\n\t\t{new_l.join(str(v) for v in self._normals)}\n\t],\n" \
@@ -241,39 +242,78 @@ class TrisMesh:
     def bbox(self) -> BoundingBox:
         return self._bbox
 
-    def set_vertex(self, i_id: int, v: Vec3) -> None:
+    def set_vertex(self, i_id: int, v: Union[Vec3, Tuple[float, float, float]]) -> None:
         if i_id < 0:
             return
+
         if i_id >= self.vertices_count:
             return
+
+        if isinstance(v, tuple):
+            _v = Vec3(v[0], v[1], v[2])
+            self._bbox.encapsulate(_v)
+            self._vertices[i_id] = _v
+            return
+
         self._bbox.encapsulate(v)
         self._vertices[i_id] = v
 
-    def set_normal(self, i_id: int, v: Vec3) -> None:
+    def set_normal(self, i_id: int, v: Union[Vec3, Tuple[float, float, float]]) -> None:
         if i_id < 0:
             return
+
         if i_id >= self.normals_count:
             return
+
+        if isinstance(v, tuple):
+            self._normals[i_id] = Vec3(v[0], v[1], v[2])
+            return
+
         self._normals[i_id] = v
 
-    def set_uv(self, i_id: int, v: Vec2) -> None:
+    def set_uv(self, i_id: int, v: Union[Vec2, Tuple[float, float]]) -> None:
         if i_id < 0:
             return
+
         if i_id >= self.uvs_count:
             return
+
+        if isinstance(v, tuple):
+            self._uvs[i_id] = Vec2(v[0], v[1])
+            return
+
         self._uvs[i_id] = v
 
-    def append_vertex(self, v: Vec3) -> None:
+    def append_vertex(self, v: Union[Vec3, Tuple[float, float, float]]) -> None:
+        if isinstance(v, tuple):
+            v_ = Vec3(v[0], v[1], v[2])
+            self._bbox.encapsulate(v_)
+            self._vertices.append(v_)
+            return
         self._bbox.encapsulate(v)
         self._vertices.append(v)
 
-    def append_normal(self, v: Vec3) -> None:
+    def append_normal(self, v: Union[Vec3, Tuple[float, float, float]]) -> None:
+        if isinstance(v, tuple):
+            self._normals.append(Vec3(v[0], v[1], v[2]))
+            return
         self._normals.append(v)
 
-    def append_uv(self, v: Vec2) -> None:
+    def append_uv(self, v: Union[Vec2, Tuple[float, float]]) -> None:
+        if isinstance(v, tuple):
+            self._uvs.append(Vec2(v[0], v[1]))
+            return
         self._uvs.append(v)
 
-    def append_face(self, f: Face) -> None:
+    def append_face(self, f: Union[Face, Tuple[int, int, int]]) -> None:
+        if isinstance(f, tuple):
+            _f = Face()
+            _f.index1(f[0])
+            _f.index2(f[1])
+            _f.index3(f[2])
+            self._faces.append(_f)
+            return
+
         self._faces.append(f)
 
     def clean_up(self) -> None:
@@ -306,6 +346,37 @@ class TrisMesh:
         return Triangle(self._vertices[f.p_1], self._vertices[f.p_2], self._vertices[f.p_3],
                         self._normals[f.n_1], self._normals[f.n_2], self._normals[f.n_3],
                         self._uvs[f.uv1], self._uvs[f.uv2], self._uvs[f.uv3])
+
+    def merge(self, other):
+        v_offset = self.vertices_count
+        uv_offset = self.uvs_count
+        n_offset = self.normals_count
+
+        for p in other.vertices:
+            self.append_vertex(p)
+
+        for n in other.normals:
+            self.append_normal(n)
+
+        for uv in other.uvs:
+            self.append_uv(uv)
+
+        for face in other.faces:
+            _face = Face()
+            _face.p_1 = face.p_1 + v_offset
+            _face.p_2 = face.p_2 + v_offset
+            _face.p_3 = face.p_3 + v_offset
+
+            _face.n_1 = face.n_1 + n_offset
+            _face.n_2 = face.n_2 + n_offset
+            _face.n_3 = face.n_3 + n_offset
+
+            _face.uv1 = face.uv1 + uv_offset
+            _face.uv2 = face.uv2 + uv_offset
+            _face.uv3 = face.uv3 + uv_offset
+            self.append_face(_face)
+
+        return self
 
 
 def read_obj_mesh(path: str) -> List[TrisMesh]:
@@ -399,6 +470,16 @@ def read_obj_mesh(path: str) -> List[TrisMesh]:
     except IOError:
         print(f"file: \"{path}\" not found")
         return []
+
+
+def write_obj_mesh(mesh: TrisMesh, path: str) -> None:
+    with open(path, "wt") as obj_file:
+        print('\n'.join("v {:.5f} {:.5f} {:.5f}".format(v.x, v.y, v.z) for v in mesh.vertices), file=obj_file)
+        print('\n'.join("vt {:.5f} {:.5f}".format(v.x, v.y) for v in mesh.uvs), file=obj_file)
+        print('\n'.join("vn {:.5f} {:.5f} {:.5f}".format(v.x, v.y, v.z) for v in mesh.normals), file=obj_file)
+        print('\n'.join("f {}/{}/{} {}/{}/{} {}/{}/{}".format(v.p_1 + 1, v.uv1 + 1, v.n_1 + 1,
+                                                              v.p_2 + 1, v.uv2 + 1, v.n_2 + 1,
+                                                              v.p_3 + 1, v.uv3 + 1, v.n_3 + 1) for v in mesh.faces), file=obj_file)
 
 
 def create_plane(height: float = 1.0, width: float = 1.0, rows: int = 10,
