@@ -1,7 +1,7 @@
 from cgeo.bezier.bezier_point_2 import BezierPoint2
-from cgeo import gutils
 from cgeo.bounds.bounding_rect import BoundingRect
 from cgeo.vectors import Vec2
+from cgeo import gutils
 from typing import List
 
 

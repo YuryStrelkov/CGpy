@@ -1,14 +1,11 @@
-from cgeo.tris_mesh.ear_clipping import triangulate
-from cgeo.mutils import numerical_precision
+from cgeo.mutils import numerical_precision, gauss_blur
 from typing import Tuple, Callable, List
 from matplotlib import pyplot as plt
-from cgeo.tris_mesh import TrisMesh
 from cgeo.vectors import Vec2
-from cgeo import tris_mesh
+from cgeo import gutils
 import numpy as np
 import random
 import numba
-
 
 Vector2Int = Tuple[int, int]
 Circle = Tuple[Tuple[float, float], float]  # cx, cy, r
@@ -23,7 +20,9 @@ def _circles(x_: float, y_: float) -> float:
     :param y_:
     :return:
     """
-    return np.cos(np.sqrt((1.4 * x_ - 0.5) ** 2 + (0.5 * y_ - 0.5) ** 2) * np.pi * 10)
+    return np.cos(x_ * np.pi * 5) * np.sin(y_ * np.pi * 5)
+    # return np.cos(np.sqrt((1.4 * x_ - 0.5) ** 2 + (0.5 * y_ - 0.5) ** 2) * np.pi * 10)
+    # return np.cos(np.sqrt((x_ - 0.5) ** 2 + (y_ - 0.5) ** 2) * np.pi)
     # return sum((r / np.sqrt((x_ - pxpy[0]) * (x_ - pxpy[0]) +
     #                         (y_ - pxpy[1]) * (y_ - pxpy[1])) for pxpy, r in _circles_array)) / len(_circles)
 
@@ -299,18 +298,6 @@ def isoline_of_vect(f_map: np.ndarray, threshold: float = 1.0, resolution: Vecto
     return [[Vec2(xy[0], xy[1]) for xy in shape] for shape in shapes]
 
 
-def _triangulate_isoline(polygon: List[Vec2]) -> TrisMesh:
-    return triangulate(polygon)
-
-
-def triangulate_isolines(polygons: List[List[Vec2]]) -> TrisMesh:
-    mesh = triangulate(polygons[0])
-    print(mesh)
-    for i in range(1, len(polygons)):
-         mesh.merge(triangulate(polygons[i]))
-    return mesh
-
-
 if __name__ == "__main__":
 
     x = np.linspace(-0.0, 1., 256)
@@ -327,21 +314,38 @@ if __name__ == "__main__":
 
     polygons = isoline_of_vect(f, threshold=_threshold)
 
-    mesh = triangulate_isolines(polygons)
+    # mesh = triangulate_isolines(polygons)
 
-    tris_mesh.write_obj_mesh(mesh, "polygons.obj")
+    # tris_mesh.write_obj_mesh(mesh, "polygons.obj")
 
-    # area_map = _field_view(x, y, lambda _x, _y: 1.0 if gutils.point_within_polygons(Vec2(_x, _y), polygons) else 0.0)
+    area_dist = np.zeros((y.size, x.size,), dtype=float)
+    for row in range(area_dist.shape[0]):
+        for col in range(area_dist.shape[1]):
+            p = Vec2(x[col], y[row])
+            area_dist[row, col] = -1.0 if gutils.point_within_polygons(p, polygons) else 0.0
+            area_dist[row, col] *= 1.0 / (1.0 + ((p.x - 0.666) ** 2 + (p.y - 0.69) ** 2) * 25)
+            # f area_dist[row, col] != 0.0:
+                #
+            # if dist < area_dist[row, col]:
+            #    area_dist[row, col] = dist
+    area_dist[0:4, :] = 0.0
+    area_dist[-4:-1, :] = 0.0
+    area_dist[:, -4:-1] = 0.0
+    area_dist[:, 0:4] = 0.0
 
-    plt.imshow(np.flipud(f.T), extent=[np.amin(x), np.amax(x), np.amin(y), np.amax(y)])
+    area_dist = gauss_blur(area_dist)
+    #  area_map = _field_view(x, y, lambda _x, _y: gutils.point_to_polygons_distance(Vec2(_x, _y), polygons)[0])
 
-    for index, (xi, yi) in enumerate(xys):
-        plt.plot(xi, yi, 'r')
+    # plt.imshow(np.flipud(f.T), extent=[np.amin(x), np.amax(x), np.amin(y), np.amax(y)])
+    plt.imshow(np.flipud(area_dist), extent=[np.amin(x), np.amax(x), np.amin(y), np.amax(y)])
+
     #for index, (xi, yi) in enumerate(xys):
+    #     plt.plot(xi, yi, 'r')
+    # for index, (xi, yi) in enumerate(xys):
     #    plt.plot(xi, yi, '.g')
 
-   # for p in mesh.vertices:
-   #     plt.plot(p.x, p.z, '.g')
+    # for p in mesh.vertices:
+    #     plt.plot(p.x, p.z, '.g')
     """
     for j in range(len(xys)):
         x, y = xys[j]

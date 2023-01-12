@@ -20,6 +20,17 @@ def list_max(values: list) -> Tuple[int, Any]:
 
 
 @numba.njit(fastmath=True)
+def signum(value) -> float:
+    """
+    :param value:
+    :return: возвращает знак числа
+    """
+    if value < 0:
+        return -1.0
+    return 1.0
+
+
+@numba.njit(fastmath=True)
 def gauss_test_surf(n: int) -> np.ndarray:
     """
     Создаёт двумерный массив значений функции z = exp(-(x^2 + y^2)).\n
@@ -28,12 +39,14 @@ def gauss_test_surf(n: int) -> np.ndarray:
     """
     gauss = np.zeros((n, n,), dtype=float)
     dx = 3.0 / (n - 1)
+    half_pi = np.pi * 0.5
+    inv_sqrt_2pi = 1.0 / np.sqrt(np.pi * 2.0)
     for i in prange(n * n):
         row = i // n
         col = i % n
-        x_ = dx * col - 1.5
-        y_ = dx * row - 1.5
-        gauss[row, col] = exp(-(x_ * x_ + y_ * y_))
+        x_ = dx * col - half_pi
+        y_ = dx * row - half_pi
+        gauss[row, col] = exp(-(x_ * x_ + y_ * y_) * 0.5) * inv_sqrt_2pi
     return gauss
 
 
@@ -188,8 +201,8 @@ def compute_derivatives_2_at_pt(points: np.ndarray, row: int, col: int) -> Tuple
     col_1 = _index_calc(col + 1, colons)  # col_1 = min(colons - 1, col_ + 1)
     col_0 = _index_calc(col - 1, colons)  # col_0 = max(0, col_ - 1)
 
-    return (points[row,   col_1] - points[row,   col_0]) * 0.5, \
-           (points[row_1, col]   - points[row_0, col]) * 0.5, \
+    return (points[row, col_1] - points[row, col_0]) * 0.5, \
+           (points[row_1, col] - points[row_0, col]) * 0.5, \
            (points[row_1, col_1] - points[row_1, col_0]) * 0.25 - \
            (points[row_0, col_1] - points[row_0, col_0]) * 0.25
 
@@ -220,8 +233,8 @@ def compute_derivatives_at_pt(points: np.ndarray, row: int, col: int) -> Vector2
     col_1 = _index_calc(col + 1, colons)  # col_1 = min(colons - 1, col_ + 1)
     col_0 = _index_calc(col - 1, colons)  # col_0 = max(0, col_ - 1)
 
-    return (points[row,   col_1] - points[row,   col_0]) * 0.5, \
-           (points[row_1, col]   - points[row_0, col]) * 0.5
+    return (points[row, col_1] - points[row, col_0]) * 0.5, \
+           (points[row_1, col] - points[row_0, col]) * 0.5
 
 
 @numba.njit(fastmath=True, parallel=True)
@@ -236,8 +249,8 @@ def compute_derivatives_2(points: np.ndarray) -> Tuple[np.ndarray, np.ndarray, n
 
     rows, colons = points.shape
 
-    points_dx  = np.zeros_like(points)
-    points_dy  = np.zeros_like(points)
+    points_dx = np.zeros_like(points)
+    points_dy = np.zeros_like(points)
     points_dxy = np.zeros_like(points)
 
     for i in prange(points.size):
@@ -274,8 +287,8 @@ def compute_derivatives(points: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
 
     rows, colons = points.shape
 
-    points_dx  = np.zeros_like(points)
-    points_dy  = np.zeros_like(points)
+    points_dx = np.zeros_like(points)
+    points_dy = np.zeros_like(points)
 
     for i in prange(points.size):
         row_ = int(i / colons)
@@ -386,7 +399,7 @@ def ifft(x: np.ndarray, do_copy: bool = True) -> np.ndarray:
 
 
 @numba.njit(parallel=True)
-def fft2(x: np.ndarray, do_copy: bool = True) -> np.ndarray:
+def fft_2d(x: np.ndarray, do_copy: bool = True) -> np.ndarray:
     if x.ndim != 2:
         raise ValueError("fft2 :: x.ndim != 2")
     _x = img_to_pow_2_size(x)
@@ -403,7 +416,7 @@ def fft2(x: np.ndarray, do_copy: bool = True) -> np.ndarray:
 
 
 @numba.njit(parallel=True)
-def ifft2(x: np.ndarray, do_copy: bool = True) -> np.ndarray:
+def ifft_2d(x: np.ndarray, do_copy: bool = True) -> np.ndarray:
     if x.ndim != 2:
         raise ValueError("fft2 :: x.ndim != 2")
     _x = x
@@ -421,7 +434,7 @@ def ifft2(x: np.ndarray, do_copy: bool = True) -> np.ndarray:
 
 @numba.njit(fastmath=True)
 def img_crop(img: np.ndarray, rows_bound: Vector2, cols_bound: Vector2) -> np.ndarray:
-    if img.ndim == 1:
+    if img.ndim < 2:
         raise RuntimeError("img_crop:: image has to be 2-dimensional, but 1-dimensional was given...")
     rows, cols, _ = img.shape
     x_min = max(cols_bound[0], 0)
@@ -433,10 +446,109 @@ def img_crop(img: np.ndarray, rows_bound: Vector2, cols_bound: Vector2) -> np.nd
 
 @numba.njit(fastmath=True)
 def img_to_pow_2_size(img: np.ndarray) -> np.ndarray:
-    rows, cols, _ = img.shape
+    if img.ndim < 2:
+        raise RuntimeError("img_to_pow_2_size:: image has to be 2-dimensional, but 1-dimensional was given...")
+    rows, cols = img.shape[0], img.shape[1]
     rows2, cols2 = 2 ** int(np.log2(rows)), 2 ** int(np.log2(cols))
     if rows == rows2 and cols2 == cols:
         return img
     return img_crop(img, ((rows - rows2) // 2, (rows + rows2) // 2),
-                         ((cols - cols2) // 2, (cols + cols2) // 2))
+                    ((cols - cols2) // 2, (cols + cols2) // 2))
 
+
+@numba.njit(fastmath=True, parallel=True)
+def convolve_2d(image: np.ndarray, core: np.ndarray) -> np.ndarray:
+    if image.ndim != 2:
+        raise RuntimeError(f"convolve2 :: image.ndim != 2")
+
+    if core.ndim != 2:
+        raise RuntimeError(f"convolve2 :: core.ndim != 2")
+
+    if core.shape[0] != core.shape[1]:
+        raise RuntimeError(f"convolve2 :: core.shape[0] != core.shape[1]")
+
+    if core.shape[0] % 2 != 1:
+        raise RuntimeError(f"convolve2 :: core.shape[0] % 2 != 1")
+
+    _array = np.zeros_like(image)
+
+    rows, cols = image.shape
+    c_size_half = core.shape[0] // 2
+    i_row: int
+    j_col: int
+    divider: float
+
+    for _row in numba.prange(rows):
+        for _col in range(cols):
+            divider = 0.0
+            value = 0.0
+            for f_row in range(-c_size_half, c_size_half):
+                for f_col in range(-c_size_half, c_size_half):
+
+                    i_row = f_row + _row
+                    i_col = f_col + _col
+
+                    if i_row < 0:
+                        continue
+                    if i_col < 0:
+                        continue
+                    if i_row >= rows:
+                        continue
+                    if i_col >= cols:
+                        continue
+
+                    f_val = core[f_row + c_size_half, f_col + c_size_half]
+                    value += image[i_row, i_col] * f_val
+                    divider += f_val
+
+            if divider != 0.0:
+                value /= divider
+            if _array[_row, _col] !=  0.0:
+                _array[_row, _col] = min(_array[_row, _col], value)
+            else:
+                _array[_row, _col] = value
+    return _array
+
+
+def gauss_blur(image: np.ndarray, blur_size: int = 9) -> np.ndarray:
+    if blur_size % 2 != 1:
+        return convolve_2d(image, gauss_test_surf(blur_size + 1))
+    return convolve_2d(image, gauss_test_surf(blur_size))
+
+
+@numba.njit(fastmath=True, parallel=True)
+def median_filter_2d(array_data: np.ndarray, filter_size: int = 15):
+    import bisect
+
+    if filter_size % 2 != 1:
+        raise Exception("Median filter length must be odd.")
+
+    if array_data.ndim != 2:
+        raise Exception("Input must be two-dimensional.")
+
+    indexer = filter_size // 2
+
+    data_final = np.zeros_like(array_data)
+
+    height, width = array_data.shape
+
+    for row in numba.prange(height):
+        temp = []
+        for col in range(width):
+            for z in range(filter_size):
+                if row + z - indexer < 0 or row + z - indexer > height - 1:
+                    for c in range(filter_size):
+                        bisect.insort(temp, 0)
+                else:
+                    if col + z - indexer < 0 or col + indexer > width - 1:
+                        bisect.insort(temp, 0)
+                        # temp.append(0)
+                    else:
+                        for k in range(filter_size):
+                            bisect.insort(temp, array_data[col + z - indexer][col + k - indexer])
+                            #  temp.append(array_data[i + z - indexer][j + k - indexer])
+            # temp.sort()
+            data_final[row][col] = temp[len(temp) // 2]
+            temp.clear()
+    del bisect
+    return data_final

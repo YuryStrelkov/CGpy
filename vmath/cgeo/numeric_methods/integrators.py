@@ -1,5 +1,4 @@
 from matplotlib import pyplot as plt
-
 from cgeo import Vec3, Vec2
 
 
@@ -69,7 +68,7 @@ class Integrator:
         return self.curr_val + (self.curr_val + arg) * 0.5 * dt
 
     def __simpson_int(self, arg: float, dt: float) -> float:
-        return (self.curr_val + arg) * 0.5 * dt
+        return self.curr_val + (self.curr_val + arg) * 0.5 * dt
 
     def integrate(self, arg: float, t: float) -> float:
         if self._time_val < 0:
@@ -155,7 +154,7 @@ class Integrator2d:
         return self.curr_val + (self.curr_val + arg) * 0.5 * dt
 
     def __simpson_int(self, arg: Vec2, dt: float) -> Vec2:
-        return (self.curr_val + arg) * 0.5 * dt
+        return self.curr_val + (self.curr_val + arg) * 0.5 * dt
 
     def integrate(self, arg: Vec2, t: float) -> Vec2:
         if self._time_val < 0:
@@ -242,7 +241,7 @@ class Integrator3d:
         return self.curr_val + (self.curr_val + arg) * 0.5 * dt
 
     def __simpson_int(self, arg: Vec3, dt: float) -> Vec3:
-        return (self.curr_val + arg) * 0.5 * dt
+        return self.curr_val + (self.curr_val + arg) * 0.5 * dt
 
     def integrate(self, arg: Vec3, t: float) -> Vec3:
         if self._time_val < 0:
@@ -275,7 +274,6 @@ def integrator_test(n_points: int = 1024):
     y = []
     for xi in x:
         y.append(integrator(Vec3(xi), xi).x)
-
     plt.plot(x, x, 'r')
     plt.plot(x, y, 'g')
     plt.show()

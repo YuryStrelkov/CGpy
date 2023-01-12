@@ -1,10 +1,8 @@
-import numpy as np
-
-from cgeo import trigonometry
-
 from cgeo.matrices import Mat4, Mat3
 from cgeo.vectors import Vec3, Vec2
 from typing import Tuple, List
+from cgeo import mutils
+import numpy as np
 import numba
 import math
 
@@ -171,27 +169,16 @@ def lin_interp_mat4(a: Mat4, b: Mat4, t: float) -> Mat4:
         a.m33 + (b.m33 - a.m33) * t)
 
 
-@numba.njit(fastmath=True)
-def signum(value) -> float:
-    """
-    :param value:
-    :return: возвращает знач числа
-    """
-    if value < 0:
-        return -1.0
-    return 1.0
-
-
 def perpendicular_2(v: Vec2) -> Vec2:
     """
     :param v:
     :return: возвращает единичный вектор пермендикулярный заданному
     """
     if v.x == 0:
-        return Vec2(signum(v.y), 0)
+        return Vec2(mutils.signum(v.y), 0)
     if v.y == 0:
-        return Vec2(0, -signum(v.x))
-    sign: float = signum(v.x / v.y)
+        return Vec2(0, -mutils.signum(v.x))
+    sign: float = mutils.signum(v.x / v.y)
     dx: float = 1.0 / v.x
     dy: float = -1.0 / v.y
     sign /= math.sqrt(dx * dx + dy * dy)
@@ -914,35 +901,17 @@ def ccw_polygon(polygon: List[Vec2]) -> bool:
 def angle2(a: Vec2, b: Vec2, c: Vec2) -> float:
     v1 = (b.x - a.x, b.y - a.y)
     v2 = (b.x - c.x, b.y - c.y)
-
     rho1 = math.sqrt(v1[0]**2 + v1[1]**2)
-
-    if rho1 < numerical_precision:
-        return 0.0
-
     rho2 = math.sqrt(v2[0]**2 + v2[1]**2)
-
-    if rho2 < numerical_precision:
-        return 0.0
-
-    return np.arccos((v1[0] * v2[0] + v1[1] * v2[1]) / rho1 / rho2)
+    return np.arccos(mutils.clamp((v1[0] * v2[0] + v1[1] * v2[1]) / rho1 / rho2, -1.0, 1.0))
 
 
 def angle3(a: Vec3, b: Vec3, c: Vec3) -> float:
     v1 = (b.x - a.x, b.y - a.y, b.z - a.z)
     v2 = (b.x - c.x, b.y - c.y, b.z - a.z)
-
     rho1 = math.sqrt(v1[0] * v1[0] + v1[1] * v1[1] + v1[2] * v1[2])
-
-    if rho1 < numerical_precision:
-        return 0.0
-
     rho2 = math.sqrt(v2[0] * v2[0] + v2[1] * v2[1] + v2[2] * v2[2])
-
-    if rho2 < numerical_precision:
-        return 0.0
-
-    return np.arccos((v1[0] * v2[0] + v1[1] * v2[1] +  v1[2] * v2[2]) / rho1 / rho2)
+    return np.arccos(mutils.clamp((v1[0] * v2[0] + v1[1] * v2[1] +  v1[2] * v2[2]) / rho1 / rho2, -1.0, 1.0))
 
 
 def plane_to_point_dist(r_0: Vec3, n: Vec3, point: Vec3) -> float:
@@ -956,6 +925,66 @@ def plane_to_point_dist(r_0: Vec3, n: Vec3, point: Vec3) -> float:
     return Vec3.dot(point - r_0, n)
 
 
+def point_to_line_seg_distance(point: Vec2, point1: Vec2, point2: Vec2, threshold: float = 0.01) -> float:
+    return _point_to_line_seg_distance(point.as_tuple, point1.as_tuple, point2.as_tuple, threshold)
+
+
+@numba.njit(fastmath=True)
+def _point_to_line_seg_distance_sign(point: Vector2, point0: Vector2, point1: Vector2, threshold: float = 0.01) -> float:
+
+    p1_p0 = (point1[0] - point0[0], point1[1] - point0[1])
+    p_p0  = (point[0]  - point0[0], point[1]  - point0[1])
+
+    if abs(p_p0[0]) > threshold:
+        return 1e9
+
+    if abs(p_p0[1]) > threshold:
+        return 1e9
+
+    len_p1_p0 = math.sqrt(p1_p0[0] * p1_p0[0] + p1_p0[1] * p1_p0[1])
+
+    if len_p1_p0 < threshold:
+        return math.sqrt(p_p0[0] * p_p0[0] + p_p0[1] * p_p0[1])
+
+    return (_cross(p1_p0, p_p0)) / len_p1_p0
+
+
+@numba.njit(fastmath=True)
+def _point_to_line_seg_distance(point: Vector2, point0: Vector2, point1: Vector2, threshold: float = 0.01) -> float:
+    return abs(_point_to_line_seg_distance_sign(point, point0, point1, threshold))
+
+
+def point_to_polygon_distance(point: Vec2, polygon: List[Vec2], threshold: float = 0.01) -> Tuple[float, int]:
+    m_dist = 1e32
+    m_dist_sect_id: int = -1
+    curr_dist: float
+    n_points: int = len(polygon)
+
+    for i in range(n_points):
+        curr_dist = point_to_line_seg_distance(point, polygon[i], polygon[(i + 1) % n_points], threshold)
+        if curr_dist < m_dist:
+            m_dist = curr_dist
+            m_dist_sect_id = i
+    return m_dist, m_dist_sect_id
+
+
+def point_to_polygons_distance(point: Vec2, polygons: List[List[Vec2]], threshold: float = 0.01) -> \
+        Tuple[float, int, int]:
+    m_dist = 1e32
+    m_dist_sect_id: int = -1
+    m_dist_poly_id: int = -1
+    curr_dist: float
+    curr_id: int
+
+    for i, poly in enumerate(polygons):
+        curr_dist, curr_id = point_to_polygon_distance(point, poly, threshold)
+        if curr_dist < m_dist:
+            m_dist = curr_dist
+            m_dist_sect_id = curr_id
+            m_dist_poly_id = i
+    return m_dist, m_dist_sect_id, m_dist_poly_id
+
+
 def ray_plane_intersect(r_0: Vec3, n: Vec3, origin: Vec3, direction: Vec3) -> Tuple[bool, float]:
     # (r - r_0, n) = 0
     """
@@ -965,7 +994,7 @@ def ray_plane_intersect(r_0: Vec3, n: Vec3, origin: Vec3, direction: Vec3) -> Tu
     :arg direction направление луча (единичный вектор)
     :return длина луча вдоль его направления до пересечения с плоскостью
     """
-    pass
+    return False, 0.0
 
 
 def ray_sphere_intersect(r_0: Vec3, r: float, origin: Vec3, direction: Vec3) -> Tuple[bool, float, float]:
@@ -976,7 +1005,7 @@ def ray_sphere_intersect(r_0: Vec3, r: float, origin: Vec3, direction: Vec3) -> 
     :arg direction направление луча (единичный вектор)
     :return длина луча вдоль его направления до первого и воторого пересечений со сферой, если они есть
     """
-    pass
+    return False, 0.0, 0.0
 
 
 def ray_box_intersect(box_min: Vec3, box_max: Vec3, origin: Vec3, direction: Vec3) -> Tuple[bool, float, float]:
@@ -988,7 +1017,7 @@ def ray_box_intersect(box_min: Vec3, box_max: Vec3, origin: Vec3, direction: Vec
     :arg direction направление луча (единичный вектор)
     :return длина луча вдоль его направления до первого и воторого пересечений со боксом, если они есть
     """
-    pass
+    return False, 0.0, 0.0
 
 
 def ray_triangle_intersect(p1: Vec3, p2: Vec3, p3: Vec3, origin: Vec3, direction: Vec3) -> Tuple[bool, float]:
@@ -1000,4 +1029,4 @@ def ray_triangle_intersect(p1: Vec3, p2: Vec3, p3: Vec3, origin: Vec3, direction
        :arg direction направление луча (единичный вектор)
        :return длина луча вдоль его направления до пересечения с треугольником, если оно
     """
-    pass
+    return False, 0.0

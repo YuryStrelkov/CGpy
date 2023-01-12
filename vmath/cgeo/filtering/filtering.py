@@ -1,47 +1,7 @@
 from cgeo.circ_buffer import CircBuffer
 from typing import Callable
 from cgeo import mutils
-from numba import np
-import numba
 import math
-
-
-@numba.njit(fastmath=True, parallel=True)
-def median_filter_2d(array_data: np.ndarray, filter_size: int = 15):
-    import bisect
-
-    if filter_size % 2 != 1:
-        raise Exception("Median filter length must be odd.")
-
-    if array_data.ndim != 2:
-        raise Exception("Input must be two-dimensional.")
-
-    indexer = filter_size // 2
-
-    data_final = np.zeros_like(array_data)
-
-    height, width = array_data.shape
-
-    for i in range(height):
-        temp = []
-        for j in range(width):
-            for z in range(filter_size):
-                if i + z - indexer < 0 or i + z - indexer > height - 1:
-                    for c in range(filter_size):
-                        bisect.insort(temp, 0)
-                else:
-                    if j + z - indexer < 0 or j + indexer > width - 1:
-                        bisect.insort(temp, 0)
-                        # temp.append(0)
-                    else:
-                        for k in range(filter_size):
-                            bisect.insort(temp, array_data[i + z - indexer][j + k - indexer])
-                            #  temp.append(array_data[i + z - indexer][j + k - indexer])
-            # temp.sort()
-            data_final[i][j] = temp[len(temp) // 2]
-            temp.clear()
-    del bisect
-    return data_final
 
 
 class RealTimeFilter:

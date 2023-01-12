@@ -1,8 +1,8 @@
 from cgeo.bounds.bounding_box import BoundingBox
 from cgeo.transforms.transform import Transform
 from cgeo.tris_mesh.triangle import Triangle
-from cgeo.vectors import Vec3, Vec2
 from typing import Tuple, List, Union
+from cgeo.vectors import Vec3, Vec2
 import numpy as np
 import re
 

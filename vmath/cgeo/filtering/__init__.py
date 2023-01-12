@@ -1,1 +1,1 @@
-from .filtering import median_filter_2d, RealTimeFilter
+from .filtering import RealTimeFilter

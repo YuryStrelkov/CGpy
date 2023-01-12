@@ -1,9 +1,9 @@
-from cgeo.mutils import compute_derivatives_2
 from cgeo.surface.interpolators import bi_linear_interp, bi_linear_interp_pt, bi_qubic_interp_pt, bi_qubic_interp, \
     bi_linear_cut, bi_qubic_cut, bi_linear_cut_along_curve, bi_qubic_cut_along_curve
+from cgeo.mutils import compute_derivatives_2
+from cgeo.vectors import Vec2, Vec3
 from cgeo import mutils, gutils
 import matplotlib.pyplot as plt
-from cgeo.vectors import Vec2, Vec3
 from typing import Tuple
 import numpy as np
 import time

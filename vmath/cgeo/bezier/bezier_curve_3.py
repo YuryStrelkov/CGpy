@@ -1,6 +1,6 @@
 from cgeo.bezier.bezier_point_3 import BezierPoint3
-from cgeo import gutils
 from cgeo.vectors import Vec3
+from cgeo import gutils
 from typing import List
 
 
@@ -159,7 +159,7 @@ class BezierCurve3:
     def align_anchors(self, pid: int, pos: Vec3) -> None:
         if not self.__in_range(pid):
             return
-        self.__points[pid].align_anchors(pos) #, weight)
+        self.__points[pid].align_anchors(pos)  # weight)
 
     def curve_value(self, pid: int, t: float) -> Vec3:
         if not self.__in_range(pid):
