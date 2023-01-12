@@ -3,7 +3,7 @@ from cgeo.vectors import Vec3, Vec2
 from typing import Tuple, List
 from cgeo import mutils
 import numpy as np
-import numba
+# import numba
 import math
 
 numerical_precision: float = 1e-9
@@ -59,7 +59,7 @@ def rotate(angle_x: float, angle_y: float, angle_z: float) -> Mat4:
     return rotate_x(angle_x) * rotate_y(angle_y) * rotate_z(angle_z)
 
 
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def deg_to_rad(deg: float) -> float:
     """
     :param deg: угол в градусах
@@ -68,7 +68,7 @@ def deg_to_rad(deg: float) -> float:
     return deg / 180.0 * math.pi
 
 
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def rad_to_deg(deg: float) -> float:
     """
     :param deg: угол в радианах
@@ -599,7 +599,7 @@ def line_to_line_dist(origin_1: Vec3, direction_1: Vec3, origin_2: Vec3, directi
     return math.sqrt(Vec3.dot(temp, temp)) / math.sqrt(Vec3.dot(temp1, temp1))
 
 
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def _rect_intersection(min_1: Vector2, max_1: Vector2,
                        min_2: Vector2, max_2: Vector2) -> Tuple[bool, Vector2, Vector2]:
     """
@@ -658,7 +658,7 @@ def rect_intersection(min_1: Vec2, max_1: Vec2,
     return flag, Vec2(p1[0], p1[1]), Vec2(p2[0], p2[0])
 
 
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def _in_between(pt: Vector2, _min: Vector2, _max: Vector2) -> bool:
     """
     Определяет принадлежность точки прямоугольной области, ограниченнной точками _min и _max.\n
@@ -685,7 +685,7 @@ def in_between(pt: Vec2, _min: Vec2, _max: Vec2) -> bool:
     return _in_between((pt.x, pt.y), (_min.x, _min.y), (_max.x, _max.y))
 
 
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def _cross(a: Vector2, b: Vector2) -> float:
     """
     Косое векторное произведение.\n
@@ -696,7 +696,7 @@ def _cross(a: Vector2, b: Vector2) -> float:
     return a[0] * b[1] - a[1] * b[0]
 
 
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def _intersect_lines(pt1: Vector2, pt2: Vector2, pt3: Vector2, pt4: Vector2) -> Tuple[bool, Vector2]:
     """
     Определяет точку пересечения двух линий, проходящих через точки pt1, pt2 и pt3, pt4 для первой и второй\n
@@ -765,7 +765,7 @@ def intersect_sects(pt1: Vec2, pt2: Vec2, pt3: Vec2, pt4: Vec2) -> Tuple[bool, V
     return flag, int_point
 
 
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def _cw(a: Vector2, b: Vector2, c: Vector2) -> bool:
     return (b[0] - a[0]) * (c[1] - a[1]) - (c[0] - a[0]) * (b[1] - a[1]) < 0
 
@@ -929,7 +929,7 @@ def point_to_line_seg_distance(point: Vec2, point1: Vec2, point2: Vec2, threshol
     return _point_to_line_seg_distance(point.as_tuple, point1.as_tuple, point2.as_tuple, threshold)
 
 
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def _point_to_line_seg_distance_sign(point: Vector2, point0: Vector2, point1: Vector2, threshold: float = 0.01) -> float:
 
     p1_p0 = (point1[0] - point0[0], point1[1] - point0[1])
@@ -949,7 +949,7 @@ def _point_to_line_seg_distance_sign(point: Vector2, point0: Vector2, point1: Ve
     return (_cross(p1_p0, p_p0)) / len_p1_p0
 
 
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def _point_to_line_seg_distance(point: Vector2, point0: Vector2, point1: Vector2, threshold: float = 0.01) -> float:
     return abs(_point_to_line_seg_distance_sign(point, point0, point1, threshold))
 

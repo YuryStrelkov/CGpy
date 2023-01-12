@@ -1,4 +1,3 @@
-from matplotlib import pyplot as plt
 from cgeo import Vec3, Vec2
 
 
@@ -264,16 +263,3 @@ class Integrator3d:
         self._time_val = 0.0
         self._time_delta = 0.0
 
-
-def integrator_test(n_points: int = 1024):
-    dx = 1.0 / (n_points - 1)
-    x = [dx * i for i in range(n_points)]
-    print(f"sum(x) = {sum(x) * dx}")
-    integrator = Integrator3d()
-    integrator.mode = 1
-    y = []
-    for xi in x:
-        y.append(integrator(Vec3(xi), xi).x)
-    plt.plot(x, x, 'r')
-    plt.plot(x, y, 'g')
-    plt.show()

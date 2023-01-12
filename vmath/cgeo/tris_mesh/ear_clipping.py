@@ -1,8 +1,6 @@
-from cgeo import Vec2, Vec3, tris_mesh
-from matplotlib import pyplot as plt
 from typing import List, Tuple, Dict
 from cgeo.tris_mesh import TrisMesh
-import numpy as np
+from cgeo import Vec2, Vec3
 import math
 import cgeo
 
@@ -128,6 +126,7 @@ def triangulate_polygons(polygons: List[List[Vec2]]) -> TrisMesh:
     return mesh
 
 
+"""
 def _test_clipping():
     t = np.linspace(0, 0.8 * 2 * np.pi, 128)
     points = [Vec2(np.sin(ti), np.cos(ti)) for ti in t.flat]
@@ -148,5 +147,6 @@ def _test_clipping():
 
 if __name__ == "__main__":
     _test_clipping()
+"""
 
 

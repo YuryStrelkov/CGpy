@@ -2,7 +2,7 @@ from cgeo.mutils import compute_derivatives_2_at_pt, compute_derivatives_2, clam
 from typing import Tuple
 from cmath import sqrt
 import numpy as np
-import numba
+# import numba
 
 
 _bicubic_poly_coefficients = (1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
@@ -26,7 +26,7 @@ _bicubic_poly_coefficients = (1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
 """
 
 
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def bi_linear_interp_pt(x: float, y: float, points: np.ndarray, width: float = 1.0, height: float = 1.0) -> float:
     """
     Билинейная иетерполяция точки (x,y)
@@ -75,7 +75,7 @@ def bi_linear_interp_pt(x: float, y: float, points: np.ndarray, width: float = 1
     return q00 + (q01 - q00) * tx + (q10 - q00) * ty + tx * ty * (q00 - q01 - q10 + q11)
 
 
-@numba.njit(fastmath=True, parallel=True)
+# @numba.njit(fastmath=True, parallel=True)
 def bi_linear_interp(x: np.ndarray, y: np.ndarray, points: np.ndarray,
                      width: float = 1.0, height: float = 1.0) -> np.ndarray:
     """
@@ -98,7 +98,8 @@ def bi_linear_interp(x: np.ndarray, y: np.ndarray, points: np.ndarray,
 
     dy_ = height / (rows - 1.0)
 
-    for i in numba.prange(result.size):
+    # for i in numba.prange(result.size):
+    for i in range(result.size):
 
         res_col_ = i % x.size
 
@@ -135,7 +136,7 @@ def bi_linear_interp(x: np.ndarray, y: np.ndarray, points: np.ndarray,
     return result
 
 
-@numba.njit(fastmath=True, parallel=True)
+# @numba.njit(fastmath=True, parallel=True)
 def bi_linear_cut(x_0: float, y_0: float, x_1: float, y_1: float, steps_n: int, points: np.ndarray,
                   width: float = 1.0, height: float = 1.0) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
@@ -170,7 +171,8 @@ def bi_linear_cut(x_0: float, y_0: float, x_1: float, y_1: float, steps_n: int, 
 
     points_fxy = np.zeros((steps_n,), dtype=float)
 
-    for i in numba.prange(steps_n):
+    # for i in numba.prange(steps_n):
+    for i in range(steps_n):
         points_x[i] = dt * dx * i + x_0
         points_y[i] = dt * dy * i + y_0
         points_fxy[i] = bi_linear_interp_pt(points_x[i], points_y[i], points, width, height)
@@ -178,7 +180,7 @@ def bi_linear_cut(x_0: float, y_0: float, x_1: float, y_1: float, steps_n: int, 
     return points_x, points_y, points_fxy
 
 
-@numba.njit(fastmath=True, parallel=True)
+# @numba.njit(fastmath=True, parallel=True)
 def bi_linear_cut_along_curve(x_pts: np.ndarray, y_pts: np.ndarray, points: np.ndarray,
                               width: float = 1.0, height: float = 1.0) -> np.ndarray:
     """
@@ -191,12 +193,13 @@ def bi_linear_cut_along_curve(x_pts: np.ndarray, y_pts: np.ndarray, points: np.n
     :return:
     """
     cut_values = np.zeros((min(x_pts.size, y_pts.size),), dtype=float)
-    for i in numba.prange(cut_values.size):
+    # for i in numba.prange(cut_values.size):
+    for i in range(cut_values.size):
         cut_values[i] = bi_linear_interp_pt(x_pts[i], y_pts[i], points, width, height)
     return cut_values
 
 
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def _cubic_poly(x: float, y: float, m: np.ndarray) -> float:
     """
     Вспомогательная  функция для вычисления кубического полинома би кубической интерполяции0
@@ -215,7 +218,7 @@ def _cubic_poly(x: float, y: float, m: np.ndarray) -> float:
            (m[12] + m[13] * y + m[14] * y2 + m[15] * y3) * x3
 
 
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def __bi_qubic_interp_pt(x: float, y: float, points: np.ndarray, points_dx: np.ndarray,
                          points_dy: np.ndarray, points_dxy: np.ndarray,
                          width: float = 1.0, height: float = 1.0) -> float:
@@ -279,7 +282,7 @@ def __bi_qubic_interp_pt(x: float, y: float, points: np.ndarray, points_dx: np.n
     return _cubic_poly(tx, ty, c)
 
 
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def bi_qubic_interp_pt(x: float, y: float, points: np.ndarray, width: float = 1.0, height: float = 1.0) -> float:
     """
     Бикубическая иетерполяция точки (x,y)
@@ -343,7 +346,7 @@ def bi_qubic_interp_pt(x: float, y: float, points: np.ndarray, width: float = 1.
     return _cubic_poly(tx, ty, c)
 
 
-@numba.njit(fastmath=True, parallel=True)
+# @numba.njit(fastmath=True, parallel=True)
 def bi_qubic_interp(x: np.ndarray, y: np.ndarray,
                     points: np.ndarray, width: float = 1.0, height: float = 1.0) -> np.ndarray:
     """
@@ -359,7 +362,8 @@ def bi_qubic_interp(x: np.ndarray, y: np.ndarray,
 
     points_dx, points_dy, points_dxy = compute_derivatives_2(points)
 
-    for i in numba.prange(result.size):
+    # for i in numba.prange(result.size):
+    for i in range(result.size):
         res_col_ = i % x.size
 
         res_row_ = i // x.size
@@ -371,7 +375,7 @@ def bi_qubic_interp(x: np.ndarray, y: np.ndarray,
     return result
 
 
-@numba.njit(fastmath=True, parallel=True)
+# @numba.njit(fastmath=True, parallel=True)
 def bi_qubic_cut(x_0: float, y_0: float, x_1: float, y_1: float, steps_n: int, points: np.ndarray,
                  width: float = 1.0, height: float = 1.0) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
@@ -405,7 +409,8 @@ def bi_qubic_cut(x_0: float, y_0: float, x_1: float, y_1: float, steps_n: int, p
 
     points_fxy = np.zeros((steps_n,), dtype=float)
 
-    for i in numba.prange(steps_n):
+    # for i in numba.prange(steps_n):
+    for i in range(steps_n):
         points_x[i] = dt * dx * i + x_0
         points_y[i] = dt * dy * i + y_0
         points_fxy[i] = bi_qubic_interp_pt(points_x[i], points_y[i], points, width, height)
@@ -413,7 +418,7 @@ def bi_qubic_cut(x_0: float, y_0: float, x_1: float, y_1: float, steps_n: int, p
     return points_x, points_y, points_fxy
 
 
-@numba.njit(fastmath=True, parallel=True)
+# @numba.njit(fastmath=True, parallel=True)
 def bi_qubic_cut_along_curve(x_pts: np.ndarray, y_pts: np.ndarray, points: np.ndarray,
                              width: float = 1.0, height: float = 1.0) -> np.ndarray:
     """
@@ -426,6 +431,7 @@ def bi_qubic_cut_along_curve(x_pts: np.ndarray, y_pts: np.ndarray, points: np.nd
     :return:
     """
     cut_values = np.zeros((min(x_pts.size, y_pts.size),), dtype=float)
-    for i in numba.prange(cut_values.size):
+    # for i in numba.prange(cut_values.size):
+    for i in range(cut_values.size):
         cut_values[i] = bi_qubic_interp_pt(x_pts[i], y_pts[i], points, width, height)
     return cut_values

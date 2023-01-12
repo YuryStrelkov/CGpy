@@ -1,6 +1,6 @@
 from typing import Callable, Tuple
 import numpy as np
-import numba
+# import numba
 
 LINEAR_INTERPOLATOR = 0
 SQUARE_INTERPOLATOR = 1
@@ -34,7 +34,7 @@ a_tan_values_lin: np.ndarray = \
 #######################################
 #####  quad interpolate tables   ######
 #######################################
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def _sect_quad_coefficients(y1: float, y2: float, y3: float) -> Tuple[float, float, float]:
     """
     [[ 2. -4.  2.]

@@ -1,11 +1,7 @@
-from cgeo.mutils import numerical_precision, gauss_blur
+from cgeo.mutils import numerical_precision
 from typing import Tuple, Callable, List
-from matplotlib import pyplot as plt
 from cgeo.vectors import Vec2
-from cgeo import gutils
 import numpy as np
-import random
-import numba
 
 Vector2Int = Tuple[int, int]
 Circle = Tuple[Tuple[float, float], float]  # cx, cy, r
@@ -31,13 +27,13 @@ def _field_view(x_: np.ndarray, y_: np.ndarray, field_func: Callable[[float, flo
     return np.array([[field_func(x_i, y_j) for x_i in x_.flat] for y_j in y_.flat])
 
 
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def _rect_bounds(x_arg: float, y_arg: float, h0: float = 1.0) -> float:
     return max((x_arg ** 2 + h0 if x_arg <= 0.0 else 0.0 + (x_arg - 1.0) ** 2 + h0 if x_arg >= 1.0 else 0.0),
                (y_arg ** 2 + h0 if y_arg <= 0.0 else 0.0 + (y_arg - 1.0) ** 2 + h0 if y_arg >= 1.0 else 0.0))
 
 
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def _bi_lin_interp(pt_x: float, pt_y: float, points: np.ndarray) -> float:
     """
     Билинейная иетерполяция точки (x,y)
@@ -298,6 +294,8 @@ def isoline_of_vect(f_map: np.ndarray, threshold: float = 1.0, resolution: Vecto
     return [[Vec2(xy[0], xy[1]) for xy in shape] for shape in shapes]
 
 
+"""
+
 if __name__ == "__main__":
 
     x = np.linspace(-0.0, 1., 256)
@@ -339,14 +337,8 @@ if __name__ == "__main__":
     # plt.imshow(np.flipud(f.T), extent=[np.amin(x), np.amax(x), np.amin(y), np.amax(y)])
     plt.imshow(np.flipud(area_dist), extent=[np.amin(x), np.amax(x), np.amin(y), np.amax(y)])
 
-    #for index, (xi, yi) in enumerate(xys):
-    #     plt.plot(xi, yi, 'r')
-    # for index, (xi, yi) in enumerate(xys):
-    #    plt.plot(xi, yi, '.g')
-
-    # for p in mesh.vertices:
-    #     plt.plot(p.x, p.z, '.g')
-    """
+"""
+"""
     for j in range(len(xys)):
         x, y = xys[j]
         for i in range(len(x) - 1):
@@ -356,9 +348,10 @@ if __name__ == "__main__":
             cy = (yi + yi1) * 0.5
             n = gutils.perpendicular_2(Vec2(xi1 - xi, yi1 - yi))
             plt.plot([cx, cx + 0.01 * n.x], [cy, cy + 0.01 * n.y], 'g')
-    """
-
+"""
+"""
     plt.xlabel("x")
     plt.ylabel("y")
     plt.grid(True)
     plt.show()
+"""

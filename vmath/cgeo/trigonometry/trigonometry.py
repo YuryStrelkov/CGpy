@@ -1,9 +1,9 @@
 from cgeo.trigonometry.trig_tables import SQUARE_INTERPOLATOR, LINEAR_INTERPOLATOR, A_TAN_RATIO, pi05, \
     INTERP_MODE_TABLES, SIN, pi2, COS, TAN, A_SIN, A_COS, A_TAN, pi
-from matplotlib import pyplot as plt
+# from matplotlib import pyplot as plt
 from typing import Union
 import numpy as np
-import numba
+# import numba
 import time
 
 
@@ -13,7 +13,7 @@ _accuracy = 1.0 - 1e-12
 #######################################
 #####  sin/cos lin interpolate   ######
 #######################################
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def _tab_func_lin(arg: float, tab: np.array, x_0: float = 0.0, x_1: float = 1.0) -> float:
     t: float
     index: int
@@ -27,7 +27,7 @@ def _tab_func_lin(arg: float, tab: np.array, x_0: float = 0.0, x_1: float = 1.0)
     return tab[index] + (tab[index + 1] - tab[index]) * t
 
 
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def _tab_func_lin_np(arg: np.ndarray, tab: np.array, x_0: float = 0.0, x_1: float = 1.0) -> np.ndarray:
     res = np.zeros_like(arg)
     t: float
@@ -47,7 +47,7 @@ def _tab_func_lin_np(arg: np.ndarray, tab: np.array, x_0: float = 0.0, x_1: floa
 #########################################
 #####  sin/cos qubic interpolate   ######
 #########################################
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def _tab_func_quad(arg: float, table: np.ndarray, x_0: float = 0.0, x_1: float = 1.0) -> float:
     t: float = (arg - x_0) * _accuracy / (x_1 - x_0)
     t -= int(t)
@@ -59,7 +59,7 @@ def _tab_func_quad(arg: float, table: np.ndarray, x_0: float = 0.0, x_1: float =
     return table[index][0] * t * t + table[index][1] * t + table[index][2]
 
 
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def _tab_func_quad_np(arg: np.ndarray, table: np.array, x_0: float = 0.0, x_1: float = 1.0) -> np.ndarray:
     res = np.zeros((arg.size,), dtype=float)
     dx = _accuracy / (x_1 - x_0)
@@ -99,7 +99,7 @@ def _tab_function(arg: Union[float, np.ndarray], tab: np.array, x_0: float = 0.0
 ################################################
 #####  arcsin/arccos linear interpolate   ######
 ################################################
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def _tab_arc_sin_arc_cos_lin(arg: float, tab: np.array, x_0: float = 0.0, x_1: float = 1.0) -> float:
     t: float
     index: int
@@ -119,7 +119,7 @@ def _tab_arc_sin_arc_cos_lin(arg: float, tab: np.array, x_0: float = 0.0, x_1: f
     return tab[index] + (tab[index + 1] - tab[index]) * t
 
 
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def _tab_arc_sin_arc_cos_lin_np(arg: np.ndarray, tab: np.array, x_0: float = 0.0, x_1: float = 1.0) -> np.ndarray:
     res = np.zeros_like(arg)
     t: float
@@ -148,7 +148,7 @@ def _tab_arc_sin_arc_cos_lin_np(arg: np.ndarray, tab: np.array, x_0: float = 0.0
 ###############################################
 #####  arcsin/arccos qubic interpolate   ######
 ###############################################
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def _tab_arc_sin_arc_cos_quad(arg: float, table: np.array, x_0: float = 0.0, x_1: float = 1.0) -> float:
     t: float
     index: int
@@ -168,7 +168,7 @@ def _tab_arc_sin_arc_cos_quad(arg: float, table: np.array, x_0: float = 0.0, x_1
     return table[index][0] * t * t + table[index][1] * t + table[index][2]
 
 
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def _tab_arc_sin_arc_cos_quad_np(arg: np.ndarray, table: np.array, x_0: float = 0.0, x_1: float = 1.0) -> np.ndarray:
     res = np.zeros_like(arg)
     t: float
@@ -215,7 +215,7 @@ def _tab_arc_sin_arc_cos(arg: Union[float, np.ndarray], tab: np.array, x_0: floa
 ###################################
 #####  tan lin interpolate   ######
 ###################################
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def _tab_tan_lin(arg: float, tab: np.array, x_0: float = 0.0, x_1: float = 1.0) -> float:
     if arg <= -1.5605:
         return -1.0 / (arg + pi05)
@@ -233,13 +233,14 @@ def _tab_tan_lin(arg: float, tab: np.array, x_0: float = 0.0, x_1: float = 1.0) 
     return tab[index] + (tab[index + 1] - tab[index]) * t
 
 
-@numba.njit(fastmath=True, parallel=True)
+# @numba.njit(fastmath=True, parallel=True)
 def _tab_tan_lin_np(arg: np.ndarray, tab: np.array, x_0: float = 0.0, x_1: float = 1.0) -> np.ndarray:
     res = np.zeros((arg.size,), dtype=float)
     dx = _accuracy / (x_1 - x_0)
     t: float
     index: int
-    for i in numba.prange(arg.size):
+    # for i in numba.prange(arg.size):
+    for i in range(arg.size):
         if arg[i] <= -1.5605:
             res[i] = -1.0 / (arg[i] + pi05)
             continue
@@ -260,7 +261,7 @@ def _tab_tan_lin_np(arg: np.ndarray, tab: np.array, x_0: float = 0.0, x_1: float
 ####################################
 #####  tan quad interpolate   ######
 ####################################
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def _tab_tan_quad(arg: float, table: np.array, x_0: float = 0.0, x_1: float = 1.0) -> float:
     if arg <= -1.5605:
         return -1.0 / (arg + pi05)
@@ -278,13 +279,14 @@ def _tab_tan_quad(arg: float, table: np.array, x_0: float = 0.0, x_1: float = 1.
     return table[index][0] * t * t + table[index][1] * t + table[index][2]
 
 
-@numba.njit(fastmath=True, parallel=True)
+# @numba.njit(fastmath=True, parallel=True)
 def _tab_tan_quad_np(arg: np.ndarray, table: np.array, x_0: float = 0.0, x_1: float = 1.0) -> np.ndarray:
     res = np.zeros((arg.size,), dtype=float)
     dx = _accuracy / (x_1 - x_0)
     t: float
     index: int
-    for i in numba.prange(arg.size):
+    # for i in numba.prange(arg.size):
+    for i in range(arg.size):
         if arg[i] <= -1.5605:
             res[i] = -1.0 / (arg[i] + pi05)
             continue
@@ -324,7 +326,7 @@ def _tab_function_tan(arg: Union[float, np.ndarray], tab: np.array, x_0: float =
 #######################################
 #####  arc tan lin interpolate   ######
 #######################################
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def _tab_arc_tan_lin(arg: float, tab: np.array, x_0: float = 0.0, x_1: float = 1.0) -> float:
     if arg <= -A_TAN_RATIO:
         return -1.0 / arg - pi05
@@ -342,13 +344,14 @@ def _tab_arc_tan_lin(arg: float, tab: np.array, x_0: float = 0.0, x_1: float = 1
     return tab[index] + (tab[index + 1] - tab[index]) * t
 
 
-@numba.njit(fastmath=True, parallel=True)
+# @numba.njit(fastmath=True, parallel=True)
 def _tab_arc_tan_lin_np(arg: np.ndarray, tab: np.array, x_0: float = 0.0, x_1: float = 1.0) -> np.ndarray:
     res = np.zeros((arg.size,), dtype=float)
     dx = _accuracy / (x_1 - x_0)
     t: float
     index: int
-    for i in numba.prange(arg.size):
+    # for i in numba.prange(arg.size):
+    for i in range(arg.size):
         if arg[i] <= -A_TAN_RATIO:
             res[i] = -1.0 / arg[i] - pi05
             continue
@@ -369,7 +372,7 @@ def _tab_arc_tan_lin_np(arg: np.ndarray, tab: np.array, x_0: float = 0.0, x_1: f
 ########################################
 #####  arc tan quad interpolate   ######
 ########################################
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def _tab_arc_tan_quad(arg: float, table: np.array, x_0: float = 0.0, x_1: float = 1.0) -> float:
     if arg <= -A_TAN_RATIO:
         return -1.0 / arg - pi05
@@ -387,13 +390,14 @@ def _tab_arc_tan_quad(arg: float, table: np.array, x_0: float = 0.0, x_1: float 
     return table[index][0] * t * t + table[index][1] * t + table[index][2]
 
 
-@numba.njit(fastmath=True, parallel=True)
+# @numba.njit(fastmath=True, parallel=True)
 def _tab_arc_tan_quad_np(arg: np.ndarray, table: np.array, x_0: float = 0.0, x_1: float = 1.0) -> np.ndarray:
     res = np.zeros((arg.size,), dtype=float)
     dx = _accuracy / (x_1 - x_0)
     t: float
     index: int
-    for i in numba.prange(arg.size):
+    # for i in numba.prange(arg.size):
+    for i in range(arg.size):
         if arg[i] <= -A_TAN_RATIO:
             res[i] = -1.0 / arg[i] - pi05
             continue
@@ -464,98 +468,3 @@ def a_tan(arg: Union[float, np.ndarray], mode: int = 0) -> Union[float, np.ndarr
     if mode not in INTERP_MODE_TABLES:
         raise RuntimeError("A_Tan :: Incorrect interpolation mode")
     return _tab_function_arc_tan(arg, INTERP_MODE_TABLES[mode][A_TAN], -A_TAN_RATIO, A_TAN_RATIO, mode)
-
-
-def sin_cos_test():
-    x = np.linspace(-1.5 * pi, pi2 * 3.0, 2048)
-    y1 = sin(x, 0)
-    y2 = sin(x * 2)
-    y3 = np.sin(x * 4)
-
-    y_1 = cos(x, 0)
-    y_2 = cos(x * 2)
-    y_3 = np.cos(x * 4)
-    """
-    plt.plot(x, y1 - y3, 'r')
-    plt.plot(x, y2 - y3, 'g')
-
-    plt.plot(x, y_1 - y_3, ':r')
-    plt.plot(x, y_2 - y_3, ':g')
-    """
-    plt.plot(x, y1, 'r')
-    plt.plot(x, y2, 'g')
-
-    # plt.plot(x, y_1, ':r')
-    # plt.plot(x, y_2, ':g')
-    plt.grid(True)
-    plt.show()
-
-
-def a_sin_cos_test():
-    x = np.linspace(-1.2, 1.2, 1024)
-    y1 = a_sin(x, 0)
-    y2 = a_sin(x)
-    y3 = np.arcsin(x)
-
-    y1_ = a_cos(x, 0)
-    y2_ = a_cos(x)
-    y3_ = np.arccos(x)
-
-    plt.plot(x, y1, 'r')
-    plt.plot(x, y2, 'g')
-    plt.plot(x, y3, 'b')
-
-    plt.plot(x, y1_, ':r')
-    plt.plot(x, y2_, ':g')
-    plt.plot(x, y3_, ':b')
-
-    plt.grid(True)
-    plt.show()
-
-
-def a_tan_test():
-    x_ = np.linspace(-300.5, 300.5, 10000)
-    x = np.linspace(-pi05 * 0.995, pi05 * 0.995, 10000)
-    y1 = tan(x)
-    y2 = tan(x, 1)
-    y3 = np.tan(x)
-    t_linear = 0.0
-    t_qubic = 0.0
-    t_np = 0.0
-    t = 0.0
-    for i in range(1000):
-        t = time.perf_counter()
-        y = sin(x)
-        t = time.perf_counter() - t
-        t_linear += t
-        t = time.perf_counter()
-        y = sin(x, 1)
-        t = time.perf_counter() - t
-        t_qubic += t
-        t = time.perf_counter()
-        y = np.sin(x)
-        t = time.perf_counter() - t
-        t_np += t
-    print(f"t_linear: {t_linear / 1000}\n"
-          f"t_qubic : {t_qubic / 1000}\n"
-          f"t_np    : {t_np / 1000}")
-    y1_ = a_tan(x_)
-    y2_ = a_tan(x_, 1)
-    y3_ = np.arctan(x_)
-
-    plt.plot(x, y1, 'r')
-    plt.plot(x, y2, 'g')
-    plt.plot(x, y3, 'b')
-
-    # plt.plot(x_, y1_, ':r')
-    # plt.plot(x_, y2_, ':g')
-    # plt.plot(x_, y3_, ':b')
-
-    plt.grid(True)
-    plt.show()
-
-
-if __name__ == "__main__":
-    # sin_cos_test()
-    a_sin_cos_test()
-    # a_tan_test()

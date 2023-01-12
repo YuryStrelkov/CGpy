@@ -1,12 +1,9 @@
 from cgeo.surface.interpolators import bi_linear_interp, bi_linear_interp_pt, bi_qubic_interp_pt, bi_qubic_interp, \
     bi_linear_cut, bi_qubic_cut, bi_linear_cut_along_curve, bi_qubic_cut_along_curve
-from cgeo.mutils import compute_derivatives_2
 from cgeo.vectors import Vec2, Vec3
-from cgeo import mutils, gutils
-import matplotlib.pyplot as plt
 from typing import Tuple
+from cgeo import gutils
 import numpy as np
-import time
 import copy
 import json
 
@@ -72,7 +69,7 @@ class Interpolator:
         x, y, z = bi_linear_cut(x_0 - self.x_0, y_0 - self.y_0,
                                 x_1 - self.x_0, y_1 - self.y_0,
                                 n_steps, self.__control_points,
-                                self.rows, self.colons, self.width, self.height)
+                                self.width, self.height)
         z += self.z_0
         return x, y, z
 
@@ -81,7 +78,7 @@ class Interpolator:
         x, y, z = bi_qubic_cut(x_0 - self.x_0, y_0 - self.y_0,
                                x_1 - self.x_0, y_1 - self.y_0,
                                n_steps, self.control_points,
-                               self.rows, self.colons, self.width, self.height)
+                               self.width, self.height)
         z += self.z_0
         return x, y, z
 
@@ -329,12 +326,8 @@ class Interpolator:
             return self.__bi_cubic_cut_along_curve(pts_x, pts_y)
 
         return np.zeros((pts_x.size,), dtype=float)
-
+    """
     def show_interpolation(self, n_: int = 32) -> None:
-        """
-        :param n_:
-        :return:
-        """
         x_ = np.linspace(self.x_0, self.x_0 + self.width, self.colons * n_ - 1, dtype=float)
         y_ = np.linspace(self.y_0, self.y_0 + self.height, self.rows * n_ - 1, dtype=float)
         # print(f"x-size: {x_.size}, y-size: {y_.size}")
@@ -348,6 +341,7 @@ class Interpolator:
         plt.xlabel("x [mm]")
         plt.ylabel("y [mm]")
         plt.show()
+    """
 
     @property
     def points_source(self) -> str:
@@ -496,78 +490,3 @@ class Interpolator:
     @z_0.setter
     def z_0(self, val: float) -> None:
         self.__origin.z = val
-
-
-def __derivatives_test(n_: int = 128):
-    t = time.time()
-    dx, dy, dxy = compute_derivatives_2(mutils.gauss_test_surf(n_))
-    print(f"compute derivatives time: {time.time() - t}")
-    d_x = 3.0 / (n_ - 1)
-    d_y = 3.0 / (n_ - 1)
-
-    print(f"min(dx)  = {np.min(dx) / d_x:25}, max(dx)  = {np.max(dx) / d_x:25}")
-    print(f"min(dy)  = {np.min(dy) / d_x:25}, max(dy)  = {np.max(dy) / d_x:25}")
-    print(f"min(dxy) = {np.min(dxy) / d_x / d_x:25}, max(dxy) = {np.max(dxy) / d_x / d_x:25}")
-
-    dx = np.reshape(dx, (n_, n_)) / d_x
-    dy = np.reshape(dy, (n_, n_)) / d_y
-    dxy = np.reshape(dxy, (n_, n_)) / (d_x * d_y)
-
-    fig, (ax1, ax2, ax3) = plt.subplots(1, 3)
-    ax1.imshow(dx)
-    ax2.imshow(dy)
-    ax3.imshow(dxy)
-    plt.show()
-
-
-def __arithmetics_test():
-
-    points_a = np.array([[1.0, 3.0, 1.0, 3.0, 1.0],
-                         [3.0, 1.0, 3.0, 1.0, 3.0],
-                         [1.0, 3.0, 1.0, 3.0, 1.0],
-                         [3.0, 1.0, 3.0, 1.0, 3.0]])
-
-    points_b = np.array([[1.0, 3.0, 1.0],
-                         [3.0, 1.0, 3.0],
-                         [1.0, 3.0, 1.0]])
-
-    interpolator_a = Interpolator(points_a)
-    interpolator_b = Interpolator(points_b)
-    # interpolator_a.load("interpolator_a.json")
-    # interpolator_b.load("interpolator_b.json")
-
-    interpolator_a.bi_cubic = True
-    interpolator_b.bi_cubic = True
-
-    # interpolator_a.save("interpolator_a.json")
-    # interpolator_b.save("interpolator_b.json")
-
-    print(interpolator_a)
-    print(interpolator_b)
-    interpolator_a.show_interpolation()
-    interpolator_b.show_interpolation()
-    (interpolator_b + interpolator_a).show_interpolation()
-    (interpolator_b * interpolator_a).show_interpolation()
-    (interpolator_b / interpolator_a).show_interpolation()
-
-
-if __name__ == '__main__':
-    """
-        _interpolator_a = Interpolator()
-        _interpolator_a.load_control_points("Ctorona 1.txt")
-        _interpolator_a.bi_cubic = True
-        _interpolator_a.save("Ctorona 1.json")
-        _interpolator_a.show_interpolation()
-
-        _interpolator = Interpolator()
-        _interpolator.bi_cubic = True
-        _interpolator.load("Ctorona 1.json")
-        _interpolator.show_interpolation()
-    """
-    # __arithmetics_test()
-    # __surf_interp_test()
-    # __surf_load_and_cut_by_curve_test()  # ("Ctorona 1.txt")
-    # __surf_load_and_interp_test()  # ("Ctorona 1.txt")
-    # __surf_load_and_cut_test()  # ("Ctorona 1.txt")
-    __arithmetics_test()
-    __derivatives_test(2048)

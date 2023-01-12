@@ -1,9 +1,9 @@
 from math import sqrt, pi, exp
 from typing import Tuple, Any
-from numba import prange
+# from numba import prange
 import numpy as np
 import operator
-import numba
+# import numba
 
 _2pij = 2j * pi
 
@@ -19,7 +19,7 @@ def list_max(values: list) -> Tuple[int, Any]:
     return max(enumerate(values), key=operator.itemgetter(1))
 
 
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def signum(value) -> float:
     """
     :param value:
@@ -30,7 +30,7 @@ def signum(value) -> float:
     return 1.0
 
 
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def gauss_test_surf(n: int) -> np.ndarray:
     """
     Создаёт двумерный массив значений функции z = exp(-(x^2 + y^2)).\n
@@ -41,7 +41,7 @@ def gauss_test_surf(n: int) -> np.ndarray:
     dx = 3.0 / (n - 1)
     half_pi = np.pi * 0.5
     inv_sqrt_2pi = 1.0 / np.sqrt(np.pi * 2.0)
-    for i in prange(n * n):
+    for i in range(n * n):
         row = i // n
         col = i % n
         x_ = dx * col - half_pi
@@ -50,7 +50,7 @@ def gauss_test_surf(n: int) -> np.ndarray:
     return gauss
 
 
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def square_equation(a: float, b: float, c: float) -> Tuple[bool, float, float]:
     det: float = b * b - 4.0 * a * c
     if det < 0.0:
@@ -59,7 +59,7 @@ def square_equation(a: float, b: float, c: float) -> Tuple[bool, float, float]:
     return True, (-b + det) / 2.0 / a, (-b - det) / 2.0 / a
 
 
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def _in_range(val: float, x_0: float, x_1: float) -> bool:
     """
     Проверяет вхождение числа в диапазон.\n
@@ -75,7 +75,7 @@ def _in_range(val: float, x_0: float, x_1: float) -> bool:
     return True
 
 
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def clamp(val: float, min_: float, max_: float) -> float:
     """
     :param val: значение
@@ -90,7 +90,7 @@ def clamp(val: float, min_: float, max_: float) -> float:
     return val
 
 
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def dec_to_rad_pt(x: float, y: float) -> Vector2:
     """
     Переводи пару координат из декартовой системы в полярную.\n
@@ -101,7 +101,7 @@ def dec_to_rad_pt(x: float, y: float) -> Vector2:
     return np.sqrt(x * x + y * y), np.arctan2(y, x)
 
 
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def rad_to_dec_pt(rho: float, phi: float) -> Vector2:
     """
     Переводи пару координат из полярной системы в декартову.\n
@@ -112,7 +112,7 @@ def rad_to_dec_pt(rho: float, phi: float) -> Vector2:
     return rho * np.cos(phi), rho * np.sin(phi)
 
 
-@numba.njit(parallel=True)
+# @numba.njit(parallel=True)
 def dec_to_rad(x: np.ndarray, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     """
     Переводи пару массивов координат из декартовой системы в полярную.\n
@@ -127,20 +127,20 @@ def dec_to_rad(x: np.ndarray, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
 
     if x.ndim == 2:
         if x.ndim == 2:
-            for i in prange(x.shape[0]):
+            for i in range(x.shape[0]):
                 for j in range(x.shape[1]):
                     x[i, j], y[i, j] = dec_to_rad_pt(x[i, j], y[i, j])
         return x, y
 
     if x.ndim == 1:
-        for i in prange(x.shape[0]):
+        for i in range(x.shape[0]):
             x[i], y[i] = dec_to_rad_pt(x[i], y[i])
         return x, y
 
     raise Exception("dec_to_rad :: x and y has to be 1 or 2 dimensional")
 
 
-@numba.njit(parallel=True)
+# @numba.njit(parallel=True)
 def rad_to_dec(rho: np.ndarray, phi: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     """
     Переводи пару массивов координат из полярной системы в декартову.\n
@@ -155,27 +155,27 @@ def rad_to_dec(rho: np.ndarray, phi: np.ndarray) -> Tuple[np.ndarray, np.ndarray
         raise Exception("rad_to_dec :: rho.ndim != phi.ndim")
 
     if rho.ndim == 2:
-        for i in prange(rho.shape[0]):
+        for i in range(rho.shape[0]):
             for j in range(rho.shape[1]):
                 rho[i, j], phi[i, j] = rad_to_dec_pt(rho[i, j], phi[i, j])
         return rho, phi
 
     if rho.ndim == 1:
-        for i in prange(rho.shape[0]):
+        for i in range(rho.shape[0]):
             rho[i], phi[i] = rad_to_dec_pt(rho[i], phi[i])
         return rho, phi
 
     raise Exception("rad_to_dec :: rho and phi has to be 1 or 2 dimensional")
 
 
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def _index_calc(index: int, indices_range: int) -> int:
     if index < 0:
         return indices_range - 1 + index % indices_range
     return index % indices_range
 
 
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def compute_derivatives_2_at_pt(points: np.ndarray, row: int, col: int) -> Tuple[float, float, float]:
     """
     Вычисляет произодные по х, по y и по xy. Используется центральный разностный аналог
@@ -207,7 +207,7 @@ def compute_derivatives_2_at_pt(points: np.ndarray, row: int, col: int) -> Tuple
            (points[row_0, col_1] - points[row_0, col_0]) * 0.25
 
 
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def compute_derivatives_at_pt(points: np.ndarray, row: int, col: int) -> Vector2:
     """
     Вычисляет произодные по х, по y. Используется центральный разностный аналог
@@ -237,7 +237,7 @@ def compute_derivatives_at_pt(points: np.ndarray, row: int, col: int) -> Vector2
            (points[row_1, col] - points[row_0, col]) * 0.5
 
 
-@numba.njit(fastmath=True, parallel=True)
+# @numba.njit(fastmath=True, parallel=True)
 def compute_derivatives_2(points: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Вычисляет произодные по х, по y и по xy. Используется центральный разностный аналог
@@ -253,7 +253,7 @@ def compute_derivatives_2(points: np.ndarray) -> Tuple[np.ndarray, np.ndarray, n
     points_dy = np.zeros_like(points)
     points_dxy = np.zeros_like(points)
 
-    for i in prange(points.size):
+    for i in range(points.size):
         row_ = int(i / colons)
         row_1 = min(rows - 1, row_ + 1)
         row_0 = max(0, row_ - 1)
@@ -275,7 +275,7 @@ def compute_derivatives_2(points: np.ndarray) -> Tuple[np.ndarray, np.ndarray, n
     return points_dx, points_dy, points_dxy
 
 
-@numba.njit(fastmath=True, parallel=True)
+# @numba.njit(fastmath=True, parallel=True)
 def compute_derivatives(points: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     """
     Вычисляет произодные по х, по y и по xy. Используется центральный разностный аналог
@@ -290,7 +290,7 @@ def compute_derivatives(points: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     points_dx = np.zeros_like(points)
     points_dy = np.zeros_like(points)
 
-    for i in prange(points.size):
+    for i in range(points.size):
         row_ = int(i / colons)
         row_1 = min(rows - 1, row_ + 1)
         row_0 = max(0, row_ - 1)
@@ -306,7 +306,7 @@ def compute_derivatives(points: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     return points_dx, points_dy
 
 
-@numba.njit(fastmath=True, parallel=True)
+# @numba.njit(fastmath=True, parallel=True)
 def compute_normals(points: np.ndarray) -> np.ndarray:
     if points.ndim != 2:
         raise RuntimeError("compute_derivatives_2 :: points array has to be 2 dimensional")
@@ -315,7 +315,7 @@ def compute_normals(points: np.ndarray) -> np.ndarray:
 
     points_n = np.zeros((rows, cols, 3,), dtype=float)
 
-    for i in prange(points.size):
+    for i in range(points.size):
         row_ = int(i / cols)
         row_1 = min(rows - 1, row_ + 1)
         row_0 = max(0, row_ - 1)
@@ -339,7 +339,7 @@ def compute_normals(points: np.ndarray) -> np.ndarray:
     return points_n
 
 
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def _fast_fourier_transform(signal: np.ndarray) -> None:
     _n = signal.size
 
@@ -377,7 +377,7 @@ def _fast_fourier_transform(signal: np.ndarray) -> None:
             signal[b] = t
 
 
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def fft(x: np.ndarray, do_copy: bool = True) -> np.ndarray:
     _x = x
     if do_copy:
@@ -386,7 +386,7 @@ def fft(x: np.ndarray, do_copy: bool = True) -> np.ndarray:
     return _x
 
 
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def ifft(x: np.ndarray, do_copy: bool = True) -> np.ndarray:
     _x = x
     if do_copy:
@@ -398,7 +398,7 @@ def ifft(x: np.ndarray, do_copy: bool = True) -> np.ndarray:
     return _x
 
 
-@numba.njit(parallel=True)
+# @numba.njit(parallel=True)
 def fft_2d(x: np.ndarray, do_copy: bool = True) -> np.ndarray:
     if x.ndim != 2:
         raise ValueError("fft2 :: x.ndim != 2")
@@ -406,16 +406,16 @@ def fft_2d(x: np.ndarray, do_copy: bool = True) -> np.ndarray:
     if do_copy:
         _x = img_to_pow_2_size(x.copy())
 
-    for i in numba.prange(_x.shape[0]):
+    for i in range(_x.shape[0]):
         _x[i, :] = fft(_x[i, :])
 
-    for i in numba.prange(_x.shape[1]):
+    for i in range(_x.shape[1]):
         _x[:, i] = fft(_x[:, i])
 
     return _x
 
 
-@numba.njit(parallel=True)
+# @numba.njit(parallel=True)
 def ifft_2d(x: np.ndarray, do_copy: bool = True) -> np.ndarray:
     if x.ndim != 2:
         raise ValueError("fft2 :: x.ndim != 2")
@@ -423,16 +423,16 @@ def ifft_2d(x: np.ndarray, do_copy: bool = True) -> np.ndarray:
     if do_copy:
         _x = x.copy()
 
-    for i in numba.prange(_x.shape[0]):
+    for i in range(_x.shape[0]):
         _x[i, :] = ifft(_x[i, :])
 
-    for i in numba.prange(_x.shape[1]):
+    for i in range(_x.shape[1]):
         _x[:, i] = ifft(_x[:, i])
 
     return _x
 
 
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def img_crop(img: np.ndarray, rows_bound: Vector2, cols_bound: Vector2) -> np.ndarray:
     if img.ndim < 2:
         raise RuntimeError("img_crop:: image has to be 2-dimensional, but 1-dimensional was given...")
@@ -444,7 +444,7 @@ def img_crop(img: np.ndarray, rows_bound: Vector2, cols_bound: Vector2) -> np.nd
     return img[y_min: y_max, x_min: x_max, :]
 
 
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def img_to_pow_2_size(img: np.ndarray) -> np.ndarray:
     if img.ndim < 2:
         raise RuntimeError("img_to_pow_2_size:: image has to be 2-dimensional, but 1-dimensional was given...")
@@ -456,7 +456,7 @@ def img_to_pow_2_size(img: np.ndarray) -> np.ndarray:
                     ((cols - cols2) // 2, (cols + cols2) // 2))
 
 
-@numba.njit(fastmath=True, parallel=True)
+# @numba.njit(fastmath=True, parallel=True)
 def convolve_2d(image: np.ndarray, core: np.ndarray) -> np.ndarray:
     if image.ndim != 2:
         raise RuntimeError(f"convolve2 :: image.ndim != 2")
@@ -478,7 +478,7 @@ def convolve_2d(image: np.ndarray, core: np.ndarray) -> np.ndarray:
     j_col: int
     divider: float
 
-    for _row in numba.prange(rows):
+    for _row in range(rows):
         for _col in range(cols):
             divider = 0.0
             value = 0.0
@@ -516,7 +516,7 @@ def gauss_blur(image: np.ndarray, blur_size: int = 9) -> np.ndarray:
     return convolve_2d(image, gauss_test_surf(blur_size))
 
 
-@numba.njit(fastmath=True, parallel=True)
+# @numba.njit(fastmath=True, parallel=True)
 def median_filter_2d(array_data: np.ndarray, filter_size: int = 15):
     import bisect
 
@@ -532,7 +532,7 @@ def median_filter_2d(array_data: np.ndarray, filter_size: int = 15):
 
     height, width = array_data.shape
 
-    for row in numba.prange(height):
+    for row in range(height):
         temp = []
         for col in range(width):
             for z in range(filter_size):
