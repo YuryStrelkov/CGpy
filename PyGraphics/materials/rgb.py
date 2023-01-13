@@ -1,3 +1,5 @@
+from typing import List
+
 import numpy as np
 
 
@@ -6,7 +8,7 @@ class RGB:
     __slots__ = "__rgb"
 
     def __init__(self, r: np.uint8 = 255, g: np.uint8 = 255, b: np.uint8 = 255):
-        self.__rgb: [np.uint8] = [np.uint8(r), np.uint8(g), np.uint8(b)]
+        self.__rgb: List[np.uint8] = [np.uint8(r), np.uint8(g), np.uint8(b)]
 
     def __str__(self):
         return f"{{\"r\":{self.r:3}, \"g\":{self.g:3}, \"b\":{self.b:3}}}"

@@ -1,11 +1,25 @@
+from cgeo.bezier.bezier_curve_3 import BezierCurve3
+from cgeo.transforms.transform import Transform
+from cgeo.surface.patch import CubicPatch
+from cgeo.vectors import Vec3, Vec2
+import numpy as np
 import time
 
-import numpy as np
+
+def vec2_test():
+    print("=================vec2_test================")
+    v1 = Vec2(1, 3)
+    v2 = Vec2(3, 1)
+    print(f"v1 + v2:  {v1 + v2}")
+    print(f"v1 - v2:  {v1 - v2}")
+    print(f"v1 * v2:  {v1 * v2}")
+    print(f"v1 / v2:  {v1 / v2}")
+    print(f"(v1,v2):  {Vec2.dot(v1, v2)}")
+    print(f"[v1;v2]:  {Vec2.cross(v1, v2)}")
+
 
 
 def transforms_3_test():
-    from core.transforms.transform import Transform
-    from core.vectors import Vec3
     print("=============transforms_3_test=============")
     t = Transform()
     v = Vec3(1, 2, 3)
@@ -26,8 +40,8 @@ def transforms_3_test():
 
 
 def transforms_2_test():
-    from core.transforms.transform2 import Transform2
-    from core.vectors import Vec2
+    from cgeo.transforms.transform2 import Transform2
+    from cgeo.vectors import Vec2
     print("=============transforms_2_test=============")
     t = Transform2()
     v = Vec2(1, 2)
@@ -45,7 +59,6 @@ def transforms_2_test():
 
 def surface_test():
     print("=============surface_test=============")
-    from core.surface.patch import CubicPatch
     patch = CubicPatch()
     print(patch)
    # print(patch.__mesh)
@@ -53,8 +66,6 @@ def surface_test():
 
 def bezier_test():
     print("=============bezier_test=============")
-    from core.bezier.bezier_curve_3 import BezierCurve3
-    from core.vectors import Vec3
     curve = BezierCurve3()
     curve.add_point(Vec3(0, 0, 0), True)
     curve.add_point(Vec3(1, 0, 0), True)
@@ -74,9 +85,14 @@ def time_test():
 
 
 if __name__ == '__main__':
-    time_test()
-    # transforms_2_test()
-    # transforms_3_test()
-    # surface_test()
-    # bezier_test()
+    #vec2_test()
+    #time_test()
+    #transforms_2_test()
+    #transforms_3_test()
+    #surface_test()
+    #bezier_test()
+    from cgeo.mutils import list_max
+    _list = [1, 1, 2, 34, 5, 2, 3, 51, 12, 3, 12, 4, 33, 12, 6]
+    _id, _item = list_max(_list)
+    print(f"id: {_id}, item: {_item}")
 
