@@ -33,6 +33,7 @@ def transforms_3_test():
     t.ay = 30
     t.ay = 60
     print(t)
+    print(f"v original       : {v}")
     v = t.transform_vect(v)
     print(f"v transformed    : {v}")
     v = t.inv_transform_vect(v)
@@ -51,6 +52,7 @@ def transforms_2_test():
     t.sy = 4.4
     t.az = 15
     print(t)
+    print(f"v original       : {v}")
     v = t.transform_vect(v)
     print(f"v transformed    : {v}")
     v = t.inv_transform_vect(v)
@@ -87,8 +89,8 @@ def time_test():
 if __name__ == '__main__':
     #vec2_test()
     #time_test()
-    #transforms_2_test()
-    #transforms_3_test()
+    transforms_2_test()
+    transforms_3_test()
     #surface_test()
     #bezier_test()
     from cgeo.mutils import list_max

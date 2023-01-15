@@ -60,32 +60,40 @@ class Transform2:
     def scale(self) -> Vec2:
         return Vec2(self.sx, self.sy)
 
-    # масштаб по Х
     @property
     def sx(self) -> float:
+        """
+        масштаб по Х
+        """
         x = self.__transform_m.m00
         y = self.__transform_m.m10
         return math.sqrt(x * x + y * y)
 
-    # масштаб по Y
     @property
     def sy(self) -> float:
+        """
+        масштаб по Y
+        """
         x = self.__transform_m.m01
         y = self.__transform_m.m11
         return math.sqrt(x * x + y * y)
-        # установить масштаб по Х
 
     @sx.setter
     def sx(self, s_x: float) -> None:
+        """
+        установить масштаб по Х
+        """
         if s_x == 0:
             return
         scl = self.sx
         self.__transform_m.m00 *= s_x / scl
         self.__transform_m.m10 *= s_x / scl
 
-    # установить масштаб по Y
     @sy.setter
     def sy(self, s_y: float) -> None:
+        """
+        установить масштаб по Y
+        """
         if s_y == 0:
             return
         scl = self.sy
@@ -143,8 +151,10 @@ class Transform2:
         self.scale = scl
         self.origin = orig
 
-    # переводит вектор в собственное пространство координат
     def transform_vect(self, vec: Vec2, w: float = 1.0) -> Vec2:
+        """
+        # переводит вектор в собственное пространство координат =)
+        """
         if w == 0:
             return Vec2(self.__transform_m.m00 * vec.x + self.__transform_m.m01 * vec.y,
                         self.__transform_m.m10 * vec.x + self.__transform_m.m11 * vec.y)
@@ -152,13 +162,17 @@ class Transform2:
         return Vec2(self.__transform_m.m00 * vec.x + self.__transform_m.m01 * vec.y + self.__transform_m.m02,
                     self.__transform_m.m10 * vec.x + self.__transform_m.m11 * vec.y + self.__transform_m.m12)
 
-    # не переводит вектор в собственное пространство координат =)
     def inv_transform_vect(self, vec: Vec2, w: float = 1.0) -> Vec2:
+        """
+        # не переводит вектор в собственное пространство координат =)
+        """
         scl: Vec2 = self.scale
+        scl.x = 1.0 / (scl.x * scl.x)
+        scl.y = 1.0 / (scl.y * scl.y)
         if w == 0:
-            return Vec2((self.__transform_m.m00 * vec.x + self.__transform_m.m10 * vec.y) / scl.x / scl.x,
-                        (self.__transform_m.m01 * vec.x + self.__transform_m.m11 * vec.y) / scl.y / scl.y)
+            return Vec2((self.__transform_m.m00 * vec.x + self.__transform_m.m10 * vec.y) * scl.x,
+                        (self.__transform_m.m01 * vec.x + self.__transform_m.m11 * vec.y) * scl.y)
 
         vec_ = Vec2(vec.x - self.x, vec.y - self.y)
-        return Vec2((self.__transform_m.m00 * vec_.x + self.__transform_m.m10 * vec_.y) / scl.x / scl.x,
-                    (self.__transform_m.m01 * vec_.x + self.__transform_m.m11 * vec_.y) / scl.y / scl.y)
+        return Vec2((self.__transform_m.m00 * vec_.x + self.__transform_m.m10 * vec_.y) * scl.x,
+                    (self.__transform_m.m01 * vec_.x + self.__transform_m.m11 * vec_.y) * scl.y)

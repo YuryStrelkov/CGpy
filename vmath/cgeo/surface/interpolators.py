@@ -40,7 +40,7 @@ def bi_linear_interp_pt(x: float, y: float, points: np.ndarray, width: float = 1
     if points.ndim != 2:
         raise RuntimeError("bi_linear_interp_pt :: points array has to be 2 dimensional")
 
-    rows, cols = points.shape[0], points.shape[0]
+    rows, cols = points.shape[0], points.shape[1]
 
     x = clamp(x, 0.0, width)
 
@@ -90,7 +90,7 @@ def bi_linear_interp(x: np.ndarray, y: np.ndarray, points: np.ndarray,
     if points.ndim != 2:
         raise RuntimeError("bi_linear_interp_pt :: points array has to be 2 dimensional")
 
-    rows, cols = points.shape[0], points.shape[0]
+    rows, cols = points.shape[0], points.shape[1]
 
     result = np.zeros((y.size, x.size,), dtype=float)
 
@@ -233,7 +233,7 @@ def __bi_qubic_interp_pt(x: float, y: float, points: np.ndarray, points_dx: np.n
     :param height: высота области интеполяции
     :return:
     """
-    rows, cols = points.shape[0], points.shape[0]
+    rows, cols = points.shape[0], points.shape[1]
 
     x = clamp(x, 0.0, width)
 
@@ -296,7 +296,7 @@ def bi_qubic_interp_pt(x: float, y: float, points: np.ndarray, width: float = 1.
     if points.ndim != 2:
         raise RuntimeError("bi_linear_interp_pt :: points array has to be 2 dimensional")
 
-    rows, cols = points.shape[0], points.shape[0]
+    rows, cols = points.shape[0], points.shape[1]
 
     x = clamp(x, 0.0, width)
 

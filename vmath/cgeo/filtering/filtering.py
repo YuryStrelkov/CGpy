@@ -46,7 +46,7 @@ class RealTimeFilter:
             self.__window_size = 1 + math.fabs(val)
             self.__window_values = CircBuffer(self.window_size)
             return
-        self.__window_size = math.fabs(val)
+        self.__window_size = int(math.fabs(val))
         self.__window_values = CircBuffer(self.window_size)
 
     @property
@@ -124,14 +124,14 @@ class RealTimeFilter:
 
         try:
             if "k_arg" in settings_file:
-                self.k_arg = int(settings_file["k_arg"])
+                self.k_arg = float(settings_file["k_arg"])
         except RuntimeWarning as _ex:
             print(f"Real time filter settings read error :: incorrect k_arg {settings_file['k_arg']}")
             self.k_arg = 0.09
 
         try:
             if "kalman_error" in settings_file:
-                self.kalman_error = int(settings_file["kalman_error"])
+                self.kalman_error = float(settings_file["kalman_error"])
         except RuntimeWarning as _ex:
             print(f"Real time filter settings read error :: incorrect kalman_error {settings_file['kalman_error']}")
             self.kalman_error = 0.8

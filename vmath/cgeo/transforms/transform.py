@@ -267,9 +267,12 @@ class Transform:
 
     def rotation_mat(self) -> Mat4:
         scl = self.scale
-        return Mat4(self.__transform_m.m00 / scl.x, self.__transform_m.m01 / scl.y, self.__transform_m.m02 / scl.z, 0,
-                    self.__transform_m.m10 / scl.x, self.__transform_m.m11 / scl.y, self.__transform_m.m12 / scl.z, 0,
-                    self.__transform_m.m20 / scl.x, self.__transform_m.m21 / scl.y, self.__transform_m.m22 / scl.z, 0,
+        scl.x = 1.0 / scl.x
+        scl.y = 1.0 / scl.y
+        scl.z = 1.0 / scl.z
+        return Mat4(self.__transform_m.m00 * scl.x, self.__transform_m.m01 * scl.y, self.__transform_m.m02 * scl.z, 0,
+                    self.__transform_m.m10 * scl.x, self.__transform_m.m11 * scl.y, self.__transform_m.m12 * scl.z, 0,
+                    self.__transform_m.m20 * scl.x, self.__transform_m.m21 * scl.y, self.__transform_m.m22 * scl.z, 0,
                     0, 0, 0, 1)
 
     def look_at(self, target: Vec3, eye: Vec3, up: Vec3 = Vec3(0, 1, 0)) -> None:
@@ -300,12 +303,15 @@ class Transform:
         :return:
         """
         scl: Vec3 = self.scale
+        scl.x = 1.0 / (scl.x * scl.x)
+        scl.y = 1.0 / (scl.y * scl.y)
+        scl.z = 1.0 / (scl.z * scl.z)
         if w == 0:
-            return Vec3((self.__transform_m.m00 * vec.x + self.__transform_m.m10 * vec.y + self.__transform_m.m20 * vec.z) / scl.x / scl.x,
-                        (self.__transform_m.m01 * vec.x + self.__transform_m.m11 * vec.y + self.__transform_m.m21 * vec.z) / scl.y / scl.y,
-                        (self.__transform_m.m02 * vec.x + self.__transform_m.m12 * vec.y + self.__transform_m.m22 * vec.z) / scl.z / scl.z)
+            return Vec3((self.__transform_m.m00 * vec.x + self.__transform_m.m10 * vec.y + self.__transform_m.m20 * vec.z) * scl.x,
+                        (self.__transform_m.m01 * vec.x + self.__transform_m.m11 * vec.y + self.__transform_m.m21 * vec.z) * scl.y,
+                        (self.__transform_m.m02 * vec.x + self.__transform_m.m12 * vec.y + self.__transform_m.m22 * vec.z) * scl.z)
 
         vec_ = Vec3(vec.x - self.x, vec.y - self.y, vec.z - self.z)
-        return Vec3((self.__transform_m.m00 * vec_.x + self.__transform_m.m10 * vec_.y + self.__transform_m.m20 * vec_.z) / scl.x / scl.x,
-                    (self.__transform_m.m01 * vec_.x + self.__transform_m.m11 * vec_.y + self.__transform_m.m21 * vec_.z) / scl.y / scl.y,
-                    (self.__transform_m.m02 * vec_.x + self.__transform_m.m12 * vec_.y + self.__transform_m.m22 * vec_.z) / scl.z / scl.z)
+        return Vec3((self.__transform_m.m00 * vec_.x + self.__transform_m.m10 * vec_.y + self.__transform_m.m20 * vec_.z) * scl.x,
+                    (self.__transform_m.m01 * vec_.x + self.__transform_m.m11 * vec_.y + self.__transform_m.m21 * vec_.z) * scl.y,
+                    (self.__transform_m.m02 * vec_.x + self.__transform_m.m12 * vec_.y + self.__transform_m.m22 * vec_.z) * scl.z)

@@ -22,7 +22,7 @@ setup(
     long_description_content_type="text/markdown",
     long_description=long_description,
     packages=find_packages(),
-    install_requires=['numpy'],
+    install_requires=['numpy', 'pillow'],
     keywords=['python', 'geometry', 'vector 2d', 'vector 3d', 'matrix 3x3', 'matrix 4x4',
               'quaternion', 'bezier curve 2d', 'bezier curve 3d', 'bezier patch',
               'quads marching', 'bounding box', 'bounding rect', 'transform 2d', 'transform 3d'],
