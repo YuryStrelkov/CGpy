@@ -45,6 +45,7 @@ class Transform:
         self.__transform_m.m22 = ez.z
 
         # self.eulerAngles = mathUtils.rot_m_to_euler_angles(self.rotation_mat())
+
     @property
     def unique_id(self) -> int:
         return id(self)

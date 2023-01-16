@@ -49,12 +49,20 @@ class Transform2:
         self.__transform_m.m12 = m.m12
 
     @property
+    def axis_x(self) -> Vec2:
+        return Vec2(self.__transform_m.m00, self.__transform_m.m10)
+
+    @property
+    def axis_y(self) -> Vec2:
+        return Vec2(self.__transform_m.m01, self.__transform_m.m11)
+
+    @property
     def front(self) -> Vec2:
-        return Vec2(self.__transform_m.m00, self.__transform_m.m10).normalize()
+        return self.axis_x.normalize()
 
     @property
     def up(self) -> Vec2:
-        return Vec2(self.__transform_m.m01, self.__transform_m.m11).normalize()
+        return self.axis_y.normalize()
 
     @property
     def scale(self) -> Vec2:

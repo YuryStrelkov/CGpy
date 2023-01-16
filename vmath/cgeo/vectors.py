@@ -185,6 +185,18 @@ class Vec2:
     def y(self, y: float): self.__xy[1] = y
 
     @property
+    def u(self) -> float: return self.__xy[0]
+
+    @property
+    def v(self) -> float: return self.__xy[1]
+
+    @u.setter
+    def u(self, x: float): self.__xy[0] = x
+
+    @v.setter
+    def v(self, y: float): self.__xy[1] = y
+
+    @property
     def magnitude_sqr(self) -> float:
         return self.__xy[0] * self.__xy[0] + self.__xy[1] * self.__xy[1]
 
@@ -398,6 +410,24 @@ class Vec3:
 
     @z.setter
     def z(self, z: float): self.__xyz[2] = z
+
+    @property
+    def u(self) -> float: return self.__xyz[0]
+
+    @property
+    def v(self) -> float: return self.__xyz[1]
+
+    @property
+    def w(self) -> float: return self.__xyz[2]
+
+    @u.setter
+    def u(self, x: float): self.__xyz[0] = x
+
+    @v.setter
+    def v(self, y: float): self.__xyz[1] = y
+
+    @w.setter
+    def w(self, z: float): self.__xyz[2] = z
 
     @property
     def magnitude_sqr(self) -> float:

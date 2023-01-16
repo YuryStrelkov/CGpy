@@ -1,3 +1,5 @@
+import matplotlib.pyplot as plt
+
 from cgeo.transforms.transform2 import Transform2
 from cgeo.images.rgba import RGBA
 from cgeo.vectors import Vec2
@@ -184,9 +186,13 @@ class Texture:
     """
     def __init__(self, _w: int = 3, _h: int = 3, _bpp: int = 4,
                  color: RGBA = RGBA(125, 135, 145)):
-        self.__interp_mode: int = 1
+        self.__interp_mode: int = 0
         self.__source_file: str = ""
         self.__transform: Transform2 = Transform2()
+        self.__transform.x  = 0.5
+        self.__transform.y  = 0.5
+        self.__transform.sx = 0.5
+        self.__transform.sy = 0.5
         # self.__transform.origin = Vec2(0.10, 0.20)
         self.__colors = np.zeros(_w * _h * _bpp, dtype=np.uint8)
         self.__width = _w
@@ -246,6 +252,10 @@ class Texture:
         return res
 
     @property
+    def transform(self) -> Transform2:
+        return self.__transform
+
+    @property
     def pixel_data(self) -> np.ndarray:
         return self.__colors
 
@@ -270,10 +280,10 @@ class Texture:
                 for pix_id, pix in enumerate(data.flat):
                     if pix_id == self.texture_byte_size:
                         break
-                    self.__colors[pix_id * 3]     = (pix &       255)
-                    self.__colors[pix_id * 3 + 1] = (pix &      65280) >> 8
-                    self.__colors[pix_id * 3 + 1] = (pix &   16711680) >> 16
-                    self.__colors[pix_id * 4 + 1] = (pix & 4278190080) >> 24
+                    self.__colors[pix_id * 3]     = (pix & 0x000F)
+                    self.__colors[pix_id * 3 + 1] = (pix & 0x00F0) >> 8
+                    self.__colors[pix_id * 3 + 2] = (pix & 0x0F00) >> 16
+                    self.__colors[pix_id * 4 + 3] = (pix & 0xF000) >> 24
                 return
 
         if data.ndim == 3:
@@ -364,11 +374,11 @@ class Texture:
 
     @property
     def tile(self) -> Vec2:
-        return self.__transform.scale
+        return self.transform.scale
 
     @property
     def offset(self) -> Vec2:
-        return self.__transform.origin
+        return self.transform.origin
 
     @property
     def texture_byte_size(self) -> int:
@@ -376,19 +386,19 @@ class Texture:
 
     @property
     def rotation(self) -> float:
-        return self.__transform.az
+        return self.transform.az
 
     @tile.setter
     def tile(self, xy: Vec2):
-        self.__transform.scale = xy
+        self.transform.scale = xy
 
     @offset.setter
     def offset(self, xy: Vec2):
-        self.__transform.origin = xy
+        self.transform.origin = xy
 
     @rotation.setter
     def rotation(self, angle: float):
-        self.__transform.az = gutils.deg_to_rad(angle)
+        self.transform.az = gutils.deg_to_rad(angle)
 
     @property
     def image_data(self) -> Image:
@@ -412,16 +422,20 @@ class Texture:
             return
         self.__interp_mode = mode
 
+    @property
+    def duv(self) -> Vec2:
+        return Vec2(2.0 / (self.height - 1), 2.0 / (self.width - 1))
+
     def load(self, origin: str) -> None:
         if not (self.__colors is None):
             del self.__colors
             self.__width = -1
             self.__bpp = 0
         self.__source_file = origin
-        image = Image.open(self.__source_file)
-        self.__width = image.size[0]
-        self.__colors: np.ndarray = np.asarray(image, dtype=np.uint8).ravel()
-        self.__bpp = self.pixel_data.size // image.height // image.width
+        image         = Image.open(self.__source_file)
+        self.__width  = image.size[0]
+        self.__colors = np.asarray(image, dtype=np.uint8).ravel()
+        self.__bpp    = self.pixel_data.size // image.height // image.width
 
     def set_color(self, row: int, col: int, color: RGBA) -> None:
         pix = row * self.width + col
@@ -442,7 +456,7 @@ class Texture:
         """
         uv:: uv.x in range[0,1], uv.y in range[0,1]
         """
-        uv_ = self.__transform.inv_transform_vect(uv)
+        uv_ = self.transform.inv_transform_vect(uv)
         self.set_color(int(uv_.y * self.height), int(uv_.x * self.width), color)
 
     # uv:: uv.x in range[0,1], uv.y in range[0,1]
@@ -450,15 +464,15 @@ class Texture:
         """
         uv:: uv.x in range[0,1], uv.y in range[0,1]
         """
-        uv_ = self.__transform.inv_transform_vect(uv)
+        uv_ = self.transform.transform_vect(uv)
 
         if self.interp_mode == 1:
-            return RGBA(*_bi_linear_interp_pt(uv_.y, uv_.x, self.pixel_data, self.height, self.width, self.bpp))
+            return RGBA(*_bi_linear_interp_pt(uv_.v, uv_.u, self.pixel_data, self.height, self.width, self.bpp))
 
         if self.interp_mode == 2:
-            return RGBA(*_bi_linear_interp_pt(uv_.y, uv_.x, self.pixel_data, self.height, self.width, self.bpp))
+            return RGBA(*_bi_linear_interp_pt(uv_.v, uv_.u, self.pixel_data, self.height, self.width, self.bpp))
 
-        return RGBA(*_nearest_interp_pt(uv_.y, uv_.x, self.pixel_data, self.height, self.width, self.bpp))
+        return RGBA(*_nearest_interp_pt(uv_.v, uv_.u, self.pixel_data, self.height, self.width, self.bpp))
 
     def show(self) -> None:
         self.image_data.show()
@@ -486,25 +500,46 @@ def tex_rot(image: Texture, angele: float) -> Texture:
     t_rot = Texture(image.width, image.height, image.bpp)
     old_ang = image.rotation
     image.rotation = angele
-    # image.tile = Vec2(0.75, 0.75)
     row: int
     col: int
     uv  = Vec2(0.0, 0.0)
-    duv = Vec2(1.0 / (image.width - 1), 1.0 / (image.height - 1))
-    aspect = 1.0 / image.aspect
+    duv = image.duv
     for pix in range(image.texture_pixels_size):
-        row = pix // image.width
-        col = pix  % image.width
-        uv.y = col * duv.x + 0.25
-        uv.x = row * duv.y - 0.25
+        row  = pix // image.width
+        col  = pix  % image.width
+        uv.u = row * duv.u - 1.0
+        uv.v = col * duv.v - 1.0
         t_rot.set_color(row, col, image.get_color_uv(uv))
     image.rotation = old_ang
     return t_rot
 
 
 if __name__ == "__main__":
-    texture = Texture()
-    texture.load("test.jpg")
+    rows = 10
+    cols = 25
+    d_col = 2.0 / (cols - 1)
+    d_row = 2.0 / (rows - 1)
+    n_points = rows * cols
+    transform = Transform2()
+    transform.sy = 2
+    transform.x = 0.5
+    transform.y = 0.5
+    transform.sx = 0.5
+    transform.sy = 0.5
+    xy_ = [Vec2(-1.0 + (i % cols) * d_col, -1.0 + (i // cols) * d_row) for i in range(n_points)]
+    xy = [transform.transform_vect(v) for v in xy_]
+    transform.az = np.pi / 4.0
+    transform.sy = 1.5
+
+    xyt = [transform.transform_vect(v) for v in xy_]
+    fig, axs = plt.subplots(1, 1)
+    [axs.plot(v.x, v.y, '.r') for v in xy]
+    [axs.plot(v.x, v.y, '.g') for v in xyt]
+    axs.set_aspect('equal', 'box')
+    plt.show()
+
+    #texture = Texture()
+    #texture.load("test.jpg")
     # texture.show()
-    texture_r = tex_rot(texture, 45.0)
-    texture_r.show()
+    #texture_r = tex_rot(texture, 30.0)
+    #texture_r.show()
