@@ -1,5 +1,3 @@
-import matplotlib.pyplot as plt
-
 from cgeo.transforms.transform2 import Transform2
 from cgeo.images.rgba import RGBA
 from cgeo.vectors import Vec2
@@ -7,6 +5,7 @@ from typing import Tuple
 from cgeo import gutils
 from PIL import Image
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 _bicubic_poly_coefficients = (1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
@@ -189,15 +188,17 @@ class Texture:
         self.__interp_mode: int = 0
         self.__source_file: str = ""
         self.__transform: Transform2 = Transform2()
-        self.__transform.x  = 0.5
-        self.__transform.y  = 0.5
-        self.__transform.sx = 0.5
-        self.__transform.sy = 0.5
-        # self.__transform.origin = Vec2(0.10, 0.20)
         self.__colors = np.zeros(_w * _h * _bpp, dtype=np.uint8)
         self.__width = _w
         self.__bpp   = _bpp
         self.clear_color(color)
+        self._reset_transform()
+
+    def _reset_transform(self) -> None:
+        self.__transform.sy = 0.5
+        self.__transform.sx = 0.5  # * self.aspect
+        self.__transform.x  = 0.5   # self.__transform.sx
+        self.__transform.y  = 0.5
 
     def __getitem__(self, index: int):
         if index < 0 or index >= self.texture_pixels_size:
@@ -424,7 +425,7 @@ class Texture:
 
     @property
     def duv(self) -> Vec2:
-        return Vec2(2.0 / (self.height - 1), 2.0 / (self.width - 1))
+        return Vec2(1.0 / (self.height - 1), 1.0 / (self.width - 1))
 
     def load(self, origin: str) -> None:
         if not (self.__colors is None):
@@ -436,6 +437,7 @@ class Texture:
         self.__width  = image.size[0]
         self.__colors = np.asarray(image, dtype=np.uint8).ravel()
         self.__bpp    = self.pixel_data.size // image.height // image.width
+        self._reset_transform()
 
     def set_color(self, row: int, col: int, color: RGBA) -> None:
         pix = row * self.width + col
@@ -457,22 +459,26 @@ class Texture:
         uv:: uv.x in range[0,1], uv.y in range[0,1]
         """
         uv_ = self.transform.inv_transform_vect(uv)
-        self.set_color(int(uv_.y * self.height), int(uv_.x * self.width), color)
+        self.set_color(int(uv_.u * self.height), int(uv_.v * self.width), color)
 
     # uv:: uv.x in range[0,1], uv.y in range[0,1]
-    def get_color_uv(self, uv: Vec2) -> RGBA:
+    def get_color_uv(self, uv_: Vec2) -> RGBA:
         """
-        uv:: uv.x in range[0,1], uv.y in range[0,1]
+        uv:: uv.x in range[-1,1], uv.y in range[-1,1]
         """
-        uv_ = self.transform.transform_vect(uv)
+        uv_.x *= 2.0
+        uv_.x -= 1.0
+        uv_.y *= 2.0
+        uv_.y -= 1.0
+        uv = self.transform.transform_vect(uv_)
 
         if self.interp_mode == 1:
-            return RGBA(*_bi_linear_interp_pt(uv_.v, uv_.u, self.pixel_data, self.height, self.width, self.bpp))
+            return RGBA(*_bi_linear_interp_pt(uv.u, uv.v, self.pixel_data, self.height, self.width, self.bpp))
 
         if self.interp_mode == 2:
-            return RGBA(*_bi_linear_interp_pt(uv_.v, uv_.u, self.pixel_data, self.height, self.width, self.bpp))
+            return RGBA(*_bi_linear_interp_pt(uv.u, uv.v, self.pixel_data, self.height, self.width, self.bpp))
 
-        return RGBA(*_nearest_interp_pt(uv_.v, uv_.u, self.pixel_data, self.height, self.width, self.bpp))
+        return RGBA(*_nearest_interp_pt(uv.u, uv.v, self.pixel_data, self.height, self.width, self.bpp))
 
     def show(self) -> None:
         self.image_data.show()
@@ -505,10 +511,10 @@ def tex_rot(image: Texture, angele: float) -> Texture:
     uv  = Vec2(0.0, 0.0)
     duv = image.duv
     for pix in range(image.texture_pixels_size):
-        row  = pix // image.width
-        col  = pix  % image.width
-        uv.u = row * duv.u - 1.0
-        uv.v = col * duv.v - 1.0
+        row = pix // image.width
+        col = pix  % image.width
+        uv.u = row * duv.u
+        uv.v = col * duv.v
         t_rot.set_color(row, col, image.get_color_uv(uv))
     image.rotation = old_ang
     return t_rot
@@ -537,9 +543,12 @@ if __name__ == "__main__":
     [axs.plot(v.x, v.y, '.g') for v in xyt]
     axs.set_aspect('equal', 'box')
     plt.show()
-
-    #texture = Texture()
-    #texture.load("test.jpg")
-    # texture.show()
-    #texture_r = tex_rot(texture, 30.0)
-    #texture_r.show()
+    """
+     """
+    texture = Texture()
+    texture.load("iceland.jpg")
+    #texture.load("right.png")
+    print(texture)
+    # texture.tile = Vec2(1.0, 1.0)
+    texture_r = tex_rot(texture, 45.0)
+    texture_r.show()
