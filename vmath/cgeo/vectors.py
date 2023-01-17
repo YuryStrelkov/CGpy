@@ -4,6 +4,15 @@ import ctypes
 import math
 
 
+def _smooth_step(value: float, bound_1: float, bound_2: float) -> float:
+    if value <= bound_1:
+        return bound_1
+    if value >= bound_2:
+        return bound_2
+    x = (value - bound_1) / (bound_2 - bound_1)
+    return x * x * (3 - 2 * x)
+
+
 class Vec2:
 
     @staticmethod
@@ -129,6 +138,11 @@ class Vec2:
         self.__xy[index] = value
 
     @staticmethod
+    def smooth_step(t: float, a, b):
+        return Vec2(_smooth_step(t, a.x, b.x),
+                    _smooth_step(t, a.y, b.y))
+
+    @staticmethod
     def dot(a, b) -> float:
         return a.x * b.x + a.y * b.y
 
@@ -185,16 +199,16 @@ class Vec2:
     def y(self, y: float): self.__xy[1] = y
 
     @property
-    def u(self) -> float: return self.__xy[0]
+    def u(self) -> float: return self.__xy[1]
 
     @property
-    def v(self) -> float: return self.__xy[1]
+    def v(self) -> float: return self.__xy[0]
 
     @u.setter
-    def u(self, x: float): self.__xy[0] = x
+    def u(self, y: float): self.__xy[1] = y
 
     @v.setter
-    def v(self, y: float): self.__xy[1] = y
+    def v(self, x: float): self.__xy[0] = x
 
     @property
     def magnitude_sqr(self) -> float:
@@ -354,6 +368,12 @@ class Vec3:
         self.__xyz[index] = value
 
     @staticmethod
+    def smooth_step(t: float, a, b):
+        return Vec3(_smooth_step(t, a.x, b.x),
+                    _smooth_step(t, a.y, b.y),
+                    _smooth_step(t, a.z, b.z))
+
+    @staticmethod
     def dot(a, b) -> float:
         return a.x * b.x + a.y * b.y + a.z * b.z
 
@@ -412,19 +432,19 @@ class Vec3:
     def z(self, z: float): self.__xyz[2] = z
 
     @property
-    def u(self) -> float: return self.__xyz[0]
+    def u(self) -> float: return self.__xyz[1]
 
     @property
-    def v(self) -> float: return self.__xyz[1]
+    def v(self) -> float: return self.__xyz[0]
 
     @property
     def w(self) -> float: return self.__xyz[2]
 
     @u.setter
-    def u(self, x: float): self.__xyz[0] = x
+    def u(self, x: float): self.__xyz[1] = x
 
     @v.setter
-    def v(self, y: float): self.__xyz[1] = y
+    def v(self, y: float): self.__xyz[0] = y
 
     @w.setter
     def w(self, z: float): self.__xyz[2] = z

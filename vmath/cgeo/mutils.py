@@ -11,6 +11,32 @@ numerical_precision: float = 1e-9
 Vector2 = Tuple[float, float]
 
 
+def smooth_step(value: float, bound_1: float, bound_2: float) -> float:
+    if value <= bound_1:
+        return bound_1
+    if value >= bound_2:
+        return bound_2
+    x = (value - bound_1) / (bound_2 - bound_1)
+    return x * x * (3 - 2 * x)
+
+
+
+"""
+
+def softmax(z):
+    z -= np.max(z)
+    return np.exp(z) / np.sum(np.exp(z))
+    
+def soft_max(value1: float, value1: float) -> float:
+    if value <= bound_1:
+        return bound_1
+    if value >= bound_2:
+        return bound_2
+    x = (value - bound_1) / (bound_2 - bound_1)
+    return x * x * (3 - 2 * x)
+"""
+
+
 def list_min(values: list) -> Tuple[int, Any]:
     return min(enumerate(values), key=operator.itemgetter(1))
 

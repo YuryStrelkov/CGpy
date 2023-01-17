@@ -17,7 +17,7 @@ class Transform2:
                    f"\t\"origin\"      :{self.origin},\n" \
                    f"\t\"scale\"       :{self.scale},\n" \
                    f"\t\"rotate\"      :{self.az / math.pi * 180},\n" \
-                   f"\t\"transform_m\" :\n{self.__transform_m}\n}}"
+                   f"\t\"transform_m\" :\n{self.__transform_m}}}"
 
     def __eq__(self, other) -> bool:
         if not isinstance(other, Transform2):

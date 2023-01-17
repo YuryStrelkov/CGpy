@@ -2,6 +2,15 @@ from typing import List, Tuple
 import numpy as np
 
 
+def _smooth_step(value: float, bound_1: float, bound_2: float) -> float:
+    if value <= bound_1:
+        return bound_1
+    if value >= bound_2:
+        return bound_2
+    x = (value - bound_1) / (bound_2 - bound_1)
+    return x * x * (3 - 2 * x)
+
+
 class Mat3:
 
     @staticmethod
@@ -30,35 +39,6 @@ class Mat3:
                    0.0, 0.0, 0.0,
         raise TypeError(f'Invalid Input: {args}')
 
-    @staticmethod
-    def identity():
-        return Mat3(1.0, 0.0, 0.0,
-                    0.0, 1.0, 0.0,
-                    0.0, 0.0, 1.0)
-
-    @staticmethod
-    def zeros():
-        return Mat3(0.0, 0.0, 0.0,
-                    0.0, 0.0, 0.0,
-                    0.0, 0.0, 0.0)
-
-    @staticmethod
-    def ones():
-        return Mat3(1.0, 1.0, 1.0,
-                    1.0, 1.0, 1.0,
-                    1.0, 1.0, 1.0)
-
-    @staticmethod
-    def from_np_array(data: np.ndarray):
-        m = Mat3()
-        i: int = 0
-        for element in data.flat:
-            m[i] = element
-            i += 1
-            if i == 9:
-                break
-        return m
-
     __slots__ = "__data"
 
     def __init__(self, *args):
@@ -86,8 +66,8 @@ class Mat3:
         self.__data[index] = value
 
     def __str__(self) -> str:
-        return f"{{\n\t\"m00\": {self.m00:20}, \"m01\": {self.m01:20}, \"m02\": {self.m02:20}],\n" \
-                   f"\t\"m10\": {self.m10:20}, \"m11\": {self.m11:20}, \"m12\": {self.m12:20}],\n" \
+        return f"{{\n\t\"m00\": {self.m00:20}, \"m01\": {self.m01:20}, \"m02\": {self.m02:20},\n" \
+                   f"\t\"m10\": {self.m10:20}, \"m11\": {self.m11:20}, \"m12\": {self.m12:20},\n" \
                    f"\t\"m20\": {self.m20:20}, \"m21\": {self.m21:20}, \"m22\": {self.m22:20}\n}}\n"
 
     def __add__(self, *args):
@@ -198,6 +178,35 @@ class Mat3:
                     b[6] * self.__data[0] + b[7] * self.__data[3] + b[8] * self.__data[6],
                     b[6] * self.__data[1] + b[7] * self.__data[4] + b[8] * self.__data[7],
                     b[6] * self.__data[2] + b[7] * self.__data[5] + b[8] * self.__data[8])
+
+    @staticmethod
+    def identity():
+        return Mat3(1.0, 0.0, 0.0,
+                    0.0, 1.0, 0.0,
+                    0.0, 0.0, 1.0)
+
+    @staticmethod
+    def zeros():
+        return Mat3(0.0, 0.0, 0.0,
+                    0.0, 0.0, 0.0,
+                    0.0, 0.0, 0.0)
+
+    @staticmethod
+    def ones():
+        return Mat3(1.0, 1.0, 1.0,
+                    1.0, 1.0, 1.0,
+                    1.0, 1.0, 1.0)
+
+    @staticmethod
+    def from_np_array(data: np.ndarray):
+        m = Mat3()
+        i: int = 0
+        for element in data.flat:
+            m[i] = element
+            i += 1
+            if i == 9:
+                break
+        return m
 
     @property
     def unique_id(self) -> int:

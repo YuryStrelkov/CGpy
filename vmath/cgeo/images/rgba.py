@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, List
 
 _r_shift = 0
 _g_shift = 8
@@ -222,6 +222,14 @@ class RGBA:
     @alpha.setter
     def alpha(self, val: int) -> None:
         self._rgba = _set_alpha(self._rgba, val)
+
+    @property
+    def as_tuple(self) -> Tuple[int, int, int, int]:
+        return self.red, self.green, self.blue, self.alpha
+
+    @property
+    def as_list(self) -> List[int]:
+        return [self.red, self.green, self.blue, self.alpha]
 
     def to_hex_rgb(self) -> str:
         return ''.join('{:02X}'.format(max(min(a, 255), 0)) for a in (self.red, self.green, self.blue))
