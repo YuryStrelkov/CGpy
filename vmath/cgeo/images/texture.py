@@ -582,7 +582,7 @@ if __name__ == "__main__":
     # transform_test()
     # exit()
     texture = Texture()
-    texture.load("test.jpg")
+    texture.load("iceland.png")
     texture.interp_mode = 1
     print(texture)
     texture_r = Texture.rotate(texture, 45)
