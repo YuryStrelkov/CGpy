@@ -1,11 +1,12 @@
 import math
+import time
 
 from cgeo.transforms.transform2 import Transform2
 from cgeo.images.rgba import RGBA
 import matplotlib.pyplot as plt
 from cgeo.vectors import Vec2
 from typing import Tuple
-from cgeo import gutils
+from cgeo import gutils, mutils, LoopTimer
 from PIL import Image
 import numpy as np
 import numba
@@ -32,6 +33,8 @@ _zero = np.uint8(0)
 
 _red = (np.uint8(100), _zero, _zero, _zero)
 
+_black = (_zero, _zero, _zero, _zero)
+
 
 @numba.njit(fastmath=True)
 def _nearest_interp_pt(x: float, y: float, points: np.ndarray, rows: int, cols: int, bpp: int) -> \
@@ -47,14 +50,14 @@ def _nearest_interp_pt(x: float, y: float, points: np.ndarray, rows: int, cols: 
     :return:
     """
     if x < 0:
-        return _red  # 100, 0, 0, 0
+        return _black  # 100, 0, 0, 0
     if x > 1.0:
-        return _red  # 100, 0, 0, 0
+        return _black  # 100, 0, 0, 0
 
     if y < 0:
-        return _red  # 100, 0, 0, 0
+        return _black  # 100, 0, 0, 0
     if y > 1.0:
-        return _red  # 100, 0, 0, 0
+        return _black  # 100, 0, 0, 0
 
     col_ = int(x * (cols - 1))
     row_ = int(y * (rows - 1))
@@ -100,14 +103,14 @@ def _bi_lin_interp_pt(x: float, y: float, points: np.ndarray, rows: int, cols: i
     :return:
     """
     if x < 0:
-        return _red
+        return _black
     if x > 1.0:
-        return _red
+        return _black
 
     if y < 0:
-        return _red
+        return _black
     if y > 1.0:
-        return _red
+        return _black
 
     col_ = int(x * (cols - 1))
     row_ = int(y * (rows - 1))
@@ -511,26 +514,21 @@ class Texture:
     def clear_color(self, color: RGBA = RGBA(125, 135, 145)) -> None:
         if self.bytes_count == 0:
             return
-
         rgb = (0,)
-
         if self.bpp == 1:
             rgb = (color.red,)
-
         if self.bpp == 3:
             rgb = (color.red, color.green, color.blue)
-
         if self.bpp == 4:
             rgb = (color.red, color.green, color.blue, color.alpha)
-
         for i in range(self.bytes_count):
             self.__colors[i] = rgb[i % self.bpp]
 
-    @staticmethod
-    def rotate(image, angele: float):
-        if not isinstance(image, Texture):
+    @classmethod
+    def rotate(cls, image, angele: float, expand: bool = False):
+        if not isinstance(image, cls):
             raise RuntimeError("")
-        t_rot = Texture(image.width, image.height, image.bpp)
+        t_rot = cls(image.width, image.height, image.bpp)
         old_ang = image.rotation
         image.rotation = angele
         row: int
@@ -538,20 +536,34 @@ class Texture:
         uv  = Vec2(0.0, 0.0)
         duv = image.duv
         for pix in range(image.pixels_count):
-            row  = pix // image.width
-            col  = pix  % image.width
+            row, col = divmod(pix, image.width)
             uv.u, uv.v = 2.0 * row * duv.u - 1.0, (2.0 * col * duv.v - 1.0)
             t_rot.set_color_raw(row, col, image.get_color_uv_raw(uv))
         image.rotation = old_ang
         return t_rot
 
-    @staticmethod
-    def scale(image, sx: float, sy: float):
-        pass
+    @classmethod
+    def scale(cls, image, sx: float, sy: float):
+        if not isinstance(image, cls):
+            raise RuntimeError("")
+        uv  = Vec2(0.0, 0.0)
+        sx = mutils.clamp(sx, 0.001, 10)
+        sy = mutils.clamp(sy, 0.001, 10)
+        image_scaled = cls(int(image.width * sx), int(image.height * sy), image.bpp)
+        duv = image_scaled.duv
+        for pix in range(image_scaled.pixels_count):
+            row, col = divmod(pix, image_scaled.width)
+            uv.u, uv.v = 2.0 * row * duv.u - 1.0, 2.0 * col * duv.v - 1.0
+            image_scaled.set_color_raw(row, col, image.get_color_uv_raw(uv))
+        return image_scaled
 
-    @staticmethod
-    def crop(image, bound_min: Tuple[int, int], bound_max: Tuple[int, int]):
+    """
+    @classmethod
+    def crop(cls, image, bound_min: Tuple[int, int], bound_max: Tuple[int, int]):
+        if not isinstance(image, cls):
+            raise RuntimeError("")
         pass
+    """
 
 
 def transform_test():
@@ -579,11 +591,23 @@ def transform_test():
 
 
 if __name__ == "__main__":
+    loop_timer = LoopTimer()
+
     # transform_test()
     # exit()
-    texture = Texture()
-    texture.load("iceland.png")
+    with loop_timer:
+        texture = Texture()
+    print(f"texture = Texture() time: {loop_timer.last_loop_time}")
+    with loop_timer:
+        texture.load("test_images\iceland.png")
+    print(f"texture.load() time: {loop_timer.last_loop_time}")
     texture.interp_mode = 1
-    print(texture)
-    texture_r = Texture.rotate(texture, 45)
+    #print(texture)
+    with loop_timer:
+        texture_r = Texture.rotate(texture, 30)
+    print(f"texture_r = Texture.rotate() time: {loop_timer.last_loop_time}")
+    texture_r.show()
+    with loop_timer:
+        texture_r = Texture.rotate(texture_r, -30)
+    print(f"texture_r = Texture.rotate() time: {loop_timer.last_loop_time}")
     texture_r.show()

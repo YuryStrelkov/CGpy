@@ -138,9 +138,9 @@ class RGBA:
     def __add__(self, *args):
         add_color = RGBA._unpack_args(args)
         new_color = self.copy()
-        new_color._rgba = create_color_rgba(self.red + _red(add_color),
+        new_color._rgba = create_color_rgba(self.red   + _red(add_color),
                                             self.green + _green(add_color),
-                                            self.blue + _blue(add_color),
+                                            self.blue  + _blue(add_color),
                                             self.alpha + _alpha(add_color))
         return new_color
 
@@ -148,35 +148,35 @@ class RGBA:
 
     def __isub__(self, *args):
         color = RGBA._unpack_args(args)
-        self._rgba = create_color_rgba(max(self.red - _red(color), 0),
+        self._rgba = create_color_rgba(max(self.red   - _red(color), 0),
                                        max(self.green - _green(color), 0),
-                                       max(self.blue - _blue(color), 0),
+                                       max(self.blue  - _blue(color), 0),
                                        max(self.alpha - _alpha(color), 0))
         return self
 
     def __sub__(self, *args):
         add_color = RGBA._unpack_args(args)
         new_color = self.copy()
-        new_color._rgba = create_color_rgba(max(self.red - _red(add_color), 0),
+        new_color._rgba = create_color_rgba(max(self.red   - _red(add_color), 0),
                                             max(self.green - _green(add_color), 0),
-                                            max(self.blue - _blue(add_color), 0),
+                                            max(self.blue  - _blue(add_color), 0),
                                             max(self.alpha - _alpha(add_color), 0))
         return new_color
 
     def __rsub__(self, *args):
         add_color = RGBA._unpack_args(args)
         new_color = self.copy()
-        new_color._rgba = create_color_rgba(max(_red(add_color) - self.red, 0),
+        new_color._rgba = create_color_rgba(max(_red(add_color)   - self.red, 0),
                                             max(_green(add_color) - self.green, 0),
-                                            max(_blue(add_color) - self.blue, 0),
+                                            max(_blue(add_color)  - self.blue, 0),
                                             max(_alpha(add_color) - self.alpha, 0))
         return new_color
 
     def __imul__(self, *args):
         color = RGBA._unpack_args(args)
-        self._rgba = create_color_rgba(int((self.red * _red(color)) / 255.0),
+        self._rgba = create_color_rgba(int((self.red   * _red(color)) / 255.0),
                                        int((self.green * _green(color)) / 255.0),
-                                       int((self.blue * _blue(color)) / 255.0),
+                                       int((self.blue  * _blue(color)) / 255.0),
                                        int((self.alpha * _alpha(color)) / 255.0))
         return self
 

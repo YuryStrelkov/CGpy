@@ -95,9 +95,9 @@ def march_squares_2d(f_map: np.ndarray, threshold: float = 1.0, resolution: Vect
     for i in range(cols_ * rows_):
 
         state = 0
-
-        row = (i // cols_) * dy
-        col = (i % cols_) * dx
+        row, col = divmod(i, cols_)
+        row *= dy
+        col *= dx
 
         a_val = max(_bi_lin_interp(col, row, f_map), _rect_bounds(col, row, threshold))
         b_val = max(_bi_lin_interp(col + dx, row, f_map), _rect_bounds(col + dx, row, threshold))

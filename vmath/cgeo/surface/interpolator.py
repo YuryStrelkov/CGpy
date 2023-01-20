@@ -37,8 +37,7 @@ class Interpolator:
         control_points = []
 
         for i in range(_rows * _cols):
-            row = i // _cols
-            col = i % _cols
+            row, col = divmod(i, _cols)
             control_points.append(operation(interpolator_a.interpolate_point(col * _dx, row * _dy),
                                             interpolator_b.interpolate_point(col * _dx, row * _dy)))
 
@@ -176,7 +175,7 @@ class Interpolator:
         nl = ", "
 
         def points_to_srt():
-            return ',\n'.join('\t\t' + ','.join(f'{self.control_points[j, i]:.5}'
+            return ',\n'.join('\t\t' + ','.join(f'{self.control_points[j, i]:.10}'
                                                 for i in range(self.colons)) for j in range(self.rows))
         return f'{{\n' \
                f'\t\"colons\"         : {self.colons},\n' \

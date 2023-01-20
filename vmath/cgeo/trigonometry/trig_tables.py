@@ -1,4 +1,4 @@
-from typing import Callable, Tuple
+from typing import Callable, Tuple, List
 import numpy as np
 # import numba
 
@@ -104,3 +104,34 @@ INTERP_TABLES_SQ = \
 INTERP_MODE_TABLES = \
     {0: INTERP_TABLES_LIN,
      1: INTERP_TABLES_SQ}
+
+
+def print_table(table_name: str, table_values: np.ndarray, output_file):
+    print(f"static const std::vector<double> {table_name} = {{", file=output_file)
+    print(",\n".join(str(val) for val in table_values.flat), file=output_file)
+    print("};", file=output_file)
+
+
+"""
+if __name__ == "__main__":
+    with open('TrigTablesLinear.h', 'wt') as output_file:
+        print("#pragma once\n#include <vector>\nnamespace trigonometry\n{", file=output_file)
+        print_table("sin_values_lin", sin_values_lin, output_file)
+        print_table("cos_values_lin", cos_values_lin, output_file)
+        print_table("tan_values_lin", tan_values_lin, output_file)
+        print_table("a_sin_values_lin", a_sin_values_lin, output_file)
+        print_table("a_cos_values_lin", a_cos_values_lin, output_file)
+        print_table("a_tan_values_lin", a_tan_values_lin, output_file)
+        print("}", file=output_file)
+
+    with open('TrigTablesQuadratic.h', 'wt') as output_file:
+        print("#pragma once\n#include <vector>\nnamespace trigonometry\n{", file=output_file)
+        print_table("sin_values_quadratic", sin_values_sq, output_file)
+        print_table("cos_values_quadratic", cos_values_sq, output_file)
+        print_table("tan_values_quadratic", tan_values_sq, output_file)
+        print_table("a_sin_values_quadratic", a_sin_values_sq, output_file)
+        print_table("a_cos_values_quadratic", a_cos_values_sq, output_file)
+        print_table("a_tan_values_quadratic", a_tan_values_sq, output_file)
+        print("}", file=output_file)
+
+"""

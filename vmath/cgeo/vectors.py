@@ -137,10 +137,10 @@ class Vec2:
             raise IndexError(f"Vec2 :: trying to access index: {index}")
         self.__xy[index] = value
 
-    @staticmethod
-    def smooth_step(t: float, a, b):
-        return Vec2(_smooth_step(t, a.x, b.x),
-                    _smooth_step(t, a.y, b.y))
+    @classmethod
+    def smooth_step(cls, t: float, a, b):
+        return cls(_smooth_step(t, a.x, b.x),
+                   _smooth_step(t, a.y, b.y))
 
     @staticmethod
     def dot(a, b) -> float:
@@ -150,13 +150,13 @@ class Vec2:
     def cross(a, b) -> float:
         return a.y * b.x - a.x * b.y
 
-    @staticmethod
-    def max(a,  b):
-        return Vec2(max(a.x, b.x), max(a.y, b.y))
+    @classmethod
+    def max(cls, a,  b):
+        return cls(max(a.x, b.x), max(a.y, b.y))
 
-    @staticmethod
-    def min(a, b):
-        return Vec2(min(a.x, b.x), min(a.y, b.y))
+    @classmethod
+    def min(cls, a, b):
+        return cls(min(a.x, b.x), min(a.y, b.y))
 
     @staticmethod
     def reflect(n, e):
@@ -367,27 +367,27 @@ class Vec3:
             raise IndexError(f"Vec3 :: trying to access index: {index}")
         self.__xyz[index] = value
 
-    @staticmethod
-    def smooth_step(t: float, a, b):
-        return Vec3(_smooth_step(t, a.x, b.x),
-                    _smooth_step(t, a.y, b.y),
-                    _smooth_step(t, a.z, b.z))
+    @classmethod
+    def smooth_step(cls, t: float, a, b):
+        return cls(_smooth_step(t, a.x, b.x),
+                   _smooth_step(t, a.y, b.y),
+                   _smooth_step(t, a.z, b.z))
 
     @staticmethod
     def dot(a, b) -> float:
         return a.x * b.x + a.y * b.y + a.z * b.z
 
-    @staticmethod
-    def cross(a, b):
-        return Vec3(a.z * b.y - a.y * b.z, a.x * b.z - a.z * b.x, a.y * b.x - a.x * b.y)
+    @classmethod
+    def cross(cls, a, b):
+        return cls(a.z * b.y - a.y * b.z, a.x * b.z - a.z * b.x, a.y * b.x - a.x * b.y)
 
-    @staticmethod
-    def max(a, b):
-        return Vec3(max(a.x, b.x), max(a.y, b.y), max(a.z, b.z))
+    @classmethod
+    def max(cls, a, b):
+        return cls(max(a.x, b.x), max(a.y, b.y), max(a.z, b.z))
 
-    @staticmethod
-    def min(a, b):
-        return Vec3(min(a.x, b.x), min(a.y, b.y), min(a.z, b.z))
+    @classmethod
+    def min(cls, a, b):
+        return cls(min(a.x, b.x), min(a.y, b.y), min(a.z, b.z))
 
     @staticmethod
     def reflect(n, e):

@@ -494,8 +494,7 @@ def create_plane(height: float = 1.0, width: float = 1.0, rows: int = 10,
     mesh: TrisMesh = TrisMesh()
     normal: Vec3 = Vec3(0, 1, 0)
     for index in range(0, points_n):
-        col = index % cols
-        row = int(index / cols)
+        row, col = divmod(index, cols)
         x = width * ((cols - 1) * 0.5 - col) / (cols - 1.0)
         z = height * ((cols - 1) * 0.5 - row) / (cols - 1.0)
         mesh.append_vertex(Vec3(x, 0, z))

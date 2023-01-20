@@ -2,15 +2,6 @@ from typing import List, Tuple
 import numpy as np
 
 
-def _smooth_step(value: float, bound_1: float, bound_2: float) -> float:
-    if value <= bound_1:
-        return bound_1
-    if value >= bound_2:
-        return bound_2
-    x = (value - bound_1) / (bound_2 - bound_1)
-    return x * x * (3 - 2 * x)
-
-
 class Mat3:
 
     @staticmethod
@@ -179,27 +170,27 @@ class Mat3:
                     b[6] * self.__data[1] + b[7] * self.__data[4] + b[8] * self.__data[7],
                     b[6] * self.__data[2] + b[7] * self.__data[5] + b[8] * self.__data[8])
 
-    @staticmethod
-    def identity():
-        return Mat3(1.0, 0.0, 0.0,
-                    0.0, 1.0, 0.0,
-                    0.0, 0.0, 1.0)
+    @classmethod
+    def identity(cls):
+        return cls(1.0, 0.0, 0.0,
+                   0.0, 1.0, 0.0,
+                   0.0, 0.0, 1.0)
 
-    @staticmethod
-    def zeros():
-        return Mat3(0.0, 0.0, 0.0,
-                    0.0, 0.0, 0.0,
-                    0.0, 0.0, 0.0)
+    @classmethod
+    def zeros(cls):
+        return cls(0.0, 0.0, 0.0,
+                   0.0, 0.0, 0.0,
+                   0.0, 0.0, 0.0)
 
-    @staticmethod
-    def ones():
-        return Mat3(1.0, 1.0, 1.0,
-                    1.0, 1.0, 1.0,
-                    1.0, 1.0, 1.0)
+    @classmethod
+    def ones(cls):
+        return cls(1.0, 1.0, 1.0,
+                   1.0, 1.0, 1.0,
+                   1.0, 1.0, 1.0)
 
-    @staticmethod
-    def from_np_array(data: np.ndarray):
-        m = Mat3()
+    @classmethod
+    def from_np_array(cls, data: np.ndarray):
+        m = cls()
         i: int = 0
         for element in data.flat:
             m[i] = element
@@ -360,30 +351,30 @@ class Mat4:
                    0.0, 0.0, 0.0, 0.0
         raise TypeError(f'Invalid Input: {args}')
 
-    @staticmethod
-    def identity():
-        return Mat4(1.0, 0.0, 0.0, 0.0,
-                    0.0, 1.0, 0.0, 0.0,
-                    0.0, 0.0, 1.0, 0.0,
-                    0.0, 0.0, 0.0, 1.0)
+    @classmethod
+    def identity(cls):
+        return cls(1.0, 0.0, 0.0, 0.0,
+                   0.0, 1.0, 0.0, 0.0,
+                   0.0, 0.0, 1.0, 0.0,
+                   0.0, 0.0, 0.0, 1.0)
 
-    @staticmethod
-    def zeros():
-        return Mat4(0.0, 0.0, 0.0, 0.0,
-                    0.0, 0.0, 0.0, 0.0,
-                    0.0, 0.0, 0.0, 0.0,
-                    0.0, 0.0, 0.0, 0.0)
+    @classmethod
+    def zeros(cls):
+        return cls(0.0, 0.0, 0.0, 0.0,
+                   0.0, 0.0, 0.0, 0.0,
+                   0.0, 0.0, 0.0, 0.0,
+                   0.0, 0.0, 0.0, 0.0)
 
-    @staticmethod
-    def ones():
-        return Mat4(1.0, 1.0, 1.0, 1.0,
-                    1.0, 1.0, 1.0, 1.0,
-                    1.0, 1.0, 1.0, 1.0,
-                    1.0, 1.0, 1.0, 1.0)
+    @classmethod
+    def ones(cls):
+        return cls(1.0, 1.0, 1.0, 1.0,
+                   1.0, 1.0, 1.0, 1.0,
+                   1.0, 1.0, 1.0, 1.0,
+                   1.0, 1.0, 1.0, 1.0)
 
-    @staticmethod
-    def from_np_array(data: np.ndarray):
-        m = Mat4()
+    @classmethod
+    def from_np_array(cls, data: np.ndarray):
+        m = cls()
         i: int = 0
         for element in data.flat:
             m[i] = element

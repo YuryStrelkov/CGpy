@@ -2,6 +2,7 @@ from cgeo.mutils import compute_derivatives_2_at_pt, compute_derivatives_2, clam
 from typing import Tuple
 from cmath import sqrt
 import numpy as np
+
 # import numba
 
 
@@ -67,12 +68,24 @@ def bi_linear_interp_pt(x: float, y: float, points: np.ndarray, width: float = 1
     tx = (x - dx_ * col_) / dx_
     ty = (y - dy_ * row_) / dy_
 
-    q00: float = points[col_,  row_ ]
-    q01: float = points[col_1, row_ ]
-    q10: float = points[col_,  row_1]
+    q00: float = points[col_, row_]
+    q01: float = points[col_1, row_]
+    q10: float = points[col_, row_1]
     q11: float = points[col_1, row_1]
 
     return q00 + (q01 - q00) * tx + (q10 - q00) * ty + tx * ty * (q00 - q01 - q10 + q11)
+
+
+# @numba.njit(fastmath=True)
+def bi_linear_interp_derivatives_pt(x: float, y: float, points: np.ndarray, width: float = 1.0,
+                                    height: float = 1.0, dx: float = 0.001, dy: float = 0.001) -> \
+        Tuple[float, float]:
+    dx = width * dx
+    dy = height * dy
+    return (bi_qubic_interp_pt(x + dx, y, points, width, height) -
+            bi_qubic_interp_pt(x - dx, y, points, width, height)) * 0.5 / dx, \
+           (bi_qubic_interp_pt(x, y + dy, points, width, height) -
+            bi_qubic_interp_pt(x, y + dy, points, width, height)) * 0.5 / dy
 
 
 # @numba.njit(fastmath=True, parallel=True)
@@ -100,10 +113,7 @@ def bi_linear_interp(x: np.ndarray, y: np.ndarray, points: np.ndarray,
 
     # for i in numba.prange(result.size):
     for i in range(result.size):
-
-        res_col_ = i % x.size
-
-        res_row_ = i // x.size
+        res_row_, res_col_ = divmod(i, x.size)
 
         x_ = clamp(x[res_col_], 0.0, width)
 
@@ -126,9 +136,9 @@ def bi_linear_interp(x: np.ndarray, y: np.ndarray, points: np.ndarray,
         tx = (x_ - dx_ * col_) / dx_
         ty = (y_ - dy_ * row_) / dy_
 
-        q00: float = points[col_,  row_]
+        q00: float = points[col_, row_]
         q01: float = points[col_1, row_]
-        q10: float = points[col_,  row_1]
+        q10: float = points[col_, row_1]
         q11: float = points[col_1, row_1]
 
         result[res_row_, res_col_] = q00 + (q01 - q00) * tx + (q10 - q00) * ty + tx * ty * (q00 - q01 - q10 + q11)
@@ -212,9 +222,9 @@ def _cubic_poly(x: float, y: float, m: np.ndarray) -> float:
     x3 = x2 * x
     y2 = y * y
     y3 = y2 * y
-    return (m[0]  + m[1] *  y + m[2]  * y2 + m[3]  * y3) + \
-           (m[4]  + m[5] *  y + m[6]  * y2 + m[7]  * y3) * x + \
-           (m[8]  + m[9] *  y + m[10] * y2 + m[11] * y3) * x2 + \
+    return (m[0] + m[1] * y + m[2] * y2 + m[3] * y3) + \
+           (m[4] + m[5] * y + m[6] * y2 + m[7] * y3) * x + \
+           (m[8] + m[9] * y + m[10] * y2 + m[11] * y3) * x2 + \
            (m[12] + m[13] * y + m[14] * y2 + m[15] * y3) * x3
 
 
@@ -259,9 +269,9 @@ def __bi_qubic_interp_pt(x: float, y: float, points: np.ndarray, points_dx: np.n
 
     tx = (x - dx_ * col_) / dx_
     ty = (y - dy_ * row_) / dy_
-    pids = ((col_,  row_),   # p00
-            (col_1, row_),   # p01
-            (col_,  row_1),  # p10
+    pids = ((col_, row_),  # p00
+            (col_1, row_),  # p01
+            (col_, row_1),  # p10
             (col_1, row_1))  # p11
 
     b = np.zeros((16,), dtype=float)  # TODO CHECK IF np.zeros(...) MAY BE REPLACED BY SOMETHING
@@ -270,9 +280,9 @@ def __bi_qubic_interp_pt(x: float, y: float, points: np.ndarray, points_dx: np.n
 
     for i in range(4):
         k, w = pids[i]
-        b[i]      = points    [k, w]
-        b[4 + i]  = points_dx [k, w]  # * dx_
-        b[8 + i]  = points_dy [k, w]  # * dy_
+        b[i] = points[k, w]
+        b[4 + i] = points_dx[k, w]  # * dx_
+        b[8 + i] = points_dy[k, w]  # * dy_
         b[12 + i] = points_dxy[k, w]  # * dx_ * dy_
 
     for i in range(c.size):
@@ -322,10 +332,10 @@ def bi_qubic_interp_pt(x: float, y: float, points: np.ndarray, width: float = 1.
 
     tx = (x - dx_ * col_) / dx_
     ty = (y - dy_ * row_) / dy_
-    pids = ((col_,  row_),  # p00
+    pids = ((col_, row_),  # p00
             (col_1, row_),  # p01
-            (col_,  row_1), # p10
-            (col_1, row_1)) # p11
+            (col_, row_1),  # p10
+            (col_1, row_1))  # p11
 
     b = np.zeros((16,), dtype=float)
 
@@ -346,6 +356,17 @@ def bi_qubic_interp_pt(x: float, y: float, points: np.ndarray, width: float = 1.
     return _cubic_poly(tx, ty, c)
 
 
+def bi_cubic_interp_derivatives_pt(x: float, y: float, points: np.ndarray,
+                                   width: float = 1.0, height: float = 1.0, dx: float = 0.001, dy: float = 0.001) -> \
+        Tuple[float, float]:
+    dx = width * dx
+    dy = height * dy
+    return (bi_qubic_interp_pt(x + dx, y, points, width, height) -
+            bi_qubic_interp_pt(x - dx, y, points, width, height)) * 0.5 / dx, \
+           (bi_qubic_interp_pt(x, y + dy, points, width, height) -
+            bi_qubic_interp_pt(x, y + dy, points, width, height)) * 0.5 / dy
+
+
 # @numba.njit(fastmath=True, parallel=True)
 def bi_qubic_interp(x: np.ndarray, y: np.ndarray,
                     points: np.ndarray, width: float = 1.0, height: float = 1.0) -> np.ndarray:
@@ -364,9 +385,7 @@ def bi_qubic_interp(x: np.ndarray, y: np.ndarray,
 
     # for i in numba.prange(result.size):
     for i in range(result.size):
-        res_col_ = i % x.size
-
-        res_row_ = i // x.size
+        res_row_, res_col_ = divmod(i, x.size)
         """
         result[res_row_, res_col_] = bi_qubic_interp_pt(x[res_col_], y[res_row_], points, width, height)
         """

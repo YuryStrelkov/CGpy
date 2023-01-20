@@ -212,17 +212,17 @@ class Quaternion:
     def dot(a, b) -> float:
         return a.ex * b.ex + a.ey * b.ey + a.ez * b.ez + a.ew * b.ew
 
-    @staticmethod
-    def max(a, b):
-        return Quaternion(max(a.ex, b.ex), max(a.ey, b.ey), max(a.ez, b.ez), max(a.ew, b.ew))
+    @classmethod
+    def max(cls, a, b):
+        return cls(max(a.ex, b.ex), max(a.ey, b.ey), max(a.ez, b.ez), max(a.ew, b.ew))
 
-    @staticmethod
-    def min(a, b):
-        return Quaternion(min(a.ex, b.ex), min(a.ey, b.ey), min(a.ez, b.ez), min(a.ew, b.ew))
+    @classmethod
+    def min(cls, a, b):
+        return cls(min(a.ex, b.ex), min(a.ey, b.ey), min(a.ez, b.ez), min(a.ew, b.ew))
 
-    @staticmethod
-    def s_lerp(q_start, q_destination, blend_factor: float):
-        cos_omega: float  = Quaternion.dot(q_start, q_destination)
+    @classmethod
+    def s_lerp(cls, q_start, q_destination, blend_factor: float):
+        cos_omega: float  = cls.dot(q_start, q_destination)
         k: float = 1.0
         if cos_omega < 0.0:
             cos_omega *= -1.0
@@ -240,10 +240,10 @@ class Quaternion:
             k0 = 1.0 - blend_factor
             k1 = blend_factor
         k0 *= k
-        return Quaternion(q_start.ex * k0 + q_destination.ex * k1,
-                          q_start.ey * k0 + q_destination.ey * k1,
-                          q_start.ez * k0 + q_destination.ez * k1,
-                          q_start.ew * k0 + q_destination.ew * k1)
+        return cls(q_start.ex * k0 + q_destination.ex * k1,
+                   q_start.ey * k0 + q_destination.ey * k1,
+                   q_start.ez * k0 + q_destination.ez * k1,
+                   q_start.ew * k0 + q_destination.ew * k1)
 
     @staticmethod
     def rotate_vec(q, vec: Vec3) -> Vec3:

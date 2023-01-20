@@ -96,8 +96,8 @@ class RealTimeFilter:
         return self.__curr_value
 
     def __kalman_filter(self, value: float) -> float:
-        _kalman_gain: float      = self.__err_estimate  / (self.__err_estimate  + self.__err_measure)
-        _current_estimate: float = self.__last_estimate  + _kalman_gain * (value - self.__last_estimate)
+        _kalman_gain: float = self.__err_estimate / (self.__err_estimate + self.__err_measure)
+        _current_estimate: float = self.__last_estimate + _kalman_gain * (value - self.__last_estimate)
         self.__err_estimate = (1.0 - _kalman_gain) * self.__err_estimate + \
                               math.fabs(self.__last_estimate - _current_estimate) * self.__k_arg
         self.__prev_value = self.__last_estimate
@@ -141,4 +141,3 @@ class RealTimeFilter:
     def save_settings(self, settings_file: str) -> None:
         with open(settings_file, "wt") as output:
             print(self, file=output)
-

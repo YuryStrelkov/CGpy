@@ -1,3 +1,5 @@
+import matplotlib.pyplot as plt
+
 from cgeo.trigonometry.trig_tables import SQUARE_INTERPOLATOR, LINEAR_INTERPOLATOR, A_TAN_RATIO, pi05, \
     INTERP_MODE_TABLES, SIN, pi2, COS, TAN, A_SIN, A_COS, A_TAN, pi
 # from matplotlib import pyplot as plt
@@ -7,7 +9,7 @@ import numpy as np
 import time
 
 
-_accuracy = 1.0 - 1e-12
+_accuracy = 1.0 - 1e-9
 
 
 #######################################
@@ -104,15 +106,10 @@ def _tab_arc_sin_arc_cos_lin(arg: float, tab: np.array, x_0: float = 0.0, x_1: f
     t: float
     index: int
     if x_0 > arg:
-        # print("Value {:.4f} out of range[{:.4f}, {:.4f}]".format(arg, x_0, x_1))
         return 0.0
     if x_1 < arg:
-        # print("Value {:.4f} out of range[{:.4f}, {:.4f}]".format(arg, x_0, x_1))
         return 0.0
     t = (arg - x_0) * _accuracy / (x_1 - x_0)
-    t -= int(t)
-    if t < 0:
-        t += 1.0
     t *= (tab.size - 1)
     index = int(t)
     t -= index
@@ -126,17 +123,12 @@ def _tab_arc_sin_arc_cos_lin_np(arg: np.ndarray, tab: np.array, x_0: float = 0.0
     index: int
     for i in range(arg.size):
         if x_0 > arg[i]:
-            # print("Value {:.4f} out of range[{:.4f}, {:.4f}]".format(arg[i], x_0, x_1))
             res[i] = 0.0
             continue
         if x_1 < arg[i]:
-            # print("Value {:.4f} out of range[{:.4f}, {:.4f}]".format(arg[i], x_0, x_1))
             res[i] = 0.0
             continue
         t = (arg[i] - x_0) * _accuracy / (x_1 - x_0)
-        t -= int(t)
-        if t < 0:
-            t += 1.0
         t *= (tab.size - 1)
         index = int(t)
         t -= index
@@ -153,15 +145,10 @@ def _tab_arc_sin_arc_cos_quad(arg: float, table: np.array, x_0: float = 0.0, x_1
     t: float
     index: int
     if x_0 > arg:
-        # print("Value {:.4f} out of range[{:.4f}, {:.4f}]".format(arg, x_0, x_1))
         return 0.0
     if x_1 < arg:
-        # print("Value {:.4f} out of range[{:.4f}, {:.4f}]".format(arg, x_0, x_1))
         return 0.0
     t = (arg - x_0) * _accuracy / (x_1 - x_0)
-    t -= int(t)
-    if t < 0:
-        t += 1.0
     t *= (table.shape[0] - 1)
     index = int(t)
     t -= index
@@ -175,17 +162,12 @@ def _tab_arc_sin_arc_cos_quad_np(arg: np.ndarray, table: np.array, x_0: float = 
     index: int
     for i in range(arg.size):
         if x_0 > arg[i]:
-            # print("Value {:.4f} out of range[{:.4f}, {:.4f}]".format(arg[i], x_0, x_1))
             res[i] = 0.0
             continue
         if x_1 < arg[i]:
-            #  print("Value {:.4f} out of range[{:.4f}, {:.4f}]".format(arg[i], x_0, x_1))
             res[i] = 0.0
             continue
         t = (arg[i] - x_0) * _accuracy / (x_1 - x_0)
-        t -= int(t)
-        if t < 0:
-            t += 1.0
         t *= (table.shape[0] - 1)
         index = int(t)
         t -= index
@@ -468,3 +450,20 @@ def a_tan(arg: Union[float, np.ndarray], mode: int = 0) -> Union[float, np.ndarr
     if mode not in INTERP_MODE_TABLES:
         raise RuntimeError("A_Tan :: Incorrect interpolation mode")
     return _tab_function_arc_tan(arg, INTERP_MODE_TABLES[mode][A_TAN], -A_TAN_RATIO, A_TAN_RATIO, mode)
+
+
+if __name__ == "__main__":
+    x = np.linspace(-200.0, 200.0, 100000)
+    asin = sin(x, 1)
+    acos = cos(x, 1)
+
+    asin_np = np.sin(x)
+    acos_np = np.cos(x)
+
+    plt.plot(x,asin_np - asin, 'r')
+    plt.plot(x,acos_np - acos, 'g')
+
+    # plt.plot(x,asin_np, ':r')
+    # plt.plot(x,acos_np, ':g')
+
+    plt.show()

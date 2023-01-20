@@ -68,8 +68,7 @@ def gauss_test_surf(n: int) -> np.ndarray:
     half_pi = np.pi * 0.5
     inv_sqrt_2pi = 1.0 / np.sqrt(np.pi * 2.0)
     for i in range(n * n):
-        row = i // n
-        col = i % n
+        row, col = divmod(i, n)
         x_ = dx * col - half_pi
         y_ = dx * row - half_pi
         gauss[row, col] = exp(-(x_ * x_ + y_ * y_) * 0.5) * inv_sqrt_2pi
@@ -280,11 +279,11 @@ def compute_derivatives_2(points: np.ndarray) -> Tuple[np.ndarray, np.ndarray, n
     points_dxy = np.zeros_like(points)
 
     for i in range(points.size):
-        row_ = int(i / colons)
+        row_, col_ = divmod(i, colons)
+
         row_1 = min(rows - 1, row_ + 1)
         row_0 = max(0, row_ - 1)
 
-        col_ = i % colons
         col_1 = min(colons - 1, col_ + 1)
         col_0 = max(0, col_ - 1)
 
@@ -317,11 +316,11 @@ def compute_derivatives(points: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     points_dy = np.zeros_like(points)
 
     for i in range(points.size):
-        row_ = int(i / colons)
+        row_, col_ = divmod(i, colons)
+
         row_1 = min(rows - 1, row_ + 1)
         row_0 = max(0, row_ - 1)
 
-        col_ = i % colons
         col_1 = min(colons - 1, col_ + 1)
         col_0 = max(0, col_ - 1)
 
@@ -342,11 +341,11 @@ def compute_normals(points: np.ndarray) -> np.ndarray:
     points_n = np.zeros((rows, cols, 3,), dtype=float)
 
     for i in range(points.size):
-        row_ = int(i / cols)
+        row_, col_ = divmod(i, cols)
+
         row_1 = min(rows - 1, row_ + 1)
         row_0 = max(0, row_ - 1)
 
-        col_ = i % cols
         col_1 = min(cols - 1, col_ + 1)
         col_0 = max(0, col_ - 1)
 
