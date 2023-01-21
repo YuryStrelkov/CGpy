@@ -1,15 +1,14 @@
-import math
-import time
-
+# import math
+# import time
 from cgeo.transforms.transform2 import Transform2
 from cgeo.images.rgba import RGBA
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 from cgeo.vectors import Vec2
 from typing import Tuple
-from cgeo import gutils, mutils, LoopTimer
+from cgeo import gutils, mutils #, LoopTimer
 from PIL import Image
 import numpy as np
-import numba
+# import numba
 
 _bicubic_poly_coefficients = (1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
                               0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
@@ -36,7 +35,7 @@ _red = (np.uint8(100), _zero, _zero, _zero)
 _black = (_zero, _zero, _zero, _zero)
 
 
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def _nearest_interp_pt(x: float, y: float, points: np.ndarray, rows: int, cols: int, bpp: int) -> \
         Tuple[np.uint8, np.uint8, np.uint8, np.uint8]:
     """
@@ -89,7 +88,7 @@ def _nearest_interp_pt(x: float, y: float, points: np.ndarray, rows: int, cols: 
                points[col_ + row_ * cols + 3]
 
 
-@numba.njit(fastmath=True)
+# @numba.njit(fastmath=True)
 def _bi_lin_interp_pt(x: float, y: float, points: np.ndarray, rows: int, cols: int, bpp: int) ->\
         Tuple[np.uint8, np.uint8, np.uint8, np.uint8]:
     """
@@ -583,13 +582,16 @@ def transform_test():
     transform.az = np.pi / 4.0
     # transform.sy = 1.5
     xyt = [transform.transform_vect(v) for v in xy_]
+    """
     fig, axs = plt.subplots(1, 1)
     [axs.plot(v.x, v.y, '.r') for v in xy]
     [axs.plot(v.x, v.y, '.g') for v in xyt]
     axs.set_aspect('equal', 'box')
     plt.show()
+    """
 
 
+"""
 if __name__ == "__main__":
     loop_timer = LoopTimer()
 
@@ -611,3 +613,5 @@ if __name__ == "__main__":
         texture_r = Texture.rotate(texture_r, -30)
     print(f"texture_r = Texture.rotate() time: {loop_timer.last_loop_time}")
     texture_r.show()
+
+"""

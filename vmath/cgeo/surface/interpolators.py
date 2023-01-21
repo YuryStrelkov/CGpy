@@ -68,10 +68,10 @@ def bi_linear_interp_pt(x: float, y: float, points: np.ndarray, width: float = 1
     tx = (x - dx_ * col_) / dx_
     ty = (y - dy_ * row_) / dy_
 
-    q00: float = points[col_, row_]
-    q01: float = points[col_1, row_]
-    q10: float = points[col_, row_1]
-    q11: float = points[col_1, row_1]
+    q00: float = points[row_,  col_]
+    q01: float = points[row_,  col_1]
+    q10: float = points[row_1, col_]
+    q11: float = points[row_1, col_1]
 
     return q00 + (q01 - q00) * tx + (q10 - q00) * ty + tx * ty * (q00 - q01 - q10 + q11)
 
@@ -82,10 +82,78 @@ def bi_linear_interp_derivatives_pt(x: float, y: float, points: np.ndarray, widt
         Tuple[float, float]:
     dx = width * dx
     dy = height * dy
-    return (bi_qubic_interp_pt(x + dx, y, points, width, height) -
-            bi_qubic_interp_pt(x - dx, y, points, width, height)) * 0.5 / dx, \
-           (bi_qubic_interp_pt(x, y + dy, points, width, height) -
-            bi_qubic_interp_pt(x, y + dy, points, width, height)) * 0.5 / dy
+
+    f_p_dx = bi_linear_interp_pt(x + dx, y, points, width, height)
+    f_m_dx = bi_linear_interp_pt(x - dx, y, points, width, height)
+    f_p_dy = bi_linear_interp_pt(x, y + dy, points, width, height)
+    f_m_dy = bi_linear_interp_pt(x, y - dy, points, width, height)
+    return (f_p_dx - f_m_dx) * 0.5 / dx, (f_p_dy - f_m_dy) * 0.5 / dy
+
+
+def bi_linear_interp_derivatives2_pt(x: float, y: float, points: np.ndarray, width: float = 1.0,
+                                     height: float = 1.0, dx: float = 0.001, dy: float = 0.001) -> \
+        Tuple[float, float, float]:
+    dx = width * dx
+    dy = height * dy
+
+    f_p_dx = bi_linear_interp_pt(x + dx, y, points, width, height)
+    f_m_dx = bi_linear_interp_pt(x - dx, y, points, width, height)
+    f_p_dy = bi_linear_interp_pt(x, y + dy, points, width, height)
+    f_m_dy = bi_linear_interp_pt(x, y - dy, points, width, height)
+
+    f_p_dy_dx = bi_linear_interp_pt(x + dx, y + dy, points, width, height)
+    f_m_dy_dx = bi_linear_interp_pt(x - dx, y - dy, points, width, height)
+    return (f_p_dx - f_m_dx) * 0.5 / dx, \
+           (f_p_dy - f_m_dy) * 0.5 / dy, \
+           (f_p_dy_dx - f_p_dx - f_p_dy + f_m_dy_dx) * 0.25 / dx / dy
+
+
+def bi_linear_interp_derivatives(x: np.ndarray, y: np.ndarray, points: np.ndarray, width: float = 1.0,
+                                 height: float = 1.0, dx: float = 0.001, dy: float = 0.001) -> np.ndarray:
+    """
+    Би-линейнаяиетерполяция частных производных диапазона точек x, y
+    :param x: x - координаты точек
+    :param y: y - координаты точек
+    :param points: одномерный список узловых точек
+    :param width: ширина области интеполяции
+    :param height: высота области интеполяции
+    :param dx:
+    :param dy:
+    :return:
+    """
+    result = np.zeros((y.size, x.size, 2), dtype=float)
+    # for i in numba.prange(result.size):
+    for i in range(result.size // 2):
+        res_row_, res_col_ = divmod(i, x.size)
+        _x, _y = bi_linear_interp_derivatives_pt(x[res_col_], y[res_row_], points, width, height, dx, dy)
+        result[res_row_, res_col_, 0] = _x
+        result[res_row_, res_col_, 1] = _y
+    return result
+
+
+def bi_linear_interp_derivatives2(x: np.ndarray, y: np.ndarray, points: np.ndarray, width: float = 1.0,
+                                  height: float = 1.0, dx: float = 0.001, dy: float = 0.001) -> np.ndarray:
+    """
+    Би-линейная иетерполяция частных производных диапазона точек x, y
+    :param x: x - координаты точек
+    :param y: y - координаты точек
+    :param points: одномерный список узловых точек
+    :param width: ширина области интеполяции
+    :param height: высота области интеполяции
+    :param dx:
+    :param dy:
+    :return:
+    """
+    result = np.zeros((y.size, x.size, 3), dtype=float)
+
+    # for i in numba.prange(result.size):
+    for i in range(result.size // 3):
+        res_row_, res_col_ = divmod(i, x.size)
+        _x, _y, _z = bi_linear_interp_derivatives2_pt(x[res_col_], y[res_row_], points, width, height, dx, dy)
+        result[res_row_, res_col_, 0] = _x
+        result[res_row_, res_col_, 1] = _y
+        result[res_row_, res_col_, 2] = _z
+    return result
 
 
 # @numba.njit(fastmath=True, parallel=True)
@@ -136,10 +204,10 @@ def bi_linear_interp(x: np.ndarray, y: np.ndarray, points: np.ndarray,
         tx = (x_ - dx_ * col_) / dx_
         ty = (y_ - dy_ * row_) / dy_
 
-        q00: float = points[col_, row_]
-        q01: float = points[col_1, row_]
-        q10: float = points[col_, row_1]
-        q11: float = points[col_1, row_1]
+        q00: float = points[row_,  col_]
+        q01: float = points[row_,  col_1 ]
+        q10: float = points[row_1, col_]
+        q11: float = points[row_1, col_1]
 
         result[res_row_, res_col_] = q00 + (q01 - q00) * tx + (q10 - q00) * ty + tx * ty * (q00 - q01 - q10 + q11)
 
@@ -269,9 +337,9 @@ def __bi_qubic_interp_pt(x: float, y: float, points: np.ndarray, points_dx: np.n
 
     tx = (x - dx_ * col_) / dx_
     ty = (y - dy_ * row_) / dy_
-    pids = ((col_, row_),  # p00
+    pids = ((col_,  row_),  # p00
             (col_1, row_),  # p01
-            (col_, row_1),  # p10
+            (col_,  row_1),  # p10
             (col_1, row_1))  # p11
 
     b = np.zeros((16,), dtype=float)  # TODO CHECK IF np.zeros(...) MAY BE REPLACED BY SOMETHING
@@ -279,11 +347,11 @@ def __bi_qubic_interp_pt(x: float, y: float, points: np.ndarray, points_dx: np.n
     c = np.zeros((16,), dtype=float)  # TODO CHECK IF np.zeros(...) MAY BE REPLACED BY SOMETHING
 
     for i in range(4):
-        k, w = pids[i]
-        b[i] = points[k, w]
-        b[4 + i] = points_dx[k, w]  # * dx_
-        b[8 + i] = points_dy[k, w]  # * dy_
-        b[12 + i] = points_dxy[k, w]  # * dx_ * dy_
+        _col, _row = pids[i]
+        b[i]      = points    [_row, _col]
+        b[4 + i]  = points_dx [_row, _col]  # * dx_
+        b[8 + i]  = points_dy [_row, _col]  # * dy_
+        b[12 + i] = points_dxy[_row, _col]  # * dx_ * dy_
 
     for i in range(c.size):
         for j in range(b.size):
@@ -342,9 +410,9 @@ def bi_qubic_interp_pt(x: float, y: float, points: np.ndarray, width: float = 1.
     c = np.zeros((16,), dtype=float)
 
     for i in range(4):
-        w, k = pids[i]
-        b[i] = points[w, k]
-        dx, dy, dxy = compute_derivatives_2_at_pt(points, w, k)
+        _col, _row = pids[i]
+        b[i] = points[_row, _col]
+        dx, dy, dxy = compute_derivatives_2_at_pt(points, _row, _col)
         b[4 + i] = dx
         b[8 + i] = dy
         b[12 + i] = dxy
@@ -356,15 +424,80 @@ def bi_qubic_interp_pt(x: float, y: float, points: np.ndarray, width: float = 1.
     return _cubic_poly(tx, ty, c)
 
 
-def bi_cubic_interp_derivatives_pt(x: float, y: float, points: np.ndarray,
-                                   width: float = 1.0, height: float = 1.0, dx: float = 0.001, dy: float = 0.001) -> \
-        Tuple[float, float]:
+def bi_cubic_interp_derivatives_pt(x: float, y: float, points: np.ndarray, width: float = 1.0,
+                                   height: float = 1.0, dx: float = 0.001, dy: float = 0.001) -> Tuple[float, float]:
     dx = width * dx
     dy = height * dy
     return (bi_qubic_interp_pt(x + dx, y, points, width, height) -
             bi_qubic_interp_pt(x - dx, y, points, width, height)) * 0.5 / dx, \
            (bi_qubic_interp_pt(x, y + dy, points, width, height) -
-            bi_qubic_interp_pt(x, y + dy, points, width, height)) * 0.5 / dy
+            bi_qubic_interp_pt(x, y - dy, points, width, height)) * 0.5 / dy
+
+
+def bi_cubic_interp_derivatives2_pt(x: float, y: float, points: np.ndarray, width: float = 1.0,
+                                    height: float = 1.0, dx: float = 0.001, dy: float = 0.001) -> \
+        Tuple[float, float, float]:
+    dx = width * dx
+    dy = height * dy
+
+    f_p_dx = bi_qubic_interp_pt(x + dx, y, points, width, height)
+    f_m_dx = bi_qubic_interp_pt(x - dx, y, points, width, height)
+    f_p_dy = bi_qubic_interp_pt(x, y + dy, points, width, height)
+    f_m_dy = bi_qubic_interp_pt(x, y - dy, points, width, height)
+
+    f_p_dy_dx = bi_qubic_interp_pt(x + dx, y + dy, points, width, height)
+    f_m_dy_dx = bi_qubic_interp_pt(x - dx, y - dy, points, width, height)
+    return (f_p_dx - f_m_dx) * 0.5 / dx, \
+           (f_p_dy - f_m_dy) * 0.5 / dy, \
+           (f_p_dy_dx - f_p_dx - f_p_dy + f_m_dy_dx) * 0.25 / dx / dy
+
+
+def bi_cubic_interp_derivatives(x: np.ndarray, y: np.ndarray, points: np.ndarray, width: float = 1.0,
+                                height: float = 1.0, dx: float = 0.001, dy: float = 0.001) -> np.ndarray:
+    """
+    Бикубическая иетерполяция частных производных диапазона точек x, y
+    :param x: x - координаты точек
+    :param y: y - координаты точек
+    :param points: одномерный список узловых точек
+    :param width: ширина области интеполяции
+    :param height: высота области интеполяции
+    :param dx:
+    :param dy:
+    :return:
+    """
+    result = np.zeros((y.size, x.size, 2), dtype=float)
+    # for i in numba.prange(result.size):
+    for i in range(result.size // 2):
+        res_row_, res_col_ = divmod(i, x.size)
+        _x, _y = bi_cubic_interp_derivatives_pt(x[res_col_], y[res_row_], points, width, height, dx, dy)
+        result[res_row_, res_col_, 0] = _x
+        result[res_row_, res_col_, 1] = _y
+    return result
+
+
+def bi_cubic_interp_derivatives2(x: np.ndarray, y: np.ndarray, points: np.ndarray, width: float = 1.0,
+                                 height: float = 1.0, dx: float = 0.001, dy: float = 0.001) -> np.ndarray:
+    """
+    Бикубическая иетерполяция частных производных диапазона точек x, y
+    :param x: x - координаты точек
+    :param y: y - координаты точек
+    :param points: одномерный список узловых точек
+    :param width: ширина области интеполяции
+    :param height: высота области интеполяции
+    :param dx:
+    :param dy:
+    :return:
+    """
+    result = np.zeros((y.size, x.size, 3), dtype=float)
+
+    # for i in numba.prange(result.size):
+    for i in range(result.size // 3):
+        res_row_, res_col_ = divmod(i, x.size)
+        _x, _y, _z = bi_cubic_interp_derivatives2_pt(x[res_col_], y[res_row_], points, width, height, dx, dy)
+        result[res_row_, res_col_, 0] = _x
+        result[res_row_, res_col_, 1] = _y
+        result[res_row_, res_col_, 2] = _z
+    return result
 
 
 # @numba.njit(fastmath=True, parallel=True)
@@ -386,9 +519,6 @@ def bi_qubic_interp(x: np.ndarray, y: np.ndarray,
     # for i in numba.prange(result.size):
     for i in range(result.size):
         res_row_, res_col_ = divmod(i, x.size)
-        """
-        result[res_row_, res_col_] = bi_qubic_interp_pt(x[res_col_], y[res_row_], points, width, height)
-        """
         result[res_row_, res_col_] = __bi_qubic_interp_pt(x[res_col_], y[res_row_], points, points_dx,
                                                           points_dy, points_dxy, width, height)
     return result

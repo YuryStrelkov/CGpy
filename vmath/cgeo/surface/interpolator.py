@@ -1,5 +1,10 @@
+# from matplotlib import pyplot as plt
+
 from cgeo.surface.interpolators import bi_linear_interp, bi_linear_interp_pt, bi_qubic_interp_pt, bi_qubic_interp, \
-    bi_linear_cut, bi_qubic_cut, bi_linear_cut_along_curve, bi_qubic_cut_along_curve
+    bi_linear_cut, bi_qubic_cut, bi_linear_cut_along_curve, bi_qubic_cut_along_curve, bi_linear_interp_derivatives, \
+    bi_linear_interp_derivatives2, bi_linear_interp_derivatives2_pt, bi_linear_interp_derivatives_pt, \
+    bi_cubic_interp_derivatives, bi_cubic_interp_derivatives2, bi_cubic_interp_derivatives2_pt, \
+    bi_cubic_interp_derivatives_pt
 from cgeo.vectors import Vec2, Vec3
 from typing import Tuple
 from cgeo import gutils
@@ -47,21 +52,65 @@ class Interpolator:
         interpolator_a.__width = pt_2[0] - pt_1[0]
         interpolator_a.__height = pt_2[1] - pt_1[1]
 
+    def __interpolate_point_bi_linear(self, x: float, y: float) -> float:
+        return bi_linear_interp_pt(x - self.x_0, y - self.y_0, self.control_points,
+                                   self.width, self.height) + self.z_0
+
+    def __interpolate_point_bi_linear_derivative(self, x: float, y: float,
+                                                 dx: float = 0.001, dy: float = 0.001) -> Tuple[float, float]:
+        x, y = bi_linear_interp_derivatives_pt(x - self.x_0, y - self.y_0, self.control_points,
+                                               self.width, self.height, dx, dy)
+        return x + self.z_0, y + self.z_0
+
+    def __interpolate_point_bi_linear_derivative2(self, x: float, y: float,
+                                                  dx: float = 0.001, dy: float = 0.001) -> Tuple[float, float, float]:
+        x, y, z = bi_linear_interp_derivatives2_pt(x - self.x_0, y - self.y_0, self.control_points,
+                                                   self.width, self.height, dx, dy)
+        return x + self.z_0, y + self.z_0,  z + self.z_0
+
     def __interpolate_bi_linear(self, x: np.ndarray, y: np.ndarray) -> np.ndarray:
         return bi_linear_interp(x - self.x_0, y - self.y_0, self.control_points,
                                 self.width, self.height) + self.z_0
 
-    def __interpolate_point_bi_linear(self, x: float, y: float) -> float:
-        return bi_linear_interp_pt(x - self.x_0, y - self.y_0, self.control_points,
-                                   self.width, self.height) + self.z_0
+    def __interpolate_bi_linear_derivative(self, x: np.ndarray, y: np.ndarray,
+                                           dx: float = 0.001, dy: float = 0.001) -> np.ndarray:
+        return bi_linear_interp_derivatives(x - self.x_0, y - self.y_0, self.control_points,
+                                            self.width, self.height, dx, dy) + self.z_0
+
+    def __interpolate_bi_linear_derivative2(self, x: np.ndarray, y: np.ndarray,
+                                            dx: float = 0.001, dy: float = 0.001) -> np.ndarray:
+        return bi_linear_interp_derivatives2(x - self.x_0, y - self.y_0, self.control_points,
+                                             self.width, self.height, dx, dy) + self.z_0
 
     def __interpolate_point_bi_cubic(self, x: float, y: float) -> float:
         return bi_qubic_interp_pt(x - self.x_0, y - self.y_0, self.control_points,
                                   self.width, self.height) + self.z_0
 
+    def __interpolate_point_bi_cubic_derivative(self, x: float, y: float,
+                                                dx: float = 0.001, dy: float = 0.001) -> Tuple[float, float]:
+        x, y = bi_cubic_interp_derivatives_pt(x - self.x_0, y - self.y_0, self.control_points,
+                                              self.width, self.height, dx, dy)
+        return x + self.z_0, y + self.z_0
+
+    def __interpolate_point_bi_cubic_derivative2(self, x: float, y: float,
+                                                 dx: float = 0.001, dy: float = 0.001) -> Tuple[float, float, float]:
+        x, y, z = bi_cubic_interp_derivatives2_pt(x - self.x_0, y - self.y_0, self.control_points,
+                                                  self.width, self.height, dx, dy)
+        return x + self.z_0, y + self.z_0,  z + self.z_0
+
     def __interpolate_bi_cubic(self, x: np.ndarray, y: np.ndarray) -> np.ndarray:
         return bi_qubic_interp(x - self.x_0, y - self.y_0, self.control_points,
                                self.width, self.height) + self.z_0
+
+    def __interpolate_bi_cubic_derivative(self, x: np.ndarray, y: np.ndarray,
+                                          dx: float = 0.001, dy: float = 0.001) -> np.ndarray:
+        return bi_cubic_interp_derivatives(x - self.x_0, y - self.y_0, self.control_points,
+                                           self.width, self.height, dx, dy) + self.z_0
+
+    def __interpolate_bi_cubic_derivative2(self, x: np.ndarray, y: np.ndarray,
+                                           dx: float = 0.001, dy: float = 0.001) -> np.ndarray:
+        return bi_cubic_interp_derivatives2(x - self.x_0, y - self.y_0, self.control_points,
+                                            self.width, self.height, dx, dy) + self.z_0
 
     def __bi_linear_cut(self, x_0: float, y_0: float, x_1: float, y_1: float, n_steps: int = 128) -> \
             Tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -260,6 +309,50 @@ class Interpolator:
 
         return 0.0
 
+    def interpolate_point_derivative(self, x: float, y: float,
+                                     dx: float = 0.001, dy: float = 0.001) -> Tuple[float, float]:
+        """
+        Значение интерполяции точки с координатами х, у.\n
+        :param x: х - координата
+        :param y: y - координата
+        :param dx: dх
+        :param dy: dy
+        :return:
+        """
+        if self.control_points is None:
+            print("Interpolator ::  control_points is None")
+            return 0.0, 0.0
+
+        if self.bi_linear:
+            return self.__interpolate_point_bi_linear_derivative(x, y, dx, dy)
+
+        if self.bi_cubic:
+            return self.__interpolate_point_bi_cubic_derivative(x, y, dx, dy)
+
+        return 0.0, 0.0
+
+    def interpolate_point_derivative2(self, x: float, y: float,
+                                      dx: float = 0.001, dy: float = 0.001) -> Tuple[float, float, float]:
+        """
+        Значение интерполяции точки с координатами х, у.\n
+        :param x: х - координата
+        :param y: y - координата
+        :param dx: dх
+        :param dy: dy
+        :return:
+        """
+        if self.control_points is None:
+            print("Interpolator ::  control_points is None")
+            return 0.0, 0.0, 0.0
+
+        if self.bi_linear:
+            return self.__interpolate_point_bi_linear_derivative2(x, y, dx, dy)
+
+        if self.bi_cubic:
+            return self.__interpolate_point_bi_cubic_derivative2(x, y, dx, dy)
+
+        return 0.0, 0.0, 0.0
+
     def interpolate(self, x_: np.ndarray, y_: np.ndarray) -> np.ndarray:
         """
         Значение интерполяции массивов точкек с координатами х, у.\n
@@ -278,6 +371,50 @@ class Interpolator:
             return self.__interpolate_bi_cubic(x_, y_)
 
         return np.zeros((x_.size, y_.size), dtype=float)
+
+    def interpolate_derivative(self, x_: np.ndarray, y_: np.ndarray,
+                               dx: float = 0.001, dy: float = 0.001) -> np.ndarray:
+        """
+        Значение интерполяции массивов точкек с координатами х, у.\n
+        :param x_: х - массив координат
+        :param y_: y - массив координат
+        :param dx: dх
+        :param dy: dy
+        :return:
+        """
+        if self.control_points is None:
+            print("Interpolator ::  control_points is None")
+            return np.zeros((x_.size, y_.size, 2), dtype=float)
+
+        if self.bi_linear:
+            return self.__interpolate_bi_linear_derivative(x_, y_, dx, dy)
+
+        if self.bi_cubic:
+            return self.__interpolate_bi_cubic_derivative(x_, y_, dx, dy)
+
+        return np.zeros((x_.size, y_.size, 2), dtype=float)
+
+    def interpolate_derivative2(self, x_: np.ndarray, y_: np.ndarray,
+                                dx: float = 0.001, dy: float = 0.001) -> np.ndarray:
+        """
+        Значение интерполяции массивов точкек с координатами х, у.\n
+        :param x_: х - массив координат
+        :param y_: y - массив координат
+        :param dx: dх
+        :param dy: dy
+        :return:
+        """
+        if self.control_points is None:
+            print("Interpolator ::  control_points is None")
+            return np.zeros((x_.size, y_.size, 3), dtype=float)
+
+        if self.bi_linear:
+            return self.__interpolate_bi_linear_derivative2(x_, y_, dx, dy)
+
+        if self.bi_cubic:
+            return self.__interpolate_bi_cubic_derivative2(x_, y_, dx, dy)
+
+        return np.zeros((x_.size, y_.size, 3), dtype=float)
 
     def cut(self, x_0: float, y_0: float, x_1: float, y_1: float, n_steps: int = 128) -> \
             Tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -364,7 +501,6 @@ class Interpolator:
         Включена би-линейная интерпляция или нет.\n
         :return:
         """
-        # what is the faking mode?! only you know. or change value to constant string or add comments
         return self.__mode == 0
 
     @property
@@ -489,3 +625,20 @@ class Interpolator:
     @z_0.setter
     def z_0(self, val: float) -> None:
         self.__origin.z = val
+
+
+"""
+
+"""
+if __name__  == "__main__":
+    res_i = Interpolator()
+    res_i.bi_cubic = True
+    res_i.load("interpolator_a.json")
+    print(res_i)
+    x = np.linspace(0, 1, 100)
+    # dxy  = res_i.interpolate_derivative2(x, x)
+    # d2xy = res_i.interpolate(x, x)
+    res_i.control_points = np.zeros((32, 32,), dtype=int)
+    print(res_i)
+    # plt.imshow(dxy[:, :, 1])
+    # plt.show()

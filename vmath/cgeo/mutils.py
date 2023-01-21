@@ -195,8 +195,6 @@ def rad_to_dec(rho: np.ndarray, phi: np.ndarray) -> Tuple[np.ndarray, np.ndarray
 
 # @numba.njit(fastmath=True)
 def _index_calc(index: int, indices_range: int) -> int:
-    if index < 0:
-        return indices_range - 1 + index % indices_range
     return index % indices_range
 
 
