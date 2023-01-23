@@ -1,8 +1,15 @@
-bool between(float x, float mim, float max)
+#define TRUE 1
+#define FALSE 0
+#define min(a, b) a < b ? a : b
+#define max(a, b) a > b ? a : b
+
+#typedef int(*interplator)(float x, float y, uint8* image, uint rows, uint cols, uint bpp);
+
+uint8 between(float x, float mim, float max)
 {
-    if(x < min) return false;
-    if(x > max) return false;
-    return true;
+    if(x < min) return FALSE;
+    if(x > max) return FALSE;
+    return TRUE;
 };
 
 int red(uint8 r)
@@ -65,102 +72,81 @@ int rgbaf(float r, float g, float b, float a)
     return redf(r)|greenf(g)|bluef(b)|alphaf(a);
 };
 
+int uv_to_pix_local(float x, float y, int cols, int rows,
+					int& col, int& row, int& col1, int& row1, float& tx, float& ty)
+{
+	if(!between(x, 0.0, 1.0))return FALSE;
+    if(!between(y, 0.0, 1.0))return FALSE;
+	
+	col = (int)(x * (cols - 1));
+    row = (int)(y * (rows - 1));
+	
+	col1 = min(col + 1, cols - 1);
+    row1 = min(row + 1, rows - 1);
+	
+    float dx = 1.0 / (cols - 1.0);
+    float dy = 1.0 / (rows - 1.0);
+
+    tx = (x - dx * col) / dx;
+    ty = (y - dy * row) / dy;
+	
+	return TRUE
+}
+
 int nearest32(float x, float y, uint8* image, uint rows, uint cols, uint bpp)
 {
-    if(!between(x, 0.0,1.0))return 0;
-    if(!between(y, 0.0,1.0))return 0;
+	int col, row, col1, row1;
+	float tx, ty;
+	
+	if (!uv_to_pix_local(x,y, rows, cols, &col, &row, &col1, &row1, &tx, &ty))return 0;
 
-    int col_ = (int)(x * (cols - 1));
-    int row_ = (int)(y * (rows - 1));
+    row = if ty < 0.5 ?row : row1;
+    col = if tx < 0.5 ?col : col1;
 
-    float dx_ = 1.0 / (cols - 1.0);
-    float dy_ = 1.0 / (rows - 1.0);
-
-    float tx = (x - dx_ * col_) / dx_;
-    float ty = (y - dy_ * row_) / dy_;
-
-    row_ = if ty < 0.5 ?row_ : min(row_ + 1, rows - 1);
-    col_ = if tx < 0.5 ?col_ : min(col_ + 1, cols - 1);
-
-    col_ *= bpp;
-    row_ *= bpp;
+    col *= bpp;
+    row *= bpp;
 
     if(bpp = 1)
     {
-        return  rgb(image[col_ + row_ * cols], 0 , 0);
+        return  rgb(image[col + row * cols], 0 , 0);
     }
     if(bpp = 3)
     {
-        return rgb(image[col_ + row_ * cols],
-                   image[col_ + row_ * cols + 1],
-                   image[col_ + row_ * cols + 2]);
+        return rgb(image[col + row * cols],
+                   image[col + row * cols + 1],
+                   image[col + row * cols + 2]);
     }
     if(bpp=4)
     {
-        return rgba(image[col_ + row_ * cols],
-                    image[col_ + row_ * cols + 1],
-                    image[col_ + row_ * cols + 2],
-                    image[col_ + row_ * cols + 3]);
+        return rgba(image[col + row * cols],
+                    image[col + row * cols + 1],
+                    image[col + row * cols + 2],
+                    image[col + row * cols + 3]);
     }
     return 0;
 }
 
-int bilinear32(float x, float y, uint8* image, uint rows, uint cols, uint bpp)
+int bilinear32(float x, float y, uint8* image, uint rows, uint cols, int bpp)
 {
-    if(!between(x, 0.0,1.0))return 0;
-    if(!between(y, 0.0,1.0))return 0;
-
-    int col_ = (int)(x * (cols - 1));
-    int row_ = (int)(y * (rows - 1));
-
-    float dx_ = 1.0 / (cols - 1.0);
-    float dy_ = 1.0 / (rows - 1.0);
-
-    float tx = (x - dx_ * col_) / dx_;
-    float ty = (y - dy_ * row_) / dy_;
-
-    row_ = if ty < 0.5 ?row_ : min(row_ + 1, rows - 1);
-    col_ = if tx < 0.5 ?col_ : min(col_ + 1, cols - 1);
-
-    col_ *= bpp;
-    row_ *= bpp;
-
-    float q00 = (float)(points[col_  + row_  * cols]);
-    float q01 = (float)(points[col_1 + row_  * cols]);
-    float q10 = (float)(points[col_  + row_1 * cols]);
-    float q11 = (float)(points[col_1 + row_1 * cols]);
-
-    float r =  q00 + (q01 - q00) * tx + (q10 - q00) * ty + tx * ty * (q00 - q01 - q10 + q11);
-
-    if(bpp == 1) return rgbf(r, 0.0, 0.0);
-
-    q00 = (float)(points[col_  + row_  * cols + 1]);
-    q01 = (float)(points[col_1 + row_  * cols + 1]);
-    q10 = (float)(points[col_  + row_1 * cols + 1]);
-    q11 = (float)(points[col_1 + row_1 * cols + 1]);
-
-    float g = q00 + (q01 - q00) * tx + (q10 - q00) * ty + tx * ty * (q00 - q01 - q10 + q11);
-
-    q00 = (float)(points[col_  + row_  * cols + 2]);
-    q01 = (float)(points[col_1 + row_  * cols + 2]);
-    q10 = (float)(points[col_  + row_1 * cols + 2]);
-    q11 = (float)(points[col_1 + row_1 * cols + 2]);
-
-    float b = q00 + (q01 - q00) * tx + (q10 - q00) * ty + tx * ty * (q00 - q01 - q10 + q11);
-
-    if(bpp == 3)
-    {
-            return rgbf(r, g, b);
-    }
-
-    q00 = float(points[col_  + row_  * cols + 3]);
-    q01 = float(points[col_1 + row_  * cols + 3]);
-    q10 = float(points[col_  + row_1 * cols + 3]);
-    q11 = float(points[col_1 + row_1 * cols + 3]);
-
-    float a = q00 + (q01 - q00) * tx + (q10 - q00) * ty + tx * ty * (q00 - q01 - q10 + q11);
-
-    return  return rgbaf(r, g, b, a);
+	int col, row, col1, row1, color = 0;
+	float tx, ty;
+	if (!uv_to_pix_local(x,y, rows, cols, &col, &row, &col1, &row1, &tx, &ty))return 0;
+	
+	float q00;
+	float q01;
+	float q10;
+	float q11;
+	
+	for(int layer = 0; layer < bpp; layer++)
+	{
+		q00 = (float)(points[(col  + row  * cols) * bpp + layer]);
+		q01 = (float)(points[(col1 + row  * cols) * bpp + layer]);
+		q10 = (float)(points[(col  + row1 * cols) * bpp + layer]);
+		q11 = (float)(points[(col1 + row1 * cols) * bpp + layer]);
+		color |= redf(q00 + (q01 - q00) * tx + (q10 - q00) * ty + tx * ty * (q00 - q01 - q10 + q11))<<(layer * 8);
+	}
+    
+	return color;
 }
 
 float cubic_poly(float x, float y, float* coefficients)
@@ -175,79 +161,117 @@ float cubic_poly(float x, float y, float* coefficients)
            (coefficients[12] + coefficients[13] * y + coefficients[14] * y2 + coefficients[15] * y3) * x3;
 };
 
-int cubic32(float x, float y, uint8* image, uint rows, uint cols, uint bpp)
+float x_derivative(int row, int col, uint8* image, uint rows, uint cols, uint bpp, uint bpp_sift)
 {
-    if(!between(x, 0.0,1.0))return 0;
-    if(!between(y, 0.0,1.0))return 0;
+	int col_prew = max(col-1, 0);
+	int col_next = min(col + 1, cols - 1);
+	return (image[(row * cols + col_next) * bpp + bpp_sift] -
+			image[(row * cols + col_prew) * bpp + bpp_sift]) * 0.5;
+};
 
-    int col_ = (int)(x * (cols - 1));
-    int row_ = (int)(y * (rows - 1));
+float y_derivative(int row, int col, uint8* image, uint rows, uint cols, uint bpp, uint bpp_sift)
+{
+	int row_prew = max(row - 1, 0);
+	int row_next = min(row + 1, rows - 1);
+	return (image[(row_next * cols + col) * bpp + bpp_sift] -
+			image[(row_prew * cols + col) * bpp + bpp_sift]) * 0.5;
+};
 
-    int col_1 = min(col_ + 1, cols - 1);
-    int row_1 = min(row_ + 1, rows - 1);
+float xy_derivative(int row, int col, uint8* image, uint rows, uint cols, uint bpp, uint bpp_sift)
+{
+    int row1 = min(row + 1, rows - 1);
+    int row0 = max(0, row - 1);
+    
+    int col1 = min(col + 1, colons - 1);
+    int col0 = max(0, col - 1);
+	
+	return (image[(row1 * cols + col1) * bpp + bpp_sift] - 
+	        image[(row1 * cols + col0) * bpp + bpp_sift]) * 0.25 -
+           (image[(row0 * cols + col1) * bpp + bpp_sift] -
+   		    image[(row0 * cols + col0) * bpp + bpp_sift]) * 0.25;
+}
 
-    float dx_ = 1.0 / (cols - 1.0);
-    float dy_ = 1.0 / (rows - 1.0);
-
-    float tx = (x - dx_ * col_) / dx_;
-    float ty = (y - dy_ * row_) / dy_;
-
-    row_ = if ty < 0.5 ?row_ : min(row_ + 1, rows - 1);
-    col_ = if tx < 0.5 ?col_ : min(col_ + 1, cols - 1);
-
-    col_ *= bpp;
-    row_ *= bpp;
-    col_1 *= bpp;
-    row_1 *= bpp;
+int bicubic32(float x, float y, uint8* image, uint rows, uint cols, int bpp)
+{
+	int col, row, col1, row1;
+	
+	float tx, ty;
+	
+	if (!uv_to_pix_local(x,y, rows, cols, &col, &row, &col1, &row1, &tx, &ty))return 0;
 
     float *b = new float[16];
-    float *c = new float[16];
-    float dx, dy, dxy;
-    int row, col, index;
+    
+	float *c = new float[16];
+    
+	int row, col, index, color = 0;
+	
+	for(int layer = 0; i < bpp; layer++)
+	{
+		b[0 ] = points[(row  * cols + col ) * bpp + layer];
+		b[4 ] = points[(row  * cols + col1) * bpp + layer];
+		b[8 ] = points[(row1 * cols + col ) * bpp + layer];
+		b[12] = points[(row1 * cols + col1) * bpp + layer];
+		b[1 ] = x_derivative (row , col , image, rows, cols, bpp, layer);
+		b[5 ] = x_derivative (row , col1, image, rows, cols, bpp, layer);
+		b[9 ] = x_derivative (row1, col , image, rows, cols, bpp, layer);
+		b[13] = x_derivative (row1, col1, image, rows, cols, bpp, layer);
+		b[2 ] = y_derivative (row , col , image, rows, cols, bpp, layer);
+		b[6 ] = y_derivative (row , col1, image, rows, cols, bpp, layer);
+		b[10] = y_derivative (row1, col , image, rows, cols, bpp, layer);
+		b[14] = y_derivative (row1, col1, image, rows, cols, bpp, layer);
+		b[3 ] = y_derivative (row , col , image, rows, cols, bpp, layer);
+		b[7 ] = xy_derivative(row , col1, image, rows, cols, bpp, layer);
+		b[11] = xy_derivative(row1, col , image, rows, cols, bpp, layer);
+		b[15] = xy_derivative(row1, col1, image, rows, cols, bpp, layer);
+		for(index = 0; index < 16; index++)
+		{
+			 c[index] = 0.0;
+		} 
+		for(index = 0; index < 256; index++)
+		{
+			row = index / 16;
+			col = index % 16;
+			c[row] += _bicubic_poly_coefficients[row * 16 + col] * b[col];
+		}
+		color |= redf(cubic_poly(tx, ty, c))<<(layer * 8);
+	}
 
-    /*
-        return (points[row, col_1] - points[row, col_0]) * 0.5, \
-           (points[row_1, col] - points[row_0, col]) * 0.5, \
-           (points[row_1, col_1] - points[row_1, col_0]) * 0.25 - \
-           (points[row_0, col_1] - points[row_0, col_0]) * 0.25
-    */
+    delete c;
+    delete b;
+	
+    return color;
+}
 
-    b[0     ]  = points[row_ * cols + col_];
-    compute_derivatives_2_at_pt(&dx, &dy, &dxy, points, row_, col_, rows, cols, bpp);
-    b[0 + 4 ] = (points[row_ * cols + (col_ + bpp) % (cols * bpp)] - points[row_ * cols, (col_ - bpp) % (cols * bpp)]) * 0.5;
-    b[0 + 8 ] = (points[row_1, col] - points[row_0, col]) * 0.5;
-    b[0 + 12] = dxy;
-
-    b[1     ]  = points[row_ * cols + col_1];
-    compute_derivatives_2_at_pt(&dx, &dy, &dxy, points, row_, col_1, rows, cols, bpp);
-    b[1 + 4 ] = dx;
-    b[1 + 8 ] = dy;
-    b[1 + 12] = dxy;
-
-    b[2     ]  = points[row_1 * cols + col_1];
-    compute_derivatives_2_at_pt(&dx, &dy, &dxy, points, row_1, col_, rows, cols, bpp);
-    b[2 + 4 ] = dx;
-    b[2 + 8 ] = dy;
-    b[2 + 12] = dxy;
-
-    b[3     ]  = points[row_1 * cols + col_1];
-    compute_derivatives_2_at_pt(&dx, &dy, &dxy, points, row_1, col_1, rows, cols, bpp);
-    b[3 + 4 ] = dx;
-    b[3 + 8 ] = dy;
-    b[3 + 12] = dxy;
-    for(index = 0; index < 16; index++) c[index] = 0;
-    for(index = 0; index < 256; index++)
-    {
-        row = index / 16;
-        col = index % 16;
-        c[row] += _bicubic_poly_coefficients[row * 16 + col] * b[col];
-    }
-
-    float r = cubic_poly(tx, ty, c);
-    if (bpp = 1)
-    {
-        delete c;
-        delete b;
-        return rgbf(r);
-    }
+void rescale(uint8* src, int src_rows, int src_cols, int src_bpp,
+			 uint8* dst, int dst_rows, int dst_cols, int dst_bpp, int method)
+{
+	int row, col, color;
+	float x_col, y_row;
+	interplator interp;
+	if(method == 0)
+	{
+		interp = nearest32;
+	}else if(method == 1)
+	{
+		interp = bilinear32;
+	}else if(method == 2)
+	{
+		interp = bicubic32;
+	}else
+	{
+		interp = nearest32;
+	}
+	int depth, index;
+	for(index = 0; i < dst_rows * dst_cols; i++)
+	{
+		col = index % dst_cols;
+		row = index / dst_cols;
+		x_col = col * 1.0 / dst_cols;
+		y_row = row * 1.0 / dst_rows;
+		color = interp(x_col, y_row, src, src_rows, src_cols, src_bpp);
+		for(depth = 0; depth < dst_bpp; depth++)
+		{
+			src[index * dst_bpp + depth] = (uint8)(color|(255 << (8 * depth)))>>(8 * depth);
+		}
+	}
 }
