@@ -76,7 +76,7 @@ class RGBA:
             if isinstance(args, RGBA):
                 return int(args)
             if isinstance(args, int):
-                return create_color_rgba(args, args, args, 0)
+                return args  # create_color_rgba(args, args, args, 0)
             if isinstance(args, float):
                 c = int(255 * args)
                 return create_color_rgba(c, c, c, 0)

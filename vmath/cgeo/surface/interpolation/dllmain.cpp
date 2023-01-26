@@ -1,10 +1,11 @@
 ﻿// dllmain.cpp : Определяет точку входа для приложения DLL.
 #include "pch.h"
-#include "image_operations.h"
+#include "interpolation.h"
 
 BOOL APIENTRY DllMain( HMODULE hModule,
                        DWORD  ul_reason_for_call,
-                       LPVOID lpReserved )
+                       LPVOID lpReserved
+                     )
 {
     switch (ul_reason_for_call)
     {

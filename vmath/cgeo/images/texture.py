@@ -1,14 +1,28 @@
-# import math
-# import time
+import ctypes
+
 from cgeo.transforms.transform2 import Transform2
 from cgeo.images.rgba import RGBA
-# import matplotlib.pyplot as plt
 from cgeo.vectors import Vec2
 from typing import Tuple
-from cgeo import gutils, mutils #, LoopTimer
+from cgeo import gutils, mutils, LoopTimer  # , LoopTimer
 from PIL import Image
 import numpy as np
-# import numba
+from ctypes import Structure, POINTER, c_int8, c_int32, CDLL
+
+
+image_op_lib = CDLL(r"E:\GitHub\CGpy\vmath\cgeo\images\Images.dll")
+
+
+class _Texture(Structure):
+    _fields_ = ("data", POINTER(c_int8)), \
+               ("bpp",  c_int8 ), \
+               ("rows", c_int32), \
+               ("cols", c_int32)
+
+
+get_color_nearest   = image_op_lib.nearest32
+get_color_bi_cubic  = image_op_lib.bicubic32
+get_color_bi_linear = image_op_lib.bilinear32
 
 _bicubic_poly_coefficients = (1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
                               0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
@@ -26,7 +40,6 @@ _bicubic_poly_coefficients = (1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
                               0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2.0, -2.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0,
                               -6.0, 6.0, 6.0, -6.0, -3.0, -3.0, 3.0, 3.0, -4.0, 4.0, -2.0, 2.0, -2.0, -2.0, -1.0, -1.0,
                               4.0, -4.0, -4.0, 4.0, 2.0, 2.0, -2.0, -2.0, 2.0, -2.0, 2.0, -2.0, 1.0, 1.0, 1.0, 1.0)
-
 
 _zero = np.uint8(0)
 
@@ -579,7 +592,7 @@ def transform_test():
     transform.sy = 0.5
     xy_ = [Vec2(-1.0 + (i % cols) * d_col, -1.0 + (i // cols) * d_row) for i in range(n_points)]
     xy = [transform.transform_vect(v) for v in xy_]
-    transform.az = np.pi / 4.0
+    transform.az = np.pi / 400.0
     # transform.sy = 1.5
     xyt = [transform.transform_vect(v) for v in xy_]
     """
@@ -594,7 +607,6 @@ def transform_test():
 """
 if __name__ == "__main__":
     loop_timer = LoopTimer()
-
     # transform_test()
     # exit()
     with loop_timer:
@@ -613,5 +625,4 @@ if __name__ == "__main__":
         texture_r = Texture.rotate(texture_r, -30)
     print(f"texture_r = Texture.rotate() time: {loop_timer.last_loop_time}")
     texture_r.show()
-
 """

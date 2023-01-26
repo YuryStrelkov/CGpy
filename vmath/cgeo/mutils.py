@@ -224,8 +224,8 @@ def compute_derivatives_2_at_pt(points: np.ndarray, row: int, col: int) -> Tuple
     col_1 = _index_calc(col + 1, colons)  # col_1 = min(colons - 1, col_ + 1)
     col_0 = _index_calc(col - 1, colons)  # col_0 = max(0, col_ - 1)
 
-    return (points[row, col_1] - points[row, col_0]) * 0.5, \
-           (points[row_1, col] - points[row_0, col]) * 0.5, \
+    return (points[row,   col_1] - points[row, col_0]) * 0.5, \
+           (points[row_1, col]   - points[row_0, col]) * 0.5, \
            (points[row_1, col_1] - points[row_1, col_0]) * 0.25 - \
            (points[row_0, col_1] - points[row_0, col_0]) * 0.25
 

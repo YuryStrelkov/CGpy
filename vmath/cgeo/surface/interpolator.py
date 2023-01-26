@@ -626,7 +626,6 @@ class Interpolator:
     def z_0(self, val: float) -> None:
         self.__origin.z = val
 
-
 """
 
 """
