@@ -225,15 +225,14 @@ class Transform:
 
     @property
     def angles(self) -> Vec3:
-        # TODO check rot_m_to_euler_angles
         return gutils.rot_m_to_euler_angles(self.rotation_mat())
 
     @angles.setter
     def angles(self, xyz: Vec3) -> None:
-        i = gutils.rotate_x(xyz.x)
-        i = gutils.rotate_y(xyz.y) * i
-        i = gutils.rotate_z(xyz.z) * i
-        scl = self.scale
+        i = gutils.rotate_x(xyz.z)
+        i = i * gutils.rotate_y(xyz.y)
+        i = i * gutils.rotate_z(xyz.x)
+        scl  = self.scale
         orig = self.origin
         self.__transform_m = i
         self.scale = scl

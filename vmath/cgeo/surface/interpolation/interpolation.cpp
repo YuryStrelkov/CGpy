@@ -2,7 +2,7 @@
 #include "interpolation.h"
 
 
-DLL_EXPORT NumpyArray1D* np_array_1d_new(I32 size, F32* data_ptr)
+DLL_EXPORT NumpyArray1D*  np_array_1d_new(I32 size, F32* data_ptr)
 {
 	assert(data_ptr);
 	NumpyArray1D* _array = (NumpyArray1D*)malloc(sizeof(NumpyArray1D));
@@ -11,15 +11,13 @@ DLL_EXPORT NumpyArray1D* np_array_1d_new(I32 size, F32* data_ptr)
 	_array->size = size;
 	return _array;
 };
-
-DLL_EXPORT void np_array_1d_del(NumpyArray1D* _array)
+DLL_EXPORT void           np_array_1d_del(NumpyArray1D* _array)
 {
 	assert(_array);
 	free(_array);
 	_array = NULL;
 };
-
-DLL_EXPORT NumpyArray2D* np_array_2d_new(I32 rows, I32 cols, F32** data_ptr)
+DLL_EXPORT NumpyArray2D*  np_array_2d_new(I32 rows, I32 cols, F32** data_ptr)
 {
 	assert(data_ptr);
 	NumpyArray2D* _array = (NumpyArray2D*)malloc(sizeof(NumpyArray2D));
@@ -29,14 +27,12 @@ DLL_EXPORT NumpyArray2D* np_array_2d_new(I32 rows, I32 cols, F32** data_ptr)
 	_array->cols = cols;
 	return _array;
 };
-
-DLL_EXPORT void np_array_2d_del(NumpyArray2D* _array)
+DLL_EXPORT void           np_array_2d_del(NumpyArray2D* _array)
 {
 	assert(_array);
 	free(_array);
 	_array = NULL;
 };
-
 DLL_EXPORT Interpolator* interpolator_new(I32 rows, I32 cols, F32** data_ptr)
 {
 	assert(data_ptr);
@@ -50,26 +46,14 @@ DLL_EXPORT Interpolator* interpolator_new(I32 rows, I32 cols, F32** data_ptr)
 	_interpolator->z0 = 0.0f;
 	return _interpolator;
 };
-
-DLL_EXPORT void interpolator_del(Interpolator* _interpolator)
+DLL_EXPORT void          interpolator_del(Interpolator* _interpolator)
 {
 	assert(_interpolator);
 	free(_interpolator);
 	_interpolator = NULL;
 };
 
-DLL_EXPORT void          interpolator_del(NumpyArray2D* interpolator)
-{
-	if (interpolator == NULL) return;
-	if (interpolator->data)
-	{
-		free(interpolator->data);
-	}
-	free(interpolator);
-	interpolator = NULL;
-}
-
-UI8 between(F32 x, F32 min, F32 max) 
+UI8 between      (F32 x, F32 min, F32 max) 
 {
 	if (x < min) return FALSE;
 	if (x > max) return FALSE;
@@ -95,7 +79,7 @@ F32 cpoint       (I32 row, I32 col, const Interpolator* interpolator)
 {
 	return interpolator->control_points->data[row][col];
 }
-F32 cubic_poly   (F32 x, F32 y, const F32* coefficients)
+F32 cubic_poly   (F32 x,   F32 y,   const F32* coefficients)
 {
 	F32 x2 = x * x;
 	F32 x3 = x2 * x;
@@ -237,27 +221,27 @@ F32  bicubic (F32 x, F32 y, const Interpolator* interpolator)
 
 	for (index = 0; index < 16; index++) c[index] = 0.0f;
 
-	c[0] = 1.0f * b[0];
-	c[1] = 1.0f * b[8];
-	c[2] = -3.0f * b[0] + 3.0f * b[2] - 2.0f * b[8] - 1.0f * b[10];
-	c[3] = 2.0f * b[0] - 2.0f * b[2] + 1.0f * b[8] + 1.0f * b[10];
-	c[4] = 1.0f * b[4];
-	c[5] = 1.0f * b[12];
-	c[6] = -3.0f * b[4] + 3.0f * b[6] - 2.0f * b[12] - 1.0f * b[14];
-	c[7] = 2.0f * b[4] - 2.0f * b[6] + 1.0f * b[12] + 1.0f * b[14];
-	c[8] = -3.0f * b[0] + 3.0f * b[1] - 2.0f * b[4] - 1.0f * b[5];
-	c[9] = -3.0f * b[8] + 3.0f * b[9] - 2.0f * b[12] - 1.0f * b[13];
-	c[10] = 9.0f * b[0] - 9.0f * b[1] - 9.0f * b[2] + 9.0f * b[3] + 6.0f * b[4] + 3.0f * b[5] - 6.0f * b[6] - 3.0f * b[7] +
-		6.0f * b[8] - 6.0f * b[9] + 3.0f * b[10] - 3.0f * b[11] + 4.0f * b[12] + 2.0f * b[13] + 2.0f * b[14] + 1.0f * b[15];
-	c[11] = -6.0f * b[0] + 6.0f * b[1] + 6.0f * b[2] - 6.0f * b[3] - 4.0f * b[4] - 2.0f * b[5] + 4.0f * b[6] + 2.0f * b[7] -
-		3.0f * b[8] + 3.0f * b[9] - 3.0f * b[10] + 3.0f * b[11] - 2.0f * b[12] - 1.0f * b[13] - 2.0f * b[14] - 1.0f * b[15];
-	c[12] = 2.0f * b[0] - 2.0f * b[1] + 1.0f * b[4] + 1.0f * b[5];
-	c[13] = 2.0f * b[8] - 2.0f * b[9] + 1.0f * b[12] + 1.0f * b[13];
-	c[14] = -6.0f * b[0] + 6.0f * b[1] + 6.0f * b[2] - 6.0f * b[3] - 3.0f * b[4] - 3.0f * b[5] + 3.0f * b[6] + 3.0f * b[7] -
-		4.0f * b[8] + 4.0f * b[9] - 2.0f * b[10] + 2.0f * b[11] - 2.0f * b[12] - 2.0f * b[13] - 1.0f * b[14] - 1.0f * b[15];
-	c[15] = 4.0f * b[0] - 4.0f * b[1] - 4.0f * b[2] + 4.0f * b[3] + 2.0f * b[4] + 2.0f * b[5] - 2.0f * b[6] - 2.0f * b[7] +
-		2.0f * b[8] - 2.0f * b[9] + 2.0f * b[10] - 2.0f * b[11] + 1.0f * b[12] + 1.0f * b[13] + 1.0f * b[14] + 1.0f * b[15];
-	
+	c[0]  =         b[0];
+	c[1]  =         b[8];
+	c[2]  = -3.0f * b[0] + 3.0f * b[2] - 2.0f * b[8] -        b[10];
+	c[3]  =  2.0f * b[0] - 2.0f * b[2] +        b[8] +        b[10];
+	c[4]  =         b[4];
+	c[5]  =         b[12];
+	c[6]  = -3.0f * b[4] + 3.0f * b[6] - 2.0f * b[12] -        b[14];
+	c[7]  =  2.0f * b[4] - 2.0f * b[6] +        b[12] +        b[14];
+	c[8]  = -3.0f * b[0] + 3.0f * b[1] - 2.0f * b[4]  -        b[5];
+	c[9]  = -3.0f * b[8] + 3.0f * b[9] - 2.0f * b[12] -        b[13];
+	c[10] =  9.0f * b[0] - 9.0f * b[1] - 9.0f * b[2]  + 9.0f * b[3]  + 6.0f * b[4]  + 3.0f * b[5]   - 6.0f * b[6] - 3.0f * b[7] +
+		     6.0f * b[8] - 6.0f * b[9] + 3.0f * b[10] - 3.0f * b[11] + 4.0f * b[12] + 2.0f * b[13] + 2.0f * b[14] +        b[15];
+	c[11] = -6.0f * b[0] + 6.0f * b[1] + 6.0f * b[2]  - 6.0f * b[3]  - 4.0f * b[4]  - 2.0f * b[5]  + 4.0f * b[6]  + 2.0f * b[7] - 
+		     3.0f * b[8] + 3.0f * b[9] - 3.0f * b[10] + 3.0f * b[11] - 2.0f * b[12] -        b[13] - 2.0f * b[14] -        b[15];
+	c[12] =  2.0f * b[0] - 2.0f * b[1] +        b[4]  +        b[5];
+	c[13] =  2.0f * b[8] - 2.0f * b[9] +        b[12] +        b[13];
+	c[14] = -6.0f * b[0] + 6.0f * b[1] + 6.0f * b[2]  - 6.0f * b[3]  - 3.0f * b[4]  - 3.0f * b[5]  + 3.0f * b[6]  + 3.0f * b[7] -
+		     4.0f * b[8] + 4.0f * b[9] - 2.0f * b[10] + 2.0f * b[11] - 2.0f * b[12] - 2.0f * b[13] -        b[14] -        b[15];
+	c[15] =  4.0f * b[0] - 4.0f * b[1] - 4.0f * b[2]  + 4.0f * b[3]  + 2.0f * b[4]  + 2.0f * b[5]  - 2.0f * b[6]  - 2.0f * b[7] +
+		     2.0f * b[8] - 2.0f * b[9] + 2.0f * b[10] - 2.0f * b[11] +        b[12] +        b[13] +        b[14] +        b[15];
+
 	F32 res = cubic_poly(tx, ty, c) + interpolator->z0;
 	
 	free(c);

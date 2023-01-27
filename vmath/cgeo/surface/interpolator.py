@@ -1,4 +1,4 @@
-# from matplotlib import pyplot as plt
+from matplotlib import pyplot as plt
 
 from cgeo.surface.interpolators import bi_linear_interp, bi_linear_interp_pt, bi_qubic_interp_pt, bi_qubic_interp, \
     bi_linear_cut, bi_qubic_cut, bi_linear_cut_along_curve, bi_qubic_cut_along_curve, bi_linear_interp_derivatives, \
@@ -634,10 +634,10 @@ if __name__  == "__main__":
     res_i.bi_cubic = True
     res_i.load("interpolator_a.json")
     print(res_i)
-    x = np.linspace(0, 1, 100)
+    x = np.linspace(0, 1, 512)
     # dxy  = res_i.interpolate_derivative2(x, x)
-    # d2xy = res_i.interpolate(x, x)
-    res_i.control_points = np.zeros((32, 32,), dtype=int)
+    d2xy = res_i.interpolate(x, x)
+    #res_i.control_points = np.zeros((32, 32,), dtype=int)
     print(res_i)
-    # plt.imshow(dxy[:, :, 1])
-    # plt.show()
+    plt.imshow(d2xy[:, :])
+    plt.show()

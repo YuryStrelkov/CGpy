@@ -1,3 +1,4 @@
+from cgeo import rotate_x, rotate_y, rotate_z, rot_m_to_euler_angles
 from cgeo.bezier.bezier_curve_3 import BezierCurve3
 from cgeo.transforms.transform import Transform
 from cgeo.surface.patch import CubicPatch
@@ -106,7 +107,28 @@ _bicubic_poly_coefficients = (1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
 
 
 if __name__ == '__main__':
+
+    ax = 90.0  # in [0:180)
+    ay = 30.0  # in [0:90)
+    az = 60.0  # in [0:180)
+
+    xr = rotate_x(ax / 180.0 * np.pi)
+    yr = rotate_y(ay / 180.0 * np.pi)
+    zr = rotate_z(az / 180.0 * np.pi)
+
+    rm = zr * yr * xr
+
+    angles = rot_m_to_euler_angles(rm)
+
+    print(rm)
+
+    print(f"=> ax: {ax:3} | ay: {ay:3} | az: {az:3}")
+
+    print(f"<= ax: {angles.x/np.pi*180:3} | ay: {angles.y/np.pi*180:3} | az: {angles.z/np.pi*180:3}")
+
+    exit()
     str_ = ""
+    cntr = 0
     for row in range(16):
         str_ += f"c[{row}] = "
         for col in range(16):
@@ -117,8 +139,9 @@ if __name__ == '__main__':
                 str_ += f"+{val:1} * b[{col:2}]"
             else:
                 str_ += f"{val:1} * b[{col:2}]"
+            cntr += 1
         str_ += ";\n"
-
+    print(f"cntr: {cntr}, cntr_percent {cntr/256 * 100:3}")
     print(str_)
 
     #time_test()

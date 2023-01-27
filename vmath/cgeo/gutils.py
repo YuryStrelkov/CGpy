@@ -95,9 +95,9 @@ def rot_m_to_euler_angles(rot: Mat4) -> Vec3:
     z1 = math.atan2(rot.m10 / math.cos(x1), rot.m00 / math.cos(x1))
     z2 = math.atan2(rot.m10 / math.cos(x2), rot.m00 / math.cos(x2))
     if (abs(x1) + abs(y1) + abs(z1)) <= (abs(x2) + abs(y2) + abs(z2)):
-        return Vec3(x1, y1, z1)
+        return Vec3(y1, x1, z1)
 
-    return Vec3(x2, y2, z2)
+    return Vec3(y2, x2, z2)
 
 
 def look_at(target: Vec3, eye: Vec3, up: Vec3 = Vec3(0, 1, 0)) -> Mat4:
