@@ -1,7 +1,7 @@
 from ctypes import Structure, POINTER, c_int8, c_int32, CDLL, c_uint32, c_float, c_char_p, c_uint8, create_string_buffer
 
 import numpy as np
-from matplotlib import pyplot as plt
+# from matplotlib import pyplot as plt
 
 from cgeo import Vec2
 from cgeo.images import RGBA
@@ -174,13 +174,13 @@ if __name__ == "__main__":
     x_b = [v.x for v in b]
     y_b = [v.y for v in b]
 
-    fig, axs = plt.subplots(1, 1)
-    axs.plot(x_, y_, 'r')
-    axs.plot(x_t, y_t, 'g')
-    axs.plot(x_b, y_b, 'b')
-    axs.set_aspect('equal', 'box')
-    axs.grid(True)
-    plt.show()
+    # fig, axs = plt.subplots(1, 1)
+    # axs.plot(x_, y_, 'r')
+    #  axs.plot(x_t, y_t, 'g')
+    # axs.plot(x_b, y_b, 'b')
+    # axs.set_aspect('equal', 'box')
+    # axs.grid(True)
+    # plt.show()
 
     # image.clear_color(RGBA(0, 255, 0))
     # image.save("test_images\\micro_clear.png")

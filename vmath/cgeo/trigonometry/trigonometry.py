@@ -1,4 +1,4 @@
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 from cgeo.trigonometry.trig_tables import SQUARE_INTERPOLATOR, LINEAR_INTERPOLATOR, A_TAN_RATIO, pi05, \
     INTERP_MODE_TABLES, SIN, pi2, COS, TAN, A_SIN, A_COS, A_TAN, pi
@@ -460,10 +460,10 @@ if __name__ == "__main__":
     asin_np = np.sin(x)
     acos_np = np.cos(x)
 
-    plt.plot(x,asin_np - asin, 'r')
-    plt.plot(x,acos_np - acos, 'g')
+   # plt.plot(x,asin_np - asin, 'r')
+   # plt.plot(x,acos_np - acos, 'g')
 
     # plt.plot(x,asin_np, ':r')
     # plt.plot(x,acos_np, ':g')
 
-    plt.show()
+   # plt.show()

@@ -22,6 +22,7 @@
 extern "C"
 {
 #endif
+	//https://asiffer.github.io/posts/numpy/
 	struct NumpyArray1D
 	{
 		F32* data;
@@ -30,9 +31,9 @@ extern "C"
 	
 	struct NumpyArray2D
 	{
-		F32** data;
-		I32   rows;
-		I32   cols;
+		F32* data;
+		I32  rows;
+		I32  cols;
 	};
 
 	struct Interpolator
@@ -47,9 +48,9 @@ extern "C"
 
 	DLL_EXPORT NumpyArray1D*  np_array_1d_new(I32 size, F32* data_ptr);
 	DLL_EXPORT void           np_array_1d_del(NumpyArray1D* _array);
-	DLL_EXPORT NumpyArray2D*  np_array_2d_new(I32 rows, I32 cols, F32** data_ptr);
+	DLL_EXPORT NumpyArray2D*  np_array_2d_new(I32 rows, I32 cols, F32* data_ptr);
 	DLL_EXPORT void           np_array_2d_del(NumpyArray2D* _array);
-	DLL_EXPORT Interpolator* interpolator_new(I32 rows, I32 cols, F32** data_ptr);
+	DLL_EXPORT Interpolator* interpolator_new(I32 rows, I32 cols, F32* data_ptr);
 	DLL_EXPORT void          interpolator_del(Interpolator* _interpolator);
 
 #define COLS(INTERPOLATOR) INTERPOLATOR->control_points->cols
@@ -73,17 +74,17 @@ extern "C"
 	F32  bilinear                               (F32 x, F32 y, const Interpolator* interpolator);
 	F32  bicubic                                (F32 x, F32 y, const Interpolator* interpolator);
 	DLL_EXPORT F32  interpolate_pt              (F32 x, F32 y, const Interpolator* interpolator, const UI8 interp_f);
-	DLL_EXPORT F32  interpolate_x_derivative_pt (F32 x, F32 y, const Interpolator* interpolator, const UI8 interp_f, const F32 delta = 1e-6f);
-	DLL_EXPORT F32  interpolate_y_derivative_pt (F32 x, F32 y, const Interpolator* interpolator, const UI8 interp_f, const F32 delta = 1e-6f);
-	DLL_EXPORT F32  interpolate_xy_derivative_pt(F32 x, F32 y, const Interpolator* interpolator, const UI8 interp_f, const F32 delta_x = 1e-6f, const F32 delta_y = 1e-6f);
+	DLL_EXPORT F32  interpolate_x_derivative_pt (F32 x, F32 y, const Interpolator* interpolator, const UI8 interp_f, const F32 delta);
+	DLL_EXPORT F32  interpolate_y_derivative_pt (F32 x, F32 y, const Interpolator* interpolator, const UI8 interp_f, const F32 delta);
+	DLL_EXPORT F32  interpolate_xy_derivative_pt(F32 x, F32 y, const Interpolator* interpolator, const UI8 interp_f, const F32 delta_x, const F32 delta_y);
 	DLL_EXPORT void interpolate                 (NumpyArray1D* result, const NumpyArray1D* x, const NumpyArray1D* y, const Interpolator* interpolator, const UI8 interp_f);
-	DLL_EXPORT void interpolate_x_derivative    (NumpyArray1D* result, const NumpyArray1D* x, const NumpyArray1D* y, const Interpolator* interpolator, const UI8 interp_f, const F32 delta = 1e-6f);
-	DLL_EXPORT void interpolate_y_derivative    (NumpyArray1D* result, const NumpyArray1D* x, const NumpyArray1D* y, const Interpolator* interpolator, const UI8 interp_f, const F32 delta = 1e-6f);
-	DLL_EXPORT void interpolate_xy_derivative   (NumpyArray1D* result, const NumpyArray1D* x, const NumpyArray1D* y, const Interpolator* interpolator, const UI8 interp_f, const F32 delta_x = 1e-6f, const F32 delta_y = 1e-6f);
+	DLL_EXPORT void interpolate_x_derivative    (NumpyArray1D* result, const NumpyArray1D* x, const NumpyArray1D* y, const Interpolator* interpolator, const UI8 interp_f, const F32 delta);
+	DLL_EXPORT void interpolate_y_derivative    (NumpyArray1D* result, const NumpyArray1D* x, const NumpyArray1D* y, const Interpolator* interpolator, const UI8 interp_f, const F32 delta);
+	DLL_EXPORT void interpolate_xy_derivative   (NumpyArray1D* result, const NumpyArray1D* x, const NumpyArray1D* y, const Interpolator* interpolator, const UI8 interp_f, const F32 delta_x, const F32 delta_y);
 	DLL_EXPORT void interpolate2                (NumpyArray2D* result, const NumpyArray1D* x, const NumpyArray1D* y, const Interpolator* interpolator, const UI8 interp_f);
-	DLL_EXPORT void interpolate_x_derivative2   (NumpyArray2D* result, const NumpyArray1D* x, const NumpyArray1D* y, const Interpolator* interpolator, const UI8 interp_f, const F32 delta = 1e-6f);
-	DLL_EXPORT void interpolate_y_derivative2   (NumpyArray2D* result, const NumpyArray1D* x, const NumpyArray1D* y, const Interpolator* interpolator, const UI8 interp_f, const F32 delta = 1e-6f);
-	DLL_EXPORT void interpolate_xy_derivative2  (NumpyArray2D* result, const NumpyArray1D* x, const NumpyArray1D* y, const Interpolator* interpolator, const UI8 interp_f, const F32 delta_x = 1e-6f, const F32 delta_y = 1e-6f);
+	DLL_EXPORT void interpolate_x_derivative2   (NumpyArray2D* result, const NumpyArray1D* x, const NumpyArray1D* y, const Interpolator* interpolator, const UI8 interp_f, const F32 delta);
+	DLL_EXPORT void interpolate_y_derivative2   (NumpyArray2D* result, const NumpyArray1D* x, const NumpyArray1D* y, const Interpolator* interpolator, const UI8 interp_f, const F32 delta);
+	DLL_EXPORT void interpolate_xy_derivative2  (NumpyArray2D* result, const NumpyArray1D* x, const NumpyArray1D* y, const Interpolator* interpolator, const UI8 interp_f, const F32 delta_x, const F32 delta_y);
 
 #ifdef __cplusplus
 }

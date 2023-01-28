@@ -17,7 +17,7 @@ DLL_EXPORT void           np_array_1d_del(NumpyArray1D* _array)
 	free(_array);
 	_array = NULL;
 };
-DLL_EXPORT NumpyArray2D*  np_array_2d_new(I32 rows, I32 cols, F32** data_ptr)
+DLL_EXPORT NumpyArray2D*  np_array_2d_new(I32 rows, I32 cols, F32* data_ptr)
 {
 	assert(data_ptr);
 	NumpyArray2D* _array = (NumpyArray2D*)malloc(sizeof(NumpyArray2D));
@@ -33,12 +33,13 @@ DLL_EXPORT void           np_array_2d_del(NumpyArray2D* _array)
 	free(_array);
 	_array = NULL;
 };
-DLL_EXPORT Interpolator* interpolator_new(I32 rows, I32 cols, F32** data_ptr)
+DLL_EXPORT Interpolator* interpolator_new(I32 rows, I32 cols, F32* data_ptr)
 {
 	assert(data_ptr);
 	Interpolator* _interpolator = (Interpolator*)malloc(sizeof(Interpolator));
 	assert(_interpolator);
 	_interpolator->control_points = np_array_2d_new(rows, cols, data_ptr);
+	assert(_interpolator->control_points);
 	_interpolator->height = 1.0f;
 	_interpolator->width = 1.0f;
 	_interpolator->x0 = 0.0f;
@@ -61,23 +62,14 @@ UI8 between      (F32 x, F32 min, F32 max)
 }
 InterplatorF  resolve_inerp_function(UI8 interpolation_method) 
 {
-	if (interpolation_method == 0)
-	{
-		return nearest;
-	}
-	if (interpolation_method == 1)
-	{
-		return bilinear;
-	}
-	if (interpolation_method == 2)
-	{
-		return bicubic;
-	}
+	if (interpolation_method == 0)return nearest;
+	if (interpolation_method == 1)return bilinear;
+	if (interpolation_method == 2)return bicubic;
 	return nearest;
 }
 F32 cpoint       (I32 row, I32 col, const Interpolator* interpolator)
 {
-	return interpolator->control_points->data[row][col];
+	return interpolator->control_points->data[row * interpolator->control_points->cols + col];
 }
 F32 cubic_poly   (F32 x,   F32 y,   const F32* coefficients)
 {
@@ -258,12 +250,12 @@ DLL_EXPORT F32  interpolate_pt              (F32 x, F32 y, const Interpolator* i
 DLL_EXPORT F32  interpolate_x_derivative_pt (F32 x, F32 y, const Interpolator* interpolator, const UI8 interp_f, const F32 delta)
 {
 	InterplatorF interp_func = resolve_inerp_function(interp_f);
-	return (interp_func(x + 0.5f * delta, y, interpolator) - interp_func(x - 0.5f * delta, y, interpolator)) / delta * 0.5f;
+	return (interp_func(x +  delta, y, interpolator) - interp_func(x - delta, y, interpolator)) * 0.5f / delta;
 }
 DLL_EXPORT F32  interpolate_y_derivative_pt (F32 x, F32 y, const Interpolator* interpolator, const UI8 interp_f, const F32 delta)
 {
 	InterplatorF interp_func = resolve_inerp_function(interp_f);
-	return (interp_func(x, y + 0.5f * delta, interpolator) - interp_func(x, y - 0.5f * delta, interpolator)) / delta * 0.5f;
+	return (interp_func(x, y + delta, interpolator) - interp_func(x, y - delta, interpolator)) * 0.5f / delta;
 }
 DLL_EXPORT F32  interpolate_xy_derivative_pt(F32 x, F32 y, const Interpolator* interpolator, const UI8 interp_f, const F32 delta_x, const F32 delta_y)
 {
@@ -287,8 +279,8 @@ DLL_EXPORT void interpolate_x_derivative (NumpyArray1D* result, const NumpyArray
 	I32 n_points = MIN(MIN(result->size, x->size), y->size);
 	for (I32 index = 0; index < n_points; index++)
 	{
-		result->data[index] = (interp_func(x->data[index] + 0.5f * delta, y->data[index], interpolator) - 
-							   interp_func(x->data[index] - 0.5f * delta, y->data[index], interpolator)) / delta * 0.5f;
+		result->data[index] = (interp_func(x->data[index] + delta, y->data[index], interpolator) - 
+							   interp_func(x->data[index] - delta, y->data[index], interpolator)) / delta * 0.5f;
 	}
 }
 DLL_EXPORT void interpolate_y_derivative (NumpyArray1D* result, const NumpyArray1D* x, const NumpyArray1D* y, const Interpolator* interpolator, const UI8 interp_f, const F32 delta)
@@ -297,8 +289,8 @@ DLL_EXPORT void interpolate_y_derivative (NumpyArray1D* result, const NumpyArray
 	I32 n_points = MIN(MIN(result->size, x->size), y->size);
 	for (I32 index = 0; index < n_points; index++)
 	{
-		result->data[index] = (interp_func(x->data[index], y->data[index] + 0.5f * delta, interpolator) -
-							   interp_func(x->data[index], y->data[index] - 0.5f * delta, interpolator)) / delta * 0.5f;
+		result->data[index] = (interp_func(x->data[index], y->data[index] + delta, interpolator) -
+							   interp_func(x->data[index], y->data[index] - delta, interpolator)) / delta * 0.5f;
 	}
 }
 DLL_EXPORT void interpolate_xy_derivative(NumpyArray1D* result, const NumpyArray1D* x, const NumpyArray1D* y, const Interpolator* interpolator, const UI8 interp_f, const F32 delta_x, const F32 delta_y)
@@ -321,11 +313,12 @@ DLL_EXPORT void interpolate2              (NumpyArray2D* result, const NumpyArra
 	I32 rows = MIN(y->size, result->rows);
 	I32 cols = MIN(x->size, result->cols);
 	I32 row, col;
+#pragma omp parallel for private(row), private(col)
 	for (I32 index = 0; index <rows * cols; index++)
 	{
 		row = index / cols;
 		col = index % cols;
-		result->data[row][col] = interp_func(x->data[col], y->data[row], interpolator);
+		result->data[index] = interp_func(x->data[col], y->data[row], interpolator);
 	}
 }
 DLL_EXPORT void interpolate_x_derivative2 (NumpyArray2D* result, const NumpyArray1D* x, const NumpyArray1D* y, const Interpolator* interpolator, const UI8 interp_f, const F32 delta)
@@ -334,12 +327,13 @@ DLL_EXPORT void interpolate_x_derivative2 (NumpyArray2D* result, const NumpyArra
 	I32 rows = MIN(y->size, result->rows);
 	I32 cols = MIN(x->size, result->cols);
 	I32 row, col;
+#pragma omp parallel for private(row), private(col)
 	for (I32 index = 0; index < rows * cols; index++)
 	{
 		row = index / cols;
 		col = index % cols;
-		result->data[row][col] = (interp_func(x->data[col] + 0.5f * delta, y->data[row], interpolator) -
-							      interp_func(x->data[col] - 0.5f * delta, y->data[row], interpolator)) / delta * 0.5f;
+		result->data[index] = (interp_func(x->data[col] + 0.5f * delta, y->data[row], interpolator) -
+							   interp_func(x->data[col] - 0.5f * delta, y->data[row], interpolator)) / delta * 0.5f;
 	}
 }
 DLL_EXPORT void interpolate_y_derivative2 (NumpyArray2D* result, const NumpyArray1D* x, const NumpyArray1D* y, const Interpolator* interpolator, const UI8 interp_f, const F32 delta)
@@ -348,12 +342,13 @@ DLL_EXPORT void interpolate_y_derivative2 (NumpyArray2D* result, const NumpyArra
 	I32 rows = MIN(y->size, result->rows);
 	I32 cols = MIN(x->size, result->cols);
 	I32 row, col;
+#pragma omp parallel for private(row), private(col)
 	for (I32 index = 0; index < rows * cols; index++)
 	{
 		row = index / cols;
 		col = index % cols;
-		result->data[row][col] = (interp_func(x->data[col], y->data[row] + 0.5f * delta, interpolator) -
-			                      interp_func(x->data[col], y->data[row] - 0.5f * delta, interpolator)) / delta * 0.5f;
+		result->data[index] = (interp_func(x->data[col], y->data[row] + 0.5f * delta, interpolator) -
+			                   interp_func(x->data[col], y->data[row] - 0.5f * delta, interpolator)) / delta * 0.5f;
 	}
 }
 DLL_EXPORT void interpolate_xy_derivative2(NumpyArray2D* result, const NumpyArray1D* x, const NumpyArray1D* y, const Interpolator* interpolator, const UI8 interp_f, const F32 delta_x, const F32 delta_y)
@@ -362,13 +357,14 @@ DLL_EXPORT void interpolate_xy_derivative2(NumpyArray2D* result, const NumpyArra
 	I32 rows = MIN(y->size, result->rows);
 	I32 cols = MIN(x->size, result->cols);
 	I32 row, col;
+#pragma omp parallel for private(row), private(col)
 	for (I32 index = 0; index < rows * cols; index++)
 	{
 		row = index / cols;
 		col = index % cols;
-		result->data[row][col] = (interp_func(x->data[col] + 0.5f * delta_x, y->data[row] + 0.5f * delta_y, interpolator) -
-								  interp_func(x->data[col] + 0.5f * delta_x, y->data[row] - 0.5f * delta_y, interpolator)) / delta_y * 0.25f -
-								 (interp_func(x->data[col] - 0.5f * delta_x, y->data[row] + 0.5f * delta_y, interpolator) -
-								  interp_func(x->data[col] - 0.5f * delta_x, y->data[row] - 0.5f * delta_y, interpolator)) / delta_y * 0.25f;
+		result->data[index] = (interp_func(x->data[col] + 0.5f * delta_x, y->data[row] + 0.5f * delta_y, interpolator) -
+							   interp_func(x->data[col] + 0.5f * delta_x, y->data[row] - 0.5f * delta_y, interpolator)) / delta_y * 0.25f -
+							  (interp_func(x->data[col] - 0.5f * delta_x, y->data[row] + 0.5f * delta_y, interpolator) -
+							   interp_func(x->data[col] - 0.5f * delta_x, y->data[row] - 0.5f * delta_y, interpolator)) / delta_y * 0.25f;
 	}
 }

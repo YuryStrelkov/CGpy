@@ -1,4 +1,4 @@
-from matplotlib import pyplot as plt
+# from matplotlib import pyplot as plt
 
 from cgeo.surface.interpolators import bi_linear_interp, bi_linear_interp_pt, bi_qubic_interp_pt, bi_qubic_interp, \
     bi_linear_cut, bi_qubic_cut, bi_linear_cut_along_curve, bi_qubic_cut_along_curve, bi_linear_interp_derivatives, \
@@ -7,7 +7,7 @@ from cgeo.surface.interpolators import bi_linear_interp, bi_linear_interp_pt, bi
     bi_cubic_interp_derivatives_pt
 from cgeo.vectors import Vec2, Vec3
 from typing import Tuple
-from cgeo import gutils
+from cgeo import gutils, LoopTimer
 import numpy as np
 import copy
 import json
@@ -147,9 +147,9 @@ class Interpolator:
                 raise RuntimeError("Interpolator :: interpolator points has to be 2-dimensional array")
             self.__control_points: np.ndarray = points
         else:
-            self.__control_points: np.ndarray = np.array([[1, 3, 1],
-                                                          [3, 1, 3],
-                                                          [1, 3, 1]], dtype=float)
+            self.__control_points: np.ndarray = np.array([[1, 3, 1, 3],
+                                                          [3, 1, 3, 1],
+                                                          [1, 3, 1, 3]], dtype=float)
 
         self.__points_file: str = "no file"
         self.__width: float = 1.0
@@ -632,12 +632,15 @@ class Interpolator:
 if __name__  == "__main__":
     res_i = Interpolator()
     res_i.bi_cubic = True
-    res_i.load("interpolator_a.json")
-    print(res_i)
-    x = np.linspace(0, 1, 512)
+    #res_i.load("interpolator_a.json")
+    #print(res_i)
+    x = np.linspace(0, 1, 1024)
     # dxy  = res_i.interpolate_derivative2(x, x)
-    d2xy = res_i.interpolate(x, x)
+    lt = LoopTimer()
+    with lt:
+        d2xy = res_i.interpolate(x, x)
+    print(f"loop time : {lt.last_loop_time}")
     #res_i.control_points = np.zeros((32, 32,), dtype=int)
-    print(res_i)
-    plt.imshow(d2xy[:, :])
-    plt.show()
+    #print(res_i)
+    # plt.imshow(d2xy[:, :])
+    # plt.show()

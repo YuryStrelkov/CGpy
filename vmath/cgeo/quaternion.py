@@ -4,13 +4,15 @@ from typing import List, Tuple
 from cgeo.vectors import Vec3
 from cgeo import gutils
 import numpy as np
-import ctypes
 import math
 
 
 class Quaternion:
     @staticmethod
     def __build_from_matrix(m: Mat4) -> Tuple[float, float, float, float]:
+        """
+        Восстонавливает кватернион из матрицы поворота
+        """
         tr = m.m00 + m.m11 + m.m22
         if tr > 0.0:
             s: float = math.sqrt(tr + 1.0)
@@ -52,14 +54,23 @@ class Quaternion:
 
     @staticmethod
     def __build_from_angles(ax: float, ay: float, az: float) -> Tuple[float, float, float, float]:
+        """
+        строит кватернион из углов
+        """
         return Quaternion.__build_from_matrix(gutils.rotate(ax, ay, az))
 
     @staticmethod
     def __build_from_quaternion(quaternion) -> Tuple[float, float, float, float]:
+        """
+        строит кватернион из кватерниона
+        """
         return quaternion.as_tuple
 
     @staticmethod
     def __build_from_axis_and_angle(axis: Vec3, angle: float) -> Tuple[float, float, float, float]:
+        """
+        строит кватернион из оси направления и угла поворота вокруг нее
+        """
         sin_half: float = trigonometry.sin(angle * 0.5)
         cos_half: float = trigonometry.cos(angle * 0.5)
         return axis.x * sin_half, axis.y * sin_half, axis.z * sin_half, cos_half
@@ -95,7 +106,7 @@ class Quaternion:
         self.__quaternion: List[float] = list(Quaternion.__unpack_args(args))
 
     def __sizeof__(self):
-        return ctypes.c_float * 4
+        return 16
 
     def __eq__(self, other):
         if not isinstance(other, Quaternion):
@@ -138,6 +149,9 @@ class Quaternion:
     #####  + operetor   ######
     ##########################
     def __iadd__(self, *args):
+        """
+        сложение(+=) кватениона с кватернионом или числом или вектором или матрицей поворота...
+        """
         other = self.__unpack_args(args)
         self.ex += other[0]
         self.ey += other[1]
@@ -146,6 +160,9 @@ class Quaternion:
         return self
 
     def __add__(self, *args):
+        """
+        сложение(+) кватениона с кватернионом или числом или вектором или матрицей поворота...
+        """
         other = Quaternion.__unpack_args(args)
         return Quaternion(self.ex + other[0],
                           self.ey + other[1],
@@ -158,6 +175,9 @@ class Quaternion:
     #####  - operetor   ######
     ##########################
     def __isub__(self, *args):
+        """
+        вычитание(-=) кватениона с кватернионом или числом или вектором или матрицей поворота...
+        """
         other = self.__unpack_args(args)
         self.ex -= other[0]
         self.ey -= other[1]
@@ -166,6 +186,9 @@ class Quaternion:
         return self
 
     def __sub__(self, *args):
+        """
+        вычитание(-) кватениона с кватернионом или числом или вектором или матрицей поворота...
+        """
         other = Quaternion.__unpack_args(args)
         return Quaternion(self.ex - other[0],
                           self.ey - other[1],
@@ -173,6 +196,9 @@ class Quaternion:
                           self.ew - other[3])
 
     def __rsub__(self, *args):
+        """
+        вычитание(-) кватениона с кватернионом или числом или вектором или матрицей поворота...
+        """
         other = Quaternion.__unpack_args(args)
         return Quaternion(other[0] - self.ex,
                           other[1] - self.ey,
@@ -183,6 +209,9 @@ class Quaternion:
     #####  * operetor   ######
     ##########################
     def __imul__(self, *args):
+        """
+        произведение(*=) кватениона с кватернионом или числом или вектором или матрицей поворота...
+        """
         """
         https://github.com/BennyQBD/3DGameEngine/blob/master/src/com/base/engine/core/Quaternion.java
         """
@@ -198,6 +227,9 @@ class Quaternion:
         return self
 
     def __mul__(self, *args):
+        """
+        произведение(*) кватениона с кватернионом или числом или вектором или матрицей поворота...
+        """
         q = Quaternion(self)
         q *= args
         return q
@@ -210,18 +242,30 @@ class Quaternion:
 
     @staticmethod
     def dot(a, b) -> float:
+        """
+        скалярное произведение кватернионов
+        """
         return a.ex * b.ex + a.ey * b.ey + a.ez * b.ez + a.ew * b.ew
 
     @classmethod
     def max(cls, a, b):
+        """
+        максимум двух кватернионов
+        """
         return cls(max(a.ex, b.ex), max(a.ey, b.ey), max(a.ez, b.ez), max(a.ew, b.ew))
 
     @classmethod
     def min(cls, a, b):
+        """
+        минимум двух кватернионов
+        """
         return cls(min(a.ex, b.ex), min(a.ey, b.ey), min(a.ez, b.ez), min(a.ew, b.ew))
 
     @classmethod
     def s_lerp(cls, q_start, q_destination, blend_factor: float):
+        """
+        сферическая интерполяция двух кватернионов
+        """
         cos_omega: float  = cls.dot(q_start, q_destination)
         k: float = 1.0
         if cos_omega < 0.0:
@@ -247,6 +291,9 @@ class Quaternion:
 
     @staticmethod
     def rotate_vec(q, vec: Vec3) -> Vec3:
+        """
+        действие кватерниона на вектор (поворот вектора с помощью кватерниона)
+        """
         return q.rot_vec(vec)
 
     def unique_id(self) -> int:
@@ -259,6 +306,9 @@ class Quaternion:
                 break
 
     def normalize(self):
+        """
+        Нормализация кватерниона
+        """
         nrm = self.magnitude
         if abs(nrm) < 1e-12:
             raise ArithmeticError("zero length vector")
@@ -270,6 +320,9 @@ class Quaternion:
         return self
 
     def normalized(self):
+        """
+        Нормализованная копия кватерниона
+        """
         nrm = self.magnitude
         if abs(nrm) < 1e-12:
             raise ArithmeticError("zero length vector")
@@ -278,8 +331,7 @@ class Quaternion:
 
     def conj(self):
         """
-        conj self
-        :return:
+        сопряжение кватерниона
         """
         self.ex *= -1.0
         self.ey *= -1.0
@@ -288,8 +340,7 @@ class Quaternion:
 
     def conjugate(self):
         """
-        returns new conjugated Quaternion
-        :return:
+        сопряженная копия кватерниона
         """
         return Quaternion(self.ex * -1.0,
                           self.ey * -1.0,
@@ -297,22 +348,34 @@ class Quaternion:
                           self.ew)
 
     def inv(self):
+        """
+        обращение кватерниона (обратный кватернион)
+        """
         self.conj()
         self.normalize()
         return self
 
     def inverse(self):
+        """
+        обращение копии кватерниона (обратный кватернион)
+        """
         q = self.conjugate()
         q.normalize()
         return q
 
     def rot_vec(self, vec: Vec3) -> Vec3:
+        """
+        действие кватерниона на вектор (поворот вектора с помощью кватерниона)
+        """
         q_conj = self.conjugate()
         q = self * vec * q_conj
         return Vec3(q.x, q.y, q.z)
 
     @property
     def as_rot_mat(self) -> Mat4:
+        """
+        Перевод кватерниона в матрицу поворота
+        """
         xx = self.ex * self.ex * 2.0
         xy = self.ex * self.ey * 2.0
         xz = self.ex * self.ez * 2.0
@@ -348,6 +411,9 @@ class Quaternion:
 
     @property
     def magnitude(self) -> float:
+        """
+        модуль длины кватерниона
+        """
         return math.sqrt(self.ex * self.ex +
                          self.ey * self.ey +
                          self.ez * self.ez +

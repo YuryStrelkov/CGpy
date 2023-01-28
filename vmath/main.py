@@ -1,4 +1,6 @@
-from cgeo import rotate_x, rotate_y, rotate_z, rot_m_to_euler_angles
+from matplotlib import pyplot as plt
+
+from cgeo import rotate_x, rotate_y, rotate_z, rot_m_to_euler_angles, mutils
 from cgeo.bezier.bezier_curve_3 import BezierCurve3
 from cgeo.transforms.transform import Transform
 from cgeo.surface.patch import CubicPatch
@@ -108,6 +110,14 @@ _bicubic_poly_coefficients = (1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
 
 if __name__ == '__main__':
 
+    pnts = [(1.0, 1.0), (2.0, 2.0), (3.0, 1.0), (4.0, -2.0), (5.0, 1.0), (3.0, 2.0), (10, -1)]
+    xy = mutils.quad_interpolate_line2(pnts)
+    x = [v[0] for v in xy]
+    y = [v[1] for v in xy]
+    plt.plot(x, y, 'r')
+    [plt.plot(px, py, "go") for (px, py) in pnts]
+    plt.show()
+
     ax = 90.0  # in [0:180)
     ay = 30.0  # in [0:90)
     az = 60.0  # in [0:180)
@@ -149,7 +159,8 @@ if __name__ == '__main__':
     transforms_3_test()
     #surface_test()
     #bezier_test()
-    from cgeo.mutils import list_max
+    from cgeo.mutils import list_max, quad_interpolate_line2
+
     _list = [1, 1, 2, 34, 5, 2, 3, 51, 12, 3, 12, 4, 33, 12, 6]
     _id, _item = list_max(_list)
     print(f"id: {_id}, item: {_item}")

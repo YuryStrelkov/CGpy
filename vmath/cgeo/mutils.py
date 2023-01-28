@@ -1,14 +1,14 @@
 from math import sqrt, pi, exp
-from typing import Tuple, Any
-# from numba import prange
+from typing import Tuple, Any, List
 import numpy as np
 import operator
-# import numba
+
 
 _2pij = 2j * pi
 
 numerical_precision: float = 1e-9
 Vector2 = Tuple[float, float]
+Vector3 = Tuple[float, float, float]
 
 
 def smooth_step(value: float, bound_1: float, bound_2: float) -> float:
@@ -193,9 +193,72 @@ def rad_to_dec(rho: np.ndarray, phi: np.ndarray) -> Tuple[np.ndarray, np.ndarray
     raise Exception("rad_to_dec :: rho and phi has to be 1 or 2 dimensional")
 
 
-# @numba.njit(fastmath=True)
-def _index_calc(index: int, indices_range: int) -> int:
-    return index % indices_range
+def _seg_quad_interp(dp1: float, p1: float, p2: float, n_points: int = 9) -> Tuple[List[float], float]:
+    dt = 1.0 / (n_points - 1)
+    x = [(p2 - p1 - dp1) * (dt * i)**2 + dp1 * dt * i + p1 for i in range(n_points)]
+    return x, (x[-1] - x[-2]) / dt
+
+
+def _seg_quad_interp2(dp1: Vector2, p1: Vector2, p2: Vector2, n_points: int = 9) -> Tuple[List[Vector2], Vector2]:
+    dt = 1.0 / (n_points - 1)
+    points: List[Vector2] = []
+    for i in range(n_points):
+        t_curr = i * dt
+        points.append(((p2[0] - p1[0] - dp1[0]) * t_curr**2 + dp1[0] * t_curr + p1[0],
+                       (p2[1] - p1[1] - dp1[1]) * t_curr**2 + dp1[1] * t_curr + p1[1]))
+    return points, ((points[-1][0] - points[-2][0]) / dt, (points[-1][1] - points[-2][1]) / dt)
+
+
+def _seg_quad_interp3(dp1: Vector3, p1: Vector3, p2: Vector3, n_points: int = 9) -> Tuple[List[Vector3], Vector3]:
+    dt = 1.0 / (n_points - 1)
+    points: List[Vector3] = []
+    for i in range(n_points):
+        t_curr = i * dt
+        points.append(((p2[0] - p1[0] - dp1[0]) * t_curr**2 + dp1[0] * t_curr + p1[0],
+                       (p2[1] - p1[1] - dp1[1]) * t_curr**2 + dp1[1] * t_curr + p1[1],
+                       (p2[2] - p1[2] - dp1[2]) * t_curr**2 + dp1[2] * t_curr + p1[2]))
+
+    return points, ((points[-1][0] - points[-2][0]) / dt,
+                    (points[-1][1] - points[-2][1]) / dt,
+                    (points[-1][2] - points[-2][2]) / dt )
+
+
+def quad_interpolate_line(points: List[float], start_derivative: float = 1.0, segment_steps: int = 32) -> List[float]:
+    n_points = len(points)
+    xs = []
+    dp = start_derivative
+    for i in range(0, n_points-1):
+        p1 = points[i]
+        p2 = points[min(i + 1, n_points - 1)]
+        x, dp = _seg_quad_interp(dp, p1, p2, segment_steps)
+        xs.extend(x)
+    return xs
+
+
+def quad_interpolate_line2(points: List[Vector2], start_derivative: Vector2 = (1, 0), segment_steps: int = 32) ->\
+        List[Vector2]:
+    n_points = len(points)
+    xs = []
+    dp = start_derivative
+    for i in range(0, n_points-1):
+        p1 = points[i]
+        p2 = points[min(i + 1, n_points - 1)]
+        x, dp = _seg_quad_interp2(dp, p1, p2, segment_steps)
+        xs.extend(x)
+    return xs
+
+
+def quad_interpolate_line3(points: List[Vector3], start_derivative: Vector3 = (1, 1, 1), segment_steps: int = 32) ->\
+        List[Vector3]:
+    n_points = len(points)
+    xs = []
+    dp = start_derivative
+    for i in range(0, n_points-1):
+        p1 = points[i]
+        p2 = points[min(i + 1, n_points - 1)]
+        x, dp = _seg_quad_interp3(dp, p1, p2, segment_steps)
+        xs.extend(x)
+    return xs
 
 
 # @numba.njit(fastmath=True)
@@ -218,11 +281,11 @@ def compute_derivatives_2_at_pt(points: np.ndarray, row: int, col: int) -> Tuple
     if not _in_range(col, 0, colons - 1):
         return 0.0, 0.0, 0.0
 
-    row_1 = _index_calc(row + 1, rows)  # min(rows - 1, row_ + 1)
-    row_0 = _index_calc(row - 1, rows)  # max(0, row_ - 1)
+    row_1 =  min(rows - 1, row + 1)
+    row_0 =  max(0, row - 1)
 
-    col_1 = _index_calc(col + 1, colons)  # col_1 = min(colons - 1, col_ + 1)
-    col_0 = _index_calc(col - 1, colons)  # col_0 = max(0, col_ - 1)
+    col_1 = min(colons - 1, col + 1)
+    col_0 = max(0, col - 1)
 
     return (points[row,   col_1] - points[row, col_0]) * 0.5, \
            (points[row_1, col]   - points[row_0, col]) * 0.5, \
@@ -250,11 +313,11 @@ def compute_derivatives_at_pt(points: np.ndarray, row: int, col: int) -> Vector2
     if not _in_range(col, 0, colons - 1):
         return 0.0, 0.0
 
-    row_1 = _index_calc(row + 1, rows)  # min(rows - 1, row_ + 1)
-    row_0 = _index_calc(row - 1, rows)  # max(0, row_ - 1)
+    row_1 =  min(rows - 1, row + 1)
+    row_0 =  max(0, row - 1)
 
-    col_1 = _index_calc(col + 1, colons)  # col_1 = min(colons - 1, col_ + 1)
-    col_0 = _index_calc(col - 1, colons)  # col_0 = max(0, col_ - 1)
+    col_1 = min(colons - 1, col + 1)
+    col_0 = max(0, col - 1)
 
     return (points[row, col_1] - points[row, col_0]) * 0.5, \
            (points[row_1, col] - points[row_0, col]) * 0.5
