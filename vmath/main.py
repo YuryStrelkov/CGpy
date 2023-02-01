@@ -109,7 +109,6 @@ _bicubic_poly_coefficients = (1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
 
 
 if __name__ == '__main__':
-
     pnts = [(5.0, 5.0), (10.0, 10.0), (15.0, 5.0), (20.0, -10.0), (15.0, 10.0), (15.0, 20.0), (50, -5)]
     xy = mutils.quad_interpolate_line2(pnts)
     x = [v[0] for v in xy]
@@ -142,9 +141,9 @@ if __name__ == '__main__':
 
     print(f"<= ax: {angles.x/np.pi*180:3} | ay: {angles.y/np.pi*180:3} | az: {angles.z/np.pi*180:3}")
 
-    anglesq = rot_m_to_euler_angles(qm)
+    angles_q = rot_m_to_euler_angles(qm)
 
-    print(f"<= ax: {anglesq.x/np.pi*180:3} | ay: {anglesq.y/np.pi*180:3} | az: {anglesq.z/np.pi*180:3}")
+    print(f"<= ax: {angles_q.x/np.pi*180:3} | ay: {angles_q.y/np.pi*180:3} | az: {angles_q.z/np.pi*180:3}")
 
     exit()
     str_ = ""

@@ -1,3 +1,4 @@
+
 from cgeo.circ_buffer import CircBuffer
 from typing import Callable
 from cgeo import mutils
@@ -141,3 +142,22 @@ class RealTimeFilter:
     def save_settings(self, settings_file: str) -> None:
         with open(settings_file, "wt") as output:
             print(self, file=output)
+
+
+"""
+if __name__ == "__main__":
+    import matplotlib.pyplot as plt
+    import random
+
+    x = [i for i in range(1000)]
+    y = [random.uniform(-3, 3) + 10 + 10*math.sin(i * 0.05) for i in range(1000)]
+    filter_ = RealTimeFilter()
+    filter_.mode = 2
+    filter_.k_arg = 0.1
+    filter_.kalman_error = 1.0
+    print(filter_)
+    yf = [filter_.filter(xi) for xi in y]
+    plt.plot(x, y, 'r')
+    plt.plot(x, yf, 'g')
+    plt.show()
+"""

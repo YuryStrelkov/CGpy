@@ -46,7 +46,7 @@ class Quaternion:
         s = math.sqrt((m[i * 4 + i] - (m[j * 4 + j] + m[k * 4 + k])) + 1.0)
         quaternion[i] = s * 0.5
         if s != 0.0:
-            s = 0.5  / s
+            s = 0.5 / s
         quaternion[j] = (m[i * 4 + j] + m[j * 4 + i]) * s
         quaternion[k] = (m[i * 4 + k] + m[k * 4 + i]) * s
         quaternion[3] = (m[j * 4 + k] - m[k * 4 + j]) * s
@@ -368,7 +368,7 @@ class Quaternion:
         действие кватерниона на вектор (поворот вектора с помощью кватерниона)
         """
         q_conj = self.conjugate()
-        q = self * vec * q_conj
+        q = (self * vec) * q_conj
         return Vec3(q.x, q.y, q.z)
 
     @property
