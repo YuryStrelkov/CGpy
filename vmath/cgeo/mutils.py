@@ -11,6 +11,10 @@ Vector2 = Tuple[float, float]
 Vector3 = Tuple[float, float, float]
 
 
+def is_close(value_a: float, value_b: float, tolerance: float) -> bool:
+    return abs(value_a - value_b) < tolerance
+
+
 def smooth_step(value: float, bound_1: float, bound_2: float) -> float:
     if value <= bound_1:
         return bound_1

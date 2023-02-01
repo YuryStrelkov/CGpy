@@ -1,6 +1,6 @@
 #include "pch.h"
-#include "image_operations.h"
 #include <math.h>
+#include "image_operations.h"
 
 CSTR            get_filename_ext(CSTR filename) {
 	CSTR dot = strrchr(filename, '.');
@@ -23,8 +23,8 @@ DLL_EXPORT Image*      image_new(I32 w, I32 h, I8 bpp)
 {
 	Image* image = (Image*)malloc(sizeof(Image));
 	if (image == NULL) return image;
-	image->rows = h;
 	image->cols = w;
+	image->rows = h;
 	image->bpp  = bpp;
 	image->data = w * h * bpp == 0 ? NULL : (UI8*)malloc(sizeof(UI8) * image->rows * image->cols * image->bpp);
 	return image;
@@ -404,101 +404,90 @@ Interplator  resolve_inerp_function(UI8 interpolation_method)
 	}
 	return nearest32;
 }
- 
-void transfrom_point(const Mat3x3* transform_m, F32 u, F32 v, F32* ut, F32* vt)
-{
-	*ut = transform_m->m00 * u + transform_m->m01 * v + transform_m->m02;
-	*vt = transform_m->m10 * u + transform_m->m11 * v + transform_m->m12;
-}
 
-F32 transform_sx(const Mat3x3* transform_m)
+void expand_bounds(const Mat3x3& tm, const Image& src, I32& width, I32& height)
 {
-	return sqrtf(transform_m->m00 * transform_m->m00 + transform_m->m10 * transform_m->m10);
-}
-
-F32 transform_sy(const Mat3x3* transform_m) 
-{
-	return sqrtf(transform_m->m01 * transform_m->m01 + transform_m->m11 * transform_m->m11);
-}
-
-void expand_bounds(const Mat3x3* tm, const Image* src, I32* width, I32* height) 
-{
-	F32 x0 = -1.0f;
-	F32 x1 =  1.0f;
-	F32 y0 = -1.0f;
-	F32 y1 =  1.0f;
+	
+	F32 x0 = -0.5f * src.cols;
+	F32 x1 =  0.5f * src.cols;
+	F32 y0 = -0.5f * src.rows;
+	F32 y1 =  0.5f * src.rows;
 
 	F32 x, y;
 	F32 x_min =  1e12f, y_min =  1e12f;
 	F32 x_max = -1e12f, y_max = -1e12f;
+
+	transform_point(x, y, x0, y0, tm);
+	x_min = MIN(x, x_min);
+	x_max = MAX(x, x_max);
+	y_min = MIN(y, y_min);
+	y_max = MAX(y, y_max);
+
+	transform_point(x, y, x1, y0, tm);
+	x_min = MIN(x, x_min);
+	x_max = MAX(x, x_max);
+	y_min = MIN(y, y_min);
+	y_max = MAX(y, y_max);
+
+	transform_point(x, y, x0, y1, tm);
+	x_min = MIN(x, x_min);
+	x_max = MAX(x, x_max);
+	y_min = MIN(y, y_min);
+	y_max = MAX(y, y_max);
+
+	transform_point(x, y, x1, y1, tm);
+	x_min = MIN(x, x_min);
+	x_max = MAX(x, x_max);
+	y_min = MIN(y, y_min);
+	y_max = MAX(y, y_max);
 	
-	transfrom_point(tm, x0, y0, &x, &y);
-	x_min = MIN(x, x_min);
-	x_max = MAX(x, x_max);
-	y_min = MIN(y, y_min);
-	y_max = MAX(y, y_max);
-
-	transfrom_point(tm, x1, y0, &x, &y);
-	x_min = MIN(x, x_min);
-	x_max = MAX(x, x_max);
-	y_min = MIN(y, y_min);
-	y_max = MAX(y, y_max);
-
-	transfrom_point(tm, x0, y1, &x, &y);
-	x_min = MIN(x, x_min);
-	x_max = MAX(x, x_max);
-	y_min = MIN(y, y_min);
-	y_max = MAX(y, y_max);
-
-	transfrom_point(tm, x1, y1, &x, &y);
-	x_min = MIN(x, x_min);
-	x_max = MAX(x, x_max);
-	y_min = MIN(y, y_min);
-	y_max = MAX(y, y_max);
-
-	*width  = I32((x_max - x_min) * 0.5f * src->cols);
-	*height = I32((y_max - y_min) * 0.5f * src->rows);
+	// F32 aspect_src = (src.cols * 1.0f) / src.rows;
+	width  = I32((x_max - x_min));// * 0.5f * src.cols);
+	height = I32((y_max - y_min));// * 0.5f * src.rows);
 }
 
 DLL_EXPORT Image* transform(F32* transform, const Image* src, const  UI8 interp_f, const UI8 expand)
 {
 	const Mat3x3* transform_m = (const Mat3x3*)transform;
+
 	Image* dst;
+	
+	F32 v, u, vt, ut, sx, sy, aspect_src, aspect_dst;
 	
 	if (expand) 
 	{
 		I32 w, h;
-		expand_bounds(transform_m, src, &w, &h);
+		expand_bounds(*transform_m, *src, w, h);
 		dst = image_new(w, h, src->bpp);
+		sx = (1.0f * w) / src->cols;
+		sy = (1.0f * h) / src->rows;
 	}
 	else 
 	{
+		sx = 1.0f;
+		sy = 1.0f;
 		dst = image_new(src->cols, src->rows, src->bpp);
 	}
 
 	Interplator interpolator = resolve_inerp_function(interp_f);
 
-	F32 v, u, vt, ut, sx, sy;
+	aspect_src = (src->cols * 1.0f) / src->rows;
+	aspect_dst = (dst->cols * 1.0f) / dst->rows;
 	F32 dv = 1.0f / (dst->cols - 1),
-		du = 1.0f / (dst->rows - 1),
-		aspect, aspect1;
-	
-	sx = transform_sx(transform_m);
-	sy = transform_sy(transform_m);
-
-	aspect  = (src->cols * 1.0f) / src->rows * sy / sx;
-	aspect1 = (dst->cols * 1.0f) / dst->rows;
+		du = 1.0f / (dst->rows - 1);
 
 	I32 layer, index, col, row;
 
 	for (index = 0; index < dst->rows * dst->cols; index++)
 	{
-		v = ((index % dst->cols) * dv * 2.0f - 1.0f);
-		u = ((index / dst->cols) * du * 2.0f - 1.0f) / aspect1;
+		v = ((index % dst->cols) * dv * 2.0f - 1.0f) * sx * aspect_src;
+		u = ((index / dst->cols) * du * 2.0f - 1.0f) * sy ;
 
-		transfrom_point(transform_m, u, v, &ut, &vt);
-		 
- 		I32 color = interpolator((vt + 1.0f) * 0.5f,  (ut * aspect + 1.0f) * 0.5f, src);
+		transform_point(ut, vt, u, v, *transform_m);
+
+		vt /= aspect_src;
+
+ 		I32 color = interpolator((vt + 1.0f) * 0.5f,  (ut + 1.0f) * 0.5f, src);
 
 		for (layer = 0; layer < dst->bpp; layer++)
 		{

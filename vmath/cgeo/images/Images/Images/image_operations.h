@@ -1,10 +1,10 @@
 #ifndef __IMAGE_OPERATIONS_H__
 #define __IMAGE_OPERATIONS_H__
-
 #include <stdlib.h>
 #include <cassert>
 #include "stb_image.h"
 #include "stb_image_write.h"
+#include "Transform.h"
 #define TRUE  1
 #define FALSE 0
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
@@ -29,14 +29,6 @@ struct Image
 	I32 rows;
 	I32 cols;
 };
-
-struct Mat3x3
-{
-	F32 m00, m01, m02;
-	F32 m10, m11, m12;
-	F32 m20, m21, m22;
-};
-
 
 typedef I32(*Interplator)(F32, F32, const Image*);
 
@@ -100,13 +92,13 @@ DLL_EXPORT I32 bilinear32(F32 x, F32 y, const Image* image);
 
 DLL_EXPORT I32 bicubic32 (F32 x, F32 y, const Image* image);
 
-void transfrom_point(const Mat3x3* transform_m, F32 u, F32 v, F32* ut, F32* vt);
+// void transfrom_point(const Mat3x3* transform_m, F32 u, F32 v, F32* ut, F32* vt);
 
-F32 transform_sx(const Mat3x3* transform_m);
+// F32 transform_sx(const Mat3x3* transform_m);
 
-F32 transform_sy(const Mat3x3* transform_m);
+// F32 transform_sy(const Mat3x3* transform_m);
 
-void expand_bounds(const Mat3x3* tm, const Image* src, I32* width, I32* height);
+void expand_bounds(const Mat3x3& tm, const Image& src, I32& width, I32& height);
 
 DLL_EXPORT Image* transform(F32* transform, const Image* src, const  UI8 interp_f, const UI8 expand);
 

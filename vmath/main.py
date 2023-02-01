@@ -1,6 +1,6 @@
 from matplotlib import pyplot as plt
 
-from cgeo import rotate_x, rotate_y, rotate_z, rot_m_to_euler_angles, mutils
+from cgeo import rotate_x, rotate_y, rotate_z, rot_m_to_euler_angles, mutils, Quaternion
 from cgeo.bezier.bezier_curve_3 import BezierCurve3
 from cgeo.transforms.transform import Transform
 from cgeo.surface.patch import CubicPatch
@@ -110,7 +110,7 @@ _bicubic_poly_coefficients = (1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
 
 if __name__ == '__main__':
 
-    pnts = [(1.0, 1.0), (2.0, 2.0), (3.0, 1.0), (4.0, -2.0), (5.0, 1.0), (3.0, 2.0), (10, -1)]
+    pnts = [(5.0, 5.0), (10.0, 10.0), (15.0, 5.0), (20.0, -10.0), (15.0, 10.0), (15.0, 20.0), (50, -5)]
     xy = mutils.quad_interpolate_line2(pnts)
     x = [v[0] for v in xy]
     y = [v[1] for v in xy]
@@ -118,9 +118,9 @@ if __name__ == '__main__':
     [plt.plot(px, py, "go") for (px, py) in pnts]
     plt.show()
 
-    ax = 90.0  # in [0:180)
-    ay = 30.0  # in [0:90)
-    az = 60.0  # in [0:180)
+    ax = 36.0  # in [0:180)
+    ay = 47.0  # in [0:90)
+    az = 58.0  # in [0:180)
 
     xr = rotate_x(ax / 180.0 * np.pi)
     yr = rotate_y(ay / 180.0 * np.pi)
@@ -130,11 +130,21 @@ if __name__ == '__main__':
 
     angles = rot_m_to_euler_angles(rm)
 
+    q = Quaternion(ax / 180.0 * np.pi, ay / 180.0 * np.pi, az / 180.0 * np.pi)
+
+    qm = q.as_rot_mat
+
+    print(qm)
+
     print(rm)
 
     print(f"=> ax: {ax:3} | ay: {ay:3} | az: {az:3}")
 
     print(f"<= ax: {angles.x/np.pi*180:3} | ay: {angles.y/np.pi*180:3} | az: {angles.z/np.pi*180:3}")
+
+    anglesq = rot_m_to_euler_angles(qm)
+
+    print(f"<= ax: {anglesq.x/np.pi*180:3} | ay: {anglesq.y/np.pi*180:3} | az: {anglesq.z/np.pi*180:3}")
 
     exit()
     str_ = ""
@@ -159,9 +169,4 @@ if __name__ == '__main__':
     transforms_3_test()
     #surface_test()
     #bezier_test()
-    from cgeo.mutils import list_max, quad_interpolate_line2
-
-    _list = [1, 1, 2, 34, 5, 2, 3, 51, 12, 3, 12, 4, 33, 12, 6]
-    _id, _item = list_max(_list)
-    print(f"id: {_id}, item: {_item}")
 

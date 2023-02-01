@@ -11,8 +11,8 @@ from cgeo.transforms import Transform2
 
 path = os.getcwd()
 #E:\GitHub\CGpy\vmath\cgeo\images\Images\x64\Release
-image_op_lib = CDLL(path + "\Images.dll")
-#image_op_lib = CDLL(r"E:\GitHub\CGpy\vmath\cgeo\images\Images\x64\Release\Images.dll")
+#image_op_lib = CDLL(path + "\Images.dll")
+image_op_lib = CDLL(r"E:\GitHub\CGpy\vmath\cgeo\images\Images\x64\Release\Images.dll")
 
 
 class _Image(Structure):
@@ -102,7 +102,7 @@ class Image:
 
     def transform(self, t: Transform2):
         tr_ptr = c_float * 9
-        transformed = transform(tr_ptr(*t.transform_matrix.as_list), self.__image, self.__interp_mode, 0)
+        transformed = transform(tr_ptr(*t.transform_matrix.as_list), self.__image, self.__interp_mode, 1)
         image_del(self.__image)
         self.__image = transformed
 
@@ -149,12 +149,11 @@ def get_bounds(t: Transform2):
     return [Vec2(x_min, y_min), Vec2(x_min, y_max), Vec2(x_max, y_max), Vec2(x_max, y_min), Vec2(x_min, y_min)]
 
 
-
 if __name__ == "__main__":
     trnsfrm = Transform2()
-    trnsfrm.az = 0.0 #  -np.pi * 0.1
-    trnsfrm.sx = 0.5
-    trnsfrm.sy = 0.5
+    # trnsfrm.az =  -np.pi * 0.05
+    trnsfrm.sx = 0.50
+    trnsfrm.sy = 0.50
 
     image = Image()
     image.load("test_images\\iceland.png")

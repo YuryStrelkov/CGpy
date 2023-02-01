@@ -30,9 +30,9 @@ def rotate_y(angle: float) -> Mat4:
      """
     cos_a = math.cos(angle)
     sin_a = math.sin(angle)
-    return Mat4(cos_a, 0, -sin_a, 0,
+    return Mat4(cos_a, 0, sin_a, 0,
                 0, 1, 0, 0,
-                sin_a, 0, cos_a, 0,
+                -sin_a, 0, cos_a, 0,
                 0, 0, 0, 1)
 
 
@@ -82,18 +82,29 @@ def rot_m_to_euler_angles(rot: Mat4) -> Vec3:
     :param rot: матрица поворота
     :return: углы поворота по осям
     """
+
+    # psi, theta, phi = x, y, z
+
     if math.fabs(rot.m20 + 1) < 1e-6:
-        return Vec3(0, -math.pi * 0.5, math.atan2(rot.m01, rot.m02))
+        return Vec3(0, math.pi * 0.5, math.atan2(rot.m01, rot.m02))
 
     if math.fabs(rot.m20 - 1) < 1e-6:
-        return Vec3(0, math.pi * 0.5, math.atan2(-rot.m01, -rot.m02))
-
-    x1 = math.asin(rot.m20)
+        return Vec3(0, -math.pi * 0.5, math.atan2(-rot.m01, -rot.m02))
+    """
+        y = -math.asin(R[2,0])
+        cos_theta = math.cos(theta)
+        x = math.atan2(rot[2,1]/cos_theta, rot[2,2]/cos_theta)
+        z = math.atan2(rot[1,0]/cos_theta, rot[0,0]/cos_theta)
+    """
+    x1 = -math.asin(rot.m20)
+    inv_cos_x1 = 1.0 / math.cos(x1)
     x2 = math.pi + x1
-    y1 = math.atan2(rot.m21 / math.cos(x1), rot.m22 / math.cos(x1))
-    y2 = math.atan2(rot.m21 / math.cos(x2), rot.m22 / math.cos(x2))
-    z1 = math.atan2(rot.m10 / math.cos(x1), rot.m00 / math.cos(x1))
-    z2 = math.atan2(rot.m10 / math.cos(x2), rot.m00 / math.cos(x2))
+    inv_cos_x2 = 1.0 / math.cos(x1)
+
+    y1 = math.atan2(rot.m21 * inv_cos_x1, rot.m22 * inv_cos_x1)
+    y2 = math.atan2(rot.m21 * inv_cos_x2, rot.m22 * inv_cos_x2)
+    z1 = math.atan2(rot.m10 * inv_cos_x1, rot.m00 * inv_cos_x1)
+    z2 = math.atan2(rot.m10 * inv_cos_x2, rot.m00 * inv_cos_x2)
     if (abs(x1) + abs(y1) + abs(z1)) <= (abs(x2) + abs(y2) + abs(z2)):
         return Vec3(y1, x1, z1)
 
