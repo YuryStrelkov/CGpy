@@ -1,13 +1,14 @@
 from ctypes import Structure, POINTER, c_int8, c_int32, CDLL, c_uint32, c_float, c_char_p, c_uint8, create_string_buffer
-
-import numpy as np
+from cgeo.transforms import Transform2
 # from matplotlib import pyplot as plt
-
-from cgeo import Vec2
+from cgeo import Vec2, LoopTimer
 from cgeo.images import RGBA
+import numpy as np
+import PIL.Image
 import os
 
-from cgeo.transforms import Transform2
+
+
 
 path = os.getcwd()
 #E:\GitHub\CGpy\vmath\cgeo\images\Images\x64\Release
@@ -61,8 +62,8 @@ get_color_bi_linear          = image_op_lib.bilinear32
 get_color_bi_linear.argtypes = [c_float, c_float, POINTER(_Image)]
 get_color_bi_linear.restype  = c_uint32
 
-rescale = image_op_lib.rescale
-rescale.argtypes = [c_float, c_float, POINTER(_Image), c_uint8]
+rescale          = image_op_lib.rescale
+rescale.argtypes = [POINTER(c_float), POINTER(_Image), c_int8, c_int8]
 rescale.restype  = POINTER(_Image)
 
 image_clear_color = image_op_lib.image_clear_color
@@ -76,7 +77,7 @@ transform.restype  = POINTER(_Image)
 class Image:
     def __init__(self, width: int = 10, height: int = 10, bpp: int = 3):
         self.__image: _Image = image_new(height, width, bpp)
-        self.__interp_mode: int = 2
+        self.__interp_mode: int = 1
 
     def __del__(self):
         image_del(self.__image)
@@ -100,17 +101,23 @@ class Image:
         if color == 0:
             raise IndexError(f"Texture :: SetItem ::  Trying to access index: {index}")
 
-    def transform(self, t: Transform2):
+    def transform(self, t: Transform2, expand: bool = False):
         tr_ptr = c_float * 9
-        transformed = transform(tr_ptr(*t.transform_matrix.as_list), self.__image, self.__interp_mode, 1)
+        transformed = transform(tr_ptr(*t.transform_matrix.as_list),
+                                self.__image, self.__interp_mode, 1 if expand else 0)
         image_del(self.__image)
         self.__image = transformed
 
     def get_uv(self, u: float, v: float) -> RGBA:
         return RGBA(get_uv(u, v, self.__image, c_uint8(self.__interp_mode)))
 
-    def rescale(self, sx: float, sy: float):
-        rescaled = rescale(sx, sy, self.__image, c_uint8(self.__interp_mode))
+    def rescale(self, sx: float, sy: float,  expand: bool = False):
+        transform  = Transform2()
+        transform.sx = sx
+        transform.sy = sy
+        tr_ptr = c_float * 9
+        rescaled = rescale(tr_ptr(*transform.transform_matrix.as_list),
+                           self.__image, self.__interp_mode, 1 if expand else 0)
         image_del(self.__image)
         self.__image = rescaled
 
@@ -151,14 +158,33 @@ def get_bounds(t: Transform2):
 
 if __name__ == "__main__":
     trnsfrm = Transform2()
-    # trnsfrm.az =  -np.pi * 0.05
-    trnsfrm.sx = 0.50
-    trnsfrm.sy = 0.50
+    trnsfrm.az =  -np.pi * 0.125
+    trnsfrm.sx = 1.0
+    trnsfrm.sy = 2.0
 
+    lt = LoopTimer()
+    # with lt:
+    #     pil_image = PIL.Image.open("test_images\\iceland.png")
+    #     data = np.asarray(pil_image, dtype=np.uint8).ravel()
+    # print(f'pil image read   time: {lt.last_loop_time:5}')
+    # with lt:
+    #     pil_image = pil_image.rotate(-45, expand=True, resample=PIL.Image.Resampling.BILINEAR)
+    # print(f'pil image rotate time: {lt.last_loop_time:5}')
+    # with lt:
+    #     pil_image.save("test_images\\pil_iceland_read.png")
+    # print(f'pil image save   time: {lt.last_loop_time:5}')
     image = Image()
-    image.load("test_images\\iceland.png")
-    image.transform(trnsfrm)
-    image.save("test_images\\iceland_read.png")
+    with lt:
+        image.load("test_images\\iceland.png")
+    print(f'lib image read   time: {lt.last_loop_time:5}')
+    with lt:
+        image.transform(trnsfrm, True)
+        # image.rescale(2.0, 1.0, False)
+    print(f'lib image rotate time: {lt.last_loop_time:5}')
+    with lt:
+        image.save("test_images\\iceland_read.png")
+    print(f'lib image save   time: {lt.last_loop_time:5}')
+
     exit()
 
     pts = [Vec2(-100, -50.0), Vec2(-100, 50.0), Vec2(100.0, 50.0), Vec2(100.0, -50.0), Vec2(-100.0, -50.0)]

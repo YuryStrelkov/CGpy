@@ -1,41 +1,34 @@
 #ifndef __TRANSFORM_H__
 #define __TRANSFORM_H__
-
+#include "common.h"
 #include <math.h>
 
-struct Mat3x3
-{
-	float m00, m01, m02;
-	float m10, m11, m12;
-	float m20, m21, m22;
-};
+F32 scl_x(const Mat3& transform);
+F32 scl_y(const Mat3& transform);
 
-float scl_x(const Mat3x3& transform);
-float scl_y(const Mat3x3& transform);
+F32 pos_x(const Mat3& transform);
+F32 pos_y(const Mat3& transform);
 
-float pos_x(const Mat3x3& transform);
-float pos_y(const Mat3x3& transform);
+F32 ang_z(const Mat3& transform);
 
-float ang_z(const Mat3x3& transform);
+Mat3 make_transform     (const F32& x0, const F32& y0, const F32& sx, const F32& sy, const F32& angle);
+					    
+void transform_point    (F32& xt, F32& yt, const F32& x, const F32& y, const Mat3& transform);
 
-Mat3x3 make_transform(const float& x0, const float& y0, const float& sx, const float& sy, float& angle);
+void inv_transform_point(F32& xt, F32& yt, const F32& x, const F32& y, const Mat3& transform);
 
-void transform_point(float& xt, float& yt, const float& x, const float& y, const Mat3x3& transform);
+void decompose_transform(F32& x0, F32& y0, F32& sx, F32& sy, F32& angle, const Mat3& transform);
 
-void inv_transform_point(float& xt, float& yt, const float& x, const float& y, const Mat3x3& transform);
+void transform_pt(F32&          xt, F32&          yt, 
+	              const F32&     x, const F32&     y,
+	              const F32&    x0, const F32&    y0,
+	              const F32&    sx, const F32&    sy, 
+			      const F32& sin_a, const F32& cos_a);
 
-void decompose_transform(float& x0, float& y0, float& sx, float& sy, float& angle, const Mat3x3& transform);
-
-void transform_pt(float&      xt,    float&      yt, 
-	              const float&  x,    const float&  y,
-	              const float& x0,    const float& y0,
-	              const float& sx,    const float& sy, 
-			      const float& sin_a, const float& cos_a);
-
-void inv_transform_pt(float&      xt,    float&      yt, 
-	                  const float&  x,    const float&  y,
-	                  const float& x0,    const float& y0,
-	                  const float& sx,    const float& sy, 
-			          const float& sin_a, const float& cos_a);
+void inv_transform_pt(F32&          xt, F32&          yt, 
+	                  const F32&     x, const F32&     y,
+	                  const F32&    x0, const F32&    y0,
+	                  const F32&    sx, const F32&    sy, 
+			          const F32& sin_a, const F32& cos_a);
 
 #endif // __TRANSFORM_H__

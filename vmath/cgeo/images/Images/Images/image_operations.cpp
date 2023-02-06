@@ -21,40 +21,26 @@ DLL_EXPORT I8  chek_image_format(CSTR src)
 
 DLL_EXPORT Image*      image_new(I32 w, I32 h, I8 bpp)
 {
-	Image* image = (Image*)malloc(sizeof(Image));
-	if (image == NULL) return image;
-	image->cols = w;
-	image->rows = h;
-	image->bpp  = bpp;
-	image->data = w * h * bpp == 0 ? NULL : (UI8*)malloc(sizeof(UI8) * image->rows * image->cols * image->bpp);
-	return image;
+	return new Image(w, h, bpp);
 }
 				     
 DLL_EXPORT void        image_del(Image* image)
 {
-	if (image == NULL) return;
-	if (image->data)
-	{
-		free(image->data);
-	}
-	free(image);
-	image = NULL;
+	if (image == nullptr) return;
+	delete image;
+	image = nullptr;
 }
 
 DLL_EXPORT Image*     image_load(CSTR src)
 {	
 	CSTR ext = get_filename_ext(src);
-	if (!chek_image_format(ext))
-	{
-		return image_new(0, 0, -1);
-	}
+	if (!chek_image_format(ext))return image_new(0, 0, 0);
 	int w, h, bpp;
-	if (!stbi_info(src, &w, &h, &bpp))return image_new(0, 0, -1);
-	Image* image = image_new(0, 0, bpp);
-	image->data  = stbi_load(src, &w, &h, &bpp, 0);
-	image->rows  = h;
-	image->cols  = w;
-	image->bpp   = bpp;
+	if (!stbi_info(src, &w, &h, &bpp))return image_new(0, 0, 0);
+	UI8* pixels = stbi_load(src, &w, &h, &bpp, 0);
+	assert(pixels);
+	Image* image = new Image(w, h, bpp, pixels);
+	assert(image);
 	return image;
 }
 
@@ -67,12 +53,12 @@ DLL_EXPORT I8         image_save(const Image* image, CSTR dst)
 	}
 	if (strcmp(ext, "png"))
 	{
-		int stride_in_bytes = image->cols * image->bpp;
+		int stride_in_bytes = image->cols() * image->bpp();
 		while (stride_in_bytes % 4 != 0)
 		{
 			stride_in_bytes++;
 		}
-		if (stbi_write_png(dst, image->cols, image->rows, image->bpp, image->data, stride_in_bytes))
+		if (stbi_write_png(dst, image->cols(), image->rows(), image->bpp(), image->data(), stride_in_bytes))
 		{
 			throw FALSE;
 		}
@@ -80,7 +66,7 @@ DLL_EXPORT I8         image_save(const Image* image, CSTR dst)
 	}
 	if (strcmp(ext, "jpg"))
 	{
-		if (!stbi_write_jpg(dst, image->cols, image->rows, image->bpp, image->data, 100))
+		if (!stbi_write_jpg(dst, image->cols(), image->rows(), image->bpp(), image->data(), 100))
 		{
 			throw FALSE;
 		}
@@ -88,7 +74,7 @@ DLL_EXPORT I8         image_save(const Image* image, CSTR dst)
 	}
 	if (strcmp(ext, "bmp"))
 	{
-		if (!stbi_write_bmp(dst, image->cols, image->rows, image->bpp, image->data))
+		if (!stbi_write_bmp(dst, image->cols(), image->rows(), image->bpp(), image->data()))
 		{
 			throw FALSE;
 		}
@@ -96,7 +82,7 @@ DLL_EXPORT I8         image_save(const Image* image, CSTR dst)
 	}
 	if (strcmp(ext, "tga"))
 	{
-		if (!stbi_write_tga(dst, image->cols, image->rows, image->bpp, image->data))
+		if (!stbi_write_tga(dst, image->cols(), image->rows(), image->bpp(), image->data()))
 		{
 			throw FALSE;
 		}
@@ -104,15 +90,16 @@ DLL_EXPORT I8         image_save(const Image* image, CSTR dst)
 	}
 	if (strcmp(ext, "hdr"))
 	{
-		I32 fdata_size = image->cols * image->rows * image->bpp;
+		I32 fdata_size = image->bytes_size();
 		F32* fdata = (float*)malloc(fdata_size * sizeof(F32));
 		I32 i;
-#pragma omp parallel for private(i)
+
+#pragma omp parallel for
 		for (i = 0; i < fdata_size; i++)
 		{
-			fdata[i] = ((F32)image->data[i]) / 255.f;
+			fdata[i] = ((F32)image->data()[i]) / 255.0f;
 		}
-		if (!stbi_write_hdr(dst, image->cols, image->rows, image->bpp, fdata))
+		if (!stbi_write_hdr(dst, image->cols(), image->rows(), image->bpp(), fdata))
 		{
 			free(fdata);
 			throw FALSE;
@@ -191,7 +178,7 @@ I32 rgbaf(F32 r, F32 g, F32 b, F32 a)
 
 UI8 channel      (I32 row, I32 col, const Image* image, UI8 layer)
 {	
-	return image->data[(col + row * image->cols) * image->bpp + layer];
+	return image->data()[(col + row * image->cols()) * image->bpp() + layer];
 };
 			     
 I32 channelI32   (I32 row, I32 col, const Image* image, UI8 layer)
@@ -207,23 +194,23 @@ F32 channelF32   (I32 row, I32 col, const Image* image, UI8 layer)
 F32 x_derivative (I32 row, I32 col, const Image* image, UI8 layer)
 {
 	I32 col_prew = MAX(col - 1, 0);
-	I32 col_next = MIN(col + 1, image->cols - 1);
+	I32 col_next = MIN(col + 1, image->cols() - 1);
 	return (channelF32(row, col_next, image, layer) - channelF32(row, col_prew, image, layer)) * 0.5f;
 };
 				 
 F32 y_derivative (I32 row, I32 col, const Image* image, UI8 layer)
 {
 	I32 row_prew = MAX(row - 1, 0);
-	I32 row_next = MIN(row + 1, image->rows - 1);
+	I32 row_next = MIN(row + 1, image->rows() - 1);
 	return (channelF32(row_next, col, image, layer) - channelF32(row_prew, col, image, layer)) * 0.5f;
 };
 
 F32 xy_derivative(I32 row, I32 col, const Image* image, UI8 layer)
 {
-	I32 row1 = MIN(row + 1, image->rows - 1);
+	I32 row1 = MIN(row + 1, image->rows() - 1);
 	I32 row0 = MAX(0, row - 1);
 
-	I32 col1 = MIN(col + 1, image->cols - 1);
+	I32 col1 = MIN(col + 1, image->cols() - 1);
 	I32 col0 = MAX(0, col - 1);
 
 	return (channelF32(row1, col1, image, layer) - channelF32(row1, col0, image, layer)) * 0.25f -
@@ -246,15 +233,14 @@ DLL_EXPORT void image_clear_color(Image* image, I32 color)
 {
 	I32 index, layer;
 
-	for (index = 0; index < image->rows * image->cols; index++)
+	for (index = 0; index < image->pixels_count(); index++)
 	{
-		for (layer = 0; layer < image->bpp; layer++)
+		for (layer = 0; layer < image->bpp(); layer++)
 		{
-			image->data[index * image->bpp + layer] = (color & (255 << layer * 8)) >> (8 * layer);
+			image->data()[index * image->bpp() + layer] = (color & (255 << layer * 8)) >> (8 * layer);
 		}
 	}
 }
-
 
 DLL_EXPORT I32 nearest32(F32 x, F32 y, const Image* image)
 {
@@ -263,13 +249,13 @@ DLL_EXPORT I32 nearest32(F32 x, F32 y, const Image* image)
 	
 	I32 col, row, color = 0;
 	
-	F32 tx = x * (image->cols);
-	F32 ty = y * (image->rows);
+	F32 tx = x * (image->cols());
+	F32 ty = y * (image->rows());
 
-	col = min(I32(tx), image->cols - 1);
-	row = min(I32(ty), image->rows - 1);
+	col = min(I32(tx), image->cols() - 1);
+	row = min(I32(ty), image->rows() - 1);
 
-	for (I8 layer = 0; layer < image->bpp; layer++)
+	for (I8 layer = 0; layer < image->bpp(); layer++)
 	{
 		color |= channel(row, col, image, layer) << (layer * 8);
 	}
@@ -284,21 +270,21 @@ DLL_EXPORT I32 bilinear32(F32 x, F32 y, const Image* image)
 	I32 col, row, col1, row1, color = 0;
 	F32 tx, ty;
 	
-	col = (I32)(x * (image->cols - 1));
-	row = (I32)(y * (image->rows - 1));
+	col = (I32)(x * (image->cols() - 1));
+	row = (I32)(y * (image->rows() - 1));
 
-	col1 = MIN(col + 1, image->cols - 1);
-	row1 = MIN(row + 1, image->rows - 1);
+	col1 = MIN(col + 1, image->cols() - 1);
+	row1 = MIN(row + 1, image->rows() - 1);
 
-	F32 dx = 1.0f / (image->cols - 1);
-	F32 dy = 1.0f / (image->rows - 1);
+	F32 dx = 1.0f / (image->cols() - 1);
+	F32 dy = 1.0f / (image->rows() - 1);
 
 	tx = MIN(1.0f, (x - col * dx) / dx);
 	ty = MIN(1.0f, (y - row * dy) / dy);
 	
 	F32 q00, q01, q10, q11;
 
-	for (I8 layer = 0; layer < image->bpp; layer++)
+	for (I8 layer = 0; layer < image->bpp(); layer++)
 	{
 		q00 = channelF32(row, col, image, layer);
 		q01 = channelF32(row, col1, image, layer);
@@ -317,14 +303,14 @@ DLL_EXPORT I32 bicubic32(F32 x, F32 y, const Image* image)
 	I32 col, row, col1, row1, color = 0, index;
 	F32 tx, ty;
 
-	col = (I32)(x * (image->cols - 1));
-	row = (I32)(y * (image->rows - 1));
+	col = (I32)(x * (image->cols() - 1));
+	row = (I32)(y * (image->rows() - 1));
 
-	col1 = MIN(col + 1, image->cols - 1);
-	row1 = MIN(row + 1, image->rows - 1);
+	col1 = MIN(col + 1, image->cols() - 1);
+	row1 = MIN(row + 1, image->rows() - 1);
 
-	F32 dx = 1.0f / (image->cols - 1);
-	F32 dy = 1.0f / (image->rows - 1);
+	F32 dx = 1.0f / (image->cols() - 1);
+	F32 dy = 1.0f / (image->rows() - 1);
 
 	tx = MIN(1.0f, (x - col * dx) / dx);
 	ty = MIN(1.0f, (y - row * dy) / dy);
@@ -333,7 +319,7 @@ DLL_EXPORT I32 bicubic32(F32 x, F32 y, const Image* image)
 
 	F32* c = (F32*)malloc(sizeof(F32) * 16);
 
-	for (I8 layer = 0; layer < image->bpp; layer++)
+	for (I8 layer = 0; layer < image->bpp(); layer++)
 	{
 		b[0 ] = channelF32(row,   col, image, layer);
 		b[1 ] = channelF32(row,  col1, image, layer);
@@ -405,13 +391,12 @@ Interplator  resolve_inerp_function(UI8 interpolation_method)
 	return nearest32;
 }
 
-void expand_bounds(const Mat3x3& tm, const Image& src, I32& width, I32& height)
+void expand_bounds(const Mat3& tm, const Image& src, I32& width, I32& height)
 {
-	
-	F32 x0 = -0.5f * src.cols;
-	F32 x1 =  0.5f * src.cols;
-	F32 y0 = -0.5f * src.rows;
-	F32 y1 =  0.5f * src.rows;
+	F32 x0 = -0.5f * src.cols();
+	F32 x1 =  0.5f * src.cols();
+	F32 y0 = -0.5f * src.rows();
+	F32 y1 =  0.5f * src.rows();
 
 	F32 x, y;
 	F32 x_min =  1e12f, y_min =  1e12f;
@@ -441,84 +426,111 @@ void expand_bounds(const Mat3x3& tm, const Image& src, I32& width, I32& height)
 	y_min = MIN(y, y_min);
 	y_max = MAX(y, y_max);
 	
-	// F32 aspect_src = (src.cols * 1.0f) / src.rows;
-	width  = I32((x_max - x_min));// * 0.5f * src.cols);
-	height = I32((y_max - y_min));// * 0.5f * src.rows);
+	width  = I32((x_max - x_min));
+	height = I32((y_max - y_min));
 }
 
-DLL_EXPORT Image* transform(F32* transform, const Image* src, const  UI8 interp_f, const UI8 expand)
+DLL_EXPORT Image* transform(const F32* transform, const Image* src, const  UI8 interp_f, const UI8 expand)
 {
-	const Mat3x3* transform_m = (const Mat3x3*)transform;
+
+	const Mat3* transform_m = (const Mat3*)transform;
 
 	Image* dst;
-	
-	F32 v, u, vt, ut, sx, sy, aspect_src, aspect_dst;
-	
-	if (expand) 
+	F32 src_scl_x = scl_x(*transform_m);
+	F32 src_scl_y = scl_y(*transform_m);
+	if (!expand)
 	{
-		I32 w, h;
-		expand_bounds(*transform_m, *src, w, h);
-		dst = image_new(w, h, src->bpp);
-		sx = (1.0f * w) / src->cols;
-		sy = (1.0f * h) / src->rows;
+		dst = image_new(I32(src->cols() * src_scl_x), I32(src->rows() * src_scl_y), src->bpp());
 	}
 	else 
 	{
-		sx = 1.0f;
-		sy = 1.0f;
-		dst = image_new(src->cols, src->rows, src->bpp);
+		I32 w, h;
+		expand_bounds(*transform_m, *src, w, h);
+		dst = image_new(w, h, src->bpp());
 	}
+
+
+	F32 i_src_scl_x = 1.0f / src_scl_x / src_scl_x;
+	F32 i_src_scl_y = 1.0f / src_scl_y / src_scl_y;
+	F32 src_aspect  = (src->cols() * 1.0f) / src->rows();
+	F32 scl_aspect  = src_scl_x / src_scl_y;
+	F32 sx          = (dst->cols() * 1.0f) / src->cols();
+	F32 sy          = (dst->rows() * 1.0f) / src->rows();
+
+	F32	du = 1.0f / (dst->rows() - 1);
+	F32 dv = 1.0f / (dst->cols() - 1);
 
 	Interplator interpolator = resolve_inerp_function(interp_f);
 
-	aspect_src = (src->cols * 1.0f) / src->rows;
-	aspect_dst = (dst->cols * 1.0f) / dst->rows;
-	F32 dv = 1.0f / (dst->cols - 1),
-		du = 1.0f / (dst->rows - 1);
-
-	I32 layer, index, col, row;
-
-	for (index = 0; index < dst->rows * dst->cols; index++)
+#pragma omp parallel for
+	for (I32 index = 0; index < dst->rows() * dst->cols(); index++)
 	{
-		v = ((index % dst->cols) * dv * 2.0f - 1.0f) * sx * aspect_src;
-		u = ((index / dst->cols) * du * 2.0f - 1.0f) * sy ;
+		F32 u = ((index / dst->cols()) * du * 2.0f - 1.0f) * sy;
+		F32 v = ((index % dst->cols()) * dv * 2.0f - 1.0f) * sx * src_aspect;
+		
+		F32 ut = (transform_m->m00 * u * i_src_scl_x * scl_aspect + transform_m->m01 * v * i_src_scl_y              + transform_m->m02);
+		F32 vt = (transform_m->m10 * u * i_src_scl_x              + transform_m->m11 * v * i_src_scl_y / scl_aspect + transform_m->m12);
 
-		transform_point(ut, vt, u, v, *transform_m);
-
-		vt /= aspect_src;
+		vt /= src_aspect;
 
  		I32 color = interpolator((vt + 1.0f) * 0.5f,  (ut + 1.0f) * 0.5f, src);
 
-		for (layer = 0; layer < dst->bpp; layer++)
+		for (I32 layer = 0; layer < dst->bpp(); layer++)
 		{
-			dst->data[index * dst->bpp + layer] = (color & (255 << layer * 8)) >> (8 * layer);
+			dst->data()[index * dst->bpp() + layer] = (color & (255 << layer * 8)) >> (8 * layer);
 		}
 	}
 	return dst;
 }
 
 
-DLL_EXPORT Image* rescale(F32 s_x, F32 s_y, const Image* src, const  UI8 interp_f)
+DLL_EXPORT Image* rescale(const F32* transform, const Image* src, const  UI8 interp_f, const UI8 expand)
 {
-	Image* dst = image_new(I32(s_x * src->cols), I32(s_y * src->rows), src->bpp);
+	const Mat3* transform_m = (const Mat3*)transform;
 
-	F32 x_col, y_row, dst_dx = 1.0f / (dst->cols - 1), dst_dy = 1.0f / (dst->rows - 1);
-	I32 layer, index, col, row;
+	float s_x = scl_x(*transform_m);
+	float s_y = scl_y(*transform_m);
+
+	Image* dst = image_new(I32(src->cols() * s_x), I32(src->rows() * s_y), src->bpp());
+
+	F32 aspect_1 = s_y / s_x;
+	F32 aspect_2 = s_x / s_y;
+
+	if (!expand)
+	{
+		s_x = 1.0f;
+		s_y = 1.0f;
+	}
+	else 
+	{
+		if (aspect_1 > aspect_2)
+		{
+			s_x = 1.0f;
+			s_y = aspect_1;
+		}
+		else 
+		{
+			s_x = aspect_2;
+			s_y = 1.0f;
+		}
+	}
 
 	Interplator interpolator = resolve_inerp_function(interp_f);
 
-	for (index = 0; index < dst->rows * dst->cols; index++)
+	F32 dv = 1.0f / (dst->cols() - 1),
+		du = 1.0f / (dst->rows() - 1);
+
+#pragma omp parallel for
+	for (I32 index = 0; index < dst->pixels_count(); index++)
 	{
-		col = index % dst->cols;
-		row = index / dst->cols;
-		x_col = col * dst_dx;
-		y_row = row * dst_dy;
+		float vt = ((index % dst->cols()) * dv * 2.0f - 1.0f) * s_x;
+		float ut = ((index / dst->cols()) * du * 2.0f - 1.0f) * s_y;
 
-		I32 color = interpolator(x_col, y_row, src);
+		I32 color = interpolator((vt + 1.0f) * 0.5f, (ut + 1.0f) * 0.5f, src);
 
-		for (layer = 0; layer < dst->bpp; layer++)
+		for (int layer = 0; layer < dst->bpp(); layer++)
 		{
-			dst->data[index * dst->bpp + layer] = (color & (255 << layer * 8)) >> (8 * layer);
+			dst->data()[index * dst->bpp() + layer] = (color & (255 << layer * 8)) >> (8 * layer);
 		}
 	}
 	return dst;
@@ -533,26 +545,26 @@ DLL_EXPORT I32 get_pix(I32 row, I32 col, const Image* img)
 {
 	if (row < 0) return -1;
 	if (col < 0) return -1;
-	if (row >= img->rows) return -1;
-	if (col >= img->cols) return -1;
-	I32 color = 0, index = (row * img->cols + col) * img->bpp;
-	for (I8 layer = 0; layer < img->bpp; layer++)
+	if (row >= img->rows()) return -1;
+	if (col >= img->cols()) return -1;
+	I32 color = 0, index = (row * img->cols() + col) * img->bpp();
+	for (I8 layer = 0; layer < img->bpp(); layer++)
 	{
-		color |= img->data[index + layer] << (layer * 8);
+		color |= img->data()[index + layer] << (layer * 8);
 	}
 	return color;
 }
 
-DLL_EXPORT I8  set_pix(I32 color, I32 row, I32 col, const Image* img)
+DLL_EXPORT I8  set_pix(I32 color, I32 row, I32 col, Image* img)
 {
 	if (row < 0) return FALSE;
 	if (col < 0) return FALSE;
-	if (row >= img->rows) return FALSE;
-	if (col >= img->cols) return FALSE;
-	I32 index = (row * img->cols + col) * img->bpp;
-	for (I8 layer = 0; layer < img->bpp; layer++)
+	if (row >= img->rows()) return FALSE;
+	if (col >= img->cols()) return FALSE;
+	I32 index = (row * img->cols() + col) * img->bpp();
+	for (I8 layer = 0; layer < img->bpp(); layer++)
 	{
-		img->data[index + layer] = (color & (255 << layer * 8)) >> (layer * 8);
+		img->data()[index + layer] = (color & (255 << layer * 8)) >> (layer * 8);
 	}
 	return TRUE;
 }

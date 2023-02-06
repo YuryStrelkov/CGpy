@@ -170,39 +170,24 @@ def draw_triangle_solid(buffer: FrameBuffer, p0: Vertex, p1: Vertex, p2: Vertex,
     for i in range(0, total_height):
         second_half: bool = i > p1.v.y - p0.v.y or p1.v.y == p0.v.y
 
-        segment_height: int = round(p1.v.y - p0.v.y)
-
-        if second_half:
-            segment_height: int = round(p2.v.y - p1.v.y)
+        segment_height: int =  round(p2.v.y - p1.v.y) if second_half else round(p1.v.y - p0.v.y)
 
         if segment_height == 0:
             continue
 
         alpha: float = float(i) / total_height
 
-        beta: float = 0
-
-        if second_half:
-            beta = float(i - (p1.v.y - p0.v.y)) / segment_height
-        else:
-            beta = float(i / segment_height)  # be careful: with above conditions no division by zero her
+        beta: float = float(i - (p1.v.y - p0.v.y)) / segment_height if second_half else float(i / segment_height)
 
         a = lerp_vertex(p0, p2, alpha)
 
-        if second_half:
-            b = lerp_vertex(p1, p2, beta)
-        else:
-            b = lerp_vertex(p0, p1, beta)
+        b = lerp_vertex(p1, p2, beta) if second_half else lerp_vertex(p0, p1, beta)
 
         if a.v.x > b.v.x:
             a, b = b, a
 
         for j in range(round(a.v.x), round(b.v.x)):
-            phi: float = 0.0
-            if b.v.x == a.v.x:
-                phi = 1.0
-            else:
-                phi = float(j - a.v.x) / float(b.v.x - a.v.x)
+            phi: float = 1.0 if b.v.x == a.v.x else float(j - a.v.x) / float(b.v.x - a.v.x)
             p: Vertex = lerp_vertex(a, b, phi)
             zx, xy = round(p.v.x), round(p.v.y)
             if buffer.set_depth(zx, xy, p.v.z):

@@ -16,6 +16,12 @@
     <Filter Include="Transfrom">
       <UniqueIdentifier>{ef253573-964f-4917-8224-1e23992b104e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Rendering">
+      <UniqueIdentifier>{ef30b179-3f28-4ea3-a414-5910bcc75f00}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Rendering\Mesh">
+      <UniqueIdentifier>{9ee8dfb0-f411-4bc4-a6ca-83a7a2e794a2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -36,6 +42,15 @@
     <ClInclude Include="Transform.h">
       <Filter>Transfrom</Filter>
     </ClInclude>
+    <ClInclude Include="rendering.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="common.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="RawMesh.h">
+      <Filter>Rendering\Mesh</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -55,6 +70,15 @@
     </ClCompile>
     <ClCompile Include="Transform.cpp">
       <Filter>Transfrom</Filter>
+    </ClCompile>
+    <ClCompile Include="rendering.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="RawMesh.cpp">
+      <Filter>Rendering\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="common.cpp">
+      <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

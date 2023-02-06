@@ -150,9 +150,9 @@ class Transform2:
     def az(self, angle: float) -> None:
         cos_a = math.cos(angle)
         sin_a = math.sin(angle)
-        rz = Mat3(cos_a, -sin_a, 0,
-                  sin_a,  cos_a, 0,
-                  0,          0, 1)
+        rz = Mat3( cos_a, sin_a, 0.0,
+                  -sin_a, cos_a, 0.0,
+                   0.0,     0.0, 1.0)
         scl  = self.scale
         orig = self.origin
         self.__transform_m = rz
