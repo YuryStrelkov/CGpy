@@ -317,6 +317,20 @@ class Mat3:
                        (self.m00 * self.m11 - self.m10 * self.m01) * det]
         return self
 
+    @property
+    def inverted(self):
+        return Mat3(self).invert()
+
+    def transpose(self):
+        self.m01, self.m10 = self.m10, self.m01
+        self.m02, self.m20 = self.m20, self.m02
+        self.m21, self.m12 = self.m12, self.m21
+        return self
+
+    @property
+    def transposed(self):
+        return Mat3(self).transpose()
+
 
 class Mat4:
 
@@ -803,6 +817,19 @@ class Mat4:
                              det * (self.m00 * a1212 - self.m01 * a0212 + self.m02 * a0112)]
         return self
 
+    @property
+    def inverted(self):
+        return Mat4(self).invert()
 
+    def transpose(self):
+        self.m01, self.m10 = self.m10, self.m01
+        self.m02, self.m20 = self.m20, self.m02
+        self.m03, self.m30 = self.m30, self.m03
+        self.m21, self.m12 = self.m12, self.m21
+        self.m31, self.m13 = self.m13, self.m31
+        self.m32, self.m23 = self.m23, self.m32
+        return self
 
-
+    @property
+    def transposed(self):
+        return Mat4(self).transpose()
