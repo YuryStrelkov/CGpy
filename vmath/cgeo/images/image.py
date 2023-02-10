@@ -1,3 +1,4 @@
+import platform
 from ctypes import Structure, POINTER, c_int8, c_int32, CDLL, c_uint32, c_float, c_char_p, c_uint8, create_string_buffer
 from cgeo.transforms import Transform2
 # from matplotlib import pyplot as plt
@@ -8,12 +9,21 @@ import PIL.Image
 import os
 
 
+# path = os.getcwd()
+# E:\GitHub\CGpy\vmath\cgeo\images\Images\x64\Release
+# image_op_lib = CDLL(path + "\Images.dll")
+path = r"E:\GitHub\CGpy\vmath\cgeo\images\Images\x64\Release\Images.dll"
 
-
-path = os.getcwd()
-#E:\GitHub\CGpy\vmath\cgeo\images\Images\x64\Release
-#image_op_lib = CDLL(path + "\Images.dll")
-image_op_lib = CDLL(r"E:\GitHub\CGpy\vmath\cgeo\images\Images\x64\Release\Images.dll")
+image_op_lib = None
+if platform.system() == 'Linux':
+    image_op_lib = CDLL(path)  # ('./path_finder/lib_astar.so')
+elif platform.system() == 'Windows':
+    if platform.architecture()[0] == '64bit':
+        image_op_lib = CDLL(path)  # ('./path_finder/x64/AStar.dll')
+    else:
+        image_op_lib = CDLL(path)  # ('./path_finder/x86/AStar.dll')
+if image_op_lib is None:
+    raise ImportError("unable to find AStar.dll...")
 
 
 class _Image(Structure):

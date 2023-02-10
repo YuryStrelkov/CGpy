@@ -1,19 +1,34 @@
-import random
 from ctypes import Structure, POINTER, c_int8, c_int32, CDLL, c_float
 import matplotlib.pyplot as plt
 import numpy as np
+import platform
+import random
 import os
 
 from cgeo import Vec3, LoopTimer
 
 path = os.getcwd()
-interpolators_lib = CDLL(path + "\interpolation.dll")
+#  interpolator_lib = CDLL(path + "\interpolation.dll")
+interpolator_lib = None
+
+if platform.system() == 'Linux':
+    interpolator_lib = CDLL(path + "\interpolation.dll")  # ('./path_finder/lib_astar.so')
+elif platform.system() == 'Windows':
+    if platform.architecture()[0] == '64bit':
+        interpolator_lib = CDLL(path + "\interpolation.dll")  # ('./path_finder/x64/AStar.dll')
+    else:
+        interpolator_lib = CDLL(path + "\interpolation.dll")  # ('./path_finder/x86/AStar.dll')
+if interpolator_lib is None:
+    raise ImportError("unable to find AStar.dll...")
+
 
 NP_ARRAY_1_D_POINTER = np.ctypeslib.ndpointer(dtype=np.float32, ndim=1, flags="aligned, contiguous")
 NP_ARRAY_2_D_POINTER = np.ctypeslib.ndpointer(dtype=np.float32, ndim=2, flags="aligned, contiguous")
+NP_ARRAY_3_D_POINTER = np.ctypeslib.ndpointer(dtype=np.float32, ndim=3, flags="aligned, contiguous")
 
 NP_ARRAY_1_D_POINTER_RW = np.ctypeslib.ndpointer(dtype=np.float32, ndim=1, flags="aligned, contiguous, writeable")
 NP_ARRAY_2_D_POINTER_RW = np.ctypeslib.ndpointer(dtype=np.float32, ndim=2, flags="aligned, contiguous, writeable")
+NP_ARRAY_3_D_POINTER_RW = np.ctypeslib.ndpointer(dtype=np.float32, ndim=3, flags="aligned, contiguous, writeable")
 
 
 class _NumpyArray1D(Structure):
@@ -27,6 +42,13 @@ class _NumpyArray2D(Structure):
                ("cols", c_int32)
 
 
+class _NumpyArray3D(Structure):
+    _fields_ = ("data",   NP_ARRAY_2_D_POINTER), \
+               ("rows",   c_int32), \
+               ("cols",   c_int32), \
+               ("layers", c_int32)
+
+
 class _Interpolator(Structure):
     _fields_ = ("control_points", POINTER(_NumpyArray2D)), \
                ("width", c_float), \
@@ -36,72 +58,80 @@ class _Interpolator(Structure):
                ("z0", c_float)
 
 
-np_array_1d_new                       = interpolators_lib.np_array_1d_new
+np_array_1d_new                       = interpolator_lib.np_array_1d_new
 np_array_1d_new.argtypes              = [c_int32, NP_ARRAY_1_D_POINTER]
 np_array_1d_new.restype               =  POINTER(_NumpyArray1D)   
                                       
-np_array_1d_del                       = interpolators_lib.np_array_1d_del
+np_array_1d_del                       = interpolator_lib.np_array_1d_del
 np_array_1d_del.argtypes              = [POINTER(_NumpyArray1D)]
                                       
-np_array_2d_new                       = interpolators_lib.np_array_2d_new
+np_array_2d_new                       = interpolator_lib.np_array_2d_new
 np_array_2d_new.argtypes              = [c_int32, c_int32, NP_ARRAY_2_D_POINTER]
 np_array_2d_new.restype               =  POINTER(_NumpyArray2D)   
                                       
-np_array_2d_del                       = interpolators_lib.np_array_2d_del
+np_array_2d_del                       = interpolator_lib.np_array_2d_del
 np_array_2d_del.argtypes              = [POINTER(_NumpyArray2D)]
 
-interpolator_new                      = interpolators_lib.interpolator_new
+interpolator_new                      = interpolator_lib.interpolator_new
 interpolator_new.argtypes             = [c_int32, c_int32, NP_ARRAY_2_D_POINTER]
 interpolator_new.restype              =  POINTER(_Interpolator)   
                                       
-interpolator_del                      = interpolators_lib.interpolator_del
+interpolator_del                      = interpolator_lib.interpolator_del
 interpolator_del.argtypes             = [POINTER(_Interpolator)]
 
-interpolate_pt                        = interpolators_lib.interpolate_pt
+interpolate_pt                        = interpolator_lib.interpolate_pt
 interpolate_pt.argtypes               = [c_float, c_float, POINTER(_Interpolator), c_int8]
 interpolate_pt.restype                =  c_float   
                                          
-interpolate_x_derivative_pt           = interpolators_lib.interpolate_x_derivative_pt
+interpolate_x_derivative_pt           = interpolator_lib.interpolate_x_derivative_pt
 interpolate_x_derivative_pt.argtypes  = [c_float, c_float, POINTER(_Interpolator), c_int8, c_float]
 interpolate_x_derivative_pt.restype   =  c_float   
                                       
-interpolate_y_derivative_pt           = interpolators_lib.interpolate_y_derivative_pt
+interpolate_y_derivative_pt           = interpolator_lib.interpolate_y_derivative_pt
 interpolate_y_derivative_pt.argtypes  = [c_float, c_float, POINTER(_Interpolator), c_int8, c_float]
 interpolate_y_derivative_pt.restype   =  c_float   
  
-interpolate_xy_derivative_pt          = interpolators_lib.interpolate_xy_derivative_pt
+interpolate_xy_derivative_pt          = interpolator_lib.interpolate_xy_derivative_pt
 interpolate_xy_derivative_pt.argtypes = [c_float, c_float, POINTER(_Interpolator), c_int8, c_float, c_float]
 interpolate_xy_derivative_pt.restype  =  c_float   
 
-interpolate                           = interpolators_lib.interpolate
-interpolate.argtypes                  = [POINTER(_NumpyArray1D), POINTER(_NumpyArray1D), POINTER(_NumpyArray1D), POINTER(_Interpolator), c_int8]
+interpolate                           = interpolator_lib.interpolate
+interpolate.argtypes                  = [POINTER(_NumpyArray1D), POINTER(_NumpyArray1D), POINTER(_NumpyArray1D),
+                                         POINTER(_Interpolator), c_int8]
                                       
-interpolate_x_derivative              = interpolators_lib.interpolate_x_derivative    
-interpolate_x_derivative.argtypes     = [POINTER(_NumpyArray1D), POINTER(_NumpyArray1D), POINTER(_NumpyArray1D), POINTER(_Interpolator), c_int8, c_float]
+interpolate_x_derivative              = interpolator_lib.interpolate_x_derivative
+interpolate_x_derivative.argtypes     = [POINTER(_NumpyArray1D), POINTER(_NumpyArray1D), POINTER(_NumpyArray1D),
+                                         POINTER(_Interpolator), c_int8, c_float]
                                       
-interpolate_y_derivative              = interpolators_lib.interpolate_y_derivative
-interpolate_y_derivative.argtypes     = [POINTER(_NumpyArray1D), POINTER(_NumpyArray1D), POINTER(_NumpyArray1D), POINTER(_Interpolator), c_int8, c_float]
+interpolate_y_derivative              = interpolator_lib.interpolate_y_derivative
+interpolate_y_derivative.argtypes     = [POINTER(_NumpyArray1D), POINTER(_NumpyArray1D), POINTER(_NumpyArray1D),
+                                         POINTER(_Interpolator), c_int8, c_float]
                                       
-interpolate_xy_derivative             = interpolators_lib.interpolate_xy_derivative  
-interpolate_xy_derivative.argtypes    = [POINTER(_NumpyArray1D), POINTER(_NumpyArray1D), POINTER(_NumpyArray1D), POINTER(_Interpolator), c_int8, c_float, c_float]
+interpolate_xy_derivative             = interpolator_lib.interpolate_xy_derivative
+interpolate_xy_derivative.argtypes    = [POINTER(_NumpyArray1D), POINTER(_NumpyArray1D), POINTER(_NumpyArray1D),
+                                         POINTER(_Interpolator), c_int8, c_float, c_float]
                                       
-interpolate2                          = interpolators_lib.interpolate2
-interpolate2.argtypes                 = [POINTER(_NumpyArray2D), POINTER(_NumpyArray1D), POINTER(_NumpyArray1D), POINTER(_Interpolator), c_int8]
+interpolate2                          = interpolator_lib.interpolate2
+interpolate2.argtypes                 = [POINTER(_NumpyArray2D), POINTER(_NumpyArray1D), POINTER(_NumpyArray1D),
+                                         POINTER(_Interpolator), c_int8]
                                       
-interpolate_x_derivative2             = interpolators_lib.interpolate_x_derivative2
-interpolate_x_derivative2.argtypes    = [POINTER(_NumpyArray2D), POINTER(_NumpyArray1D), POINTER(_NumpyArray1D), POINTER(_Interpolator), c_int8, c_float]
+interpolate_x_derivative2             = interpolator_lib.interpolate_x_derivative2
+interpolate_x_derivative2.argtypes    = [POINTER(_NumpyArray2D), POINTER(_NumpyArray1D), POINTER(_NumpyArray1D),
+                                         POINTER(_Interpolator), c_int8, c_float]
                                       
-interpolate_y_derivative2             = interpolators_lib.interpolate_y_derivative2
-interpolate_y_derivative2.argtypes    = [POINTER(_NumpyArray2D), POINTER(_NumpyArray1D), POINTER(_NumpyArray1D), POINTER(_Interpolator), c_int8, c_float]
+interpolate_y_derivative2             = interpolator_lib.interpolate_y_derivative2
+interpolate_y_derivative2.argtypes    = [POINTER(_NumpyArray2D), POINTER(_NumpyArray1D), POINTER(_NumpyArray1D),
+                                         POINTER(_Interpolator), c_int8, c_float]
                                       
-interpolate_xy_derivative2            = interpolators_lib.interpolate_xy_derivative2  
-interpolate_xy_derivative2.argtypes   = [POINTER(_NumpyArray2D), POINTER(_NumpyArray1D), POINTER(_NumpyArray1D), POINTER(_Interpolator), c_int8, c_float, c_float]
+interpolate_xy_derivative2            = interpolator_lib.interpolate_xy_derivative2
+interpolate_xy_derivative2.argtypes   = [POINTER(_NumpyArray2D), POINTER(_NumpyArray1D), POINTER(_NumpyArray1D),
+                                         POINTER(_Interpolator), c_int8, c_float, c_float]
 
 
 # TODO check: https://stackoverflow.com/questions/22425921/pass-a-2d-numpy-array-to-c-using-ctypes
 class Array1D:
     def __init__(self, array: np.ndarray):
-        self.__array: _NumpyArray2D = None
+        self.__array = None
         if array.ndim != 1:
             raise RuntimeError()
         self.__array =  np_array_1d_new(array.size, array)
@@ -133,7 +163,7 @@ class Array1D:
 # TODO check: https://stackoverflow.com/questions/22425921/pass-a-2d-numpy-array-to-c-using-ctypes
 class Array2D:
     def __init__(self, array: np.ndarray):
-        self.__array: _NumpyArray2D = None
+        self.__array = None
         if array.ndim != 2:
             raise RuntimeError()
         self.__array = np_array_2d_new(array.shape[0], array.shape[1], array)
@@ -168,6 +198,46 @@ class Array2D:
     @property
     def ptr(self) -> _NumpyArray2D:
         return self.__array
+
+
+# TODO check: https://stackoverflow.com/questions/22425921/pass-a-2d-numpy-array-to-c-using-ctypes
+# class Array3D:
+#     def __init__(self, array: np.ndarray):
+#         self.__array = None
+#         if array.ndim != 3:
+#             raise RuntimeError()
+#         # self.__array = np_array_3d_new(array.shape[0], array.shape[1],  array.shape[2], array)
+# 
+#     def __del__(self):
+#         if self.__array is None:
+#             return
+#         # np_array_3d_del(self.__array)
+# 
+#     def __enter__(self):
+#         return self
+# 
+#     def __exit__(self, exc_type, exc_val, exc_tb):
+#         pass
+# 
+#     @property
+#     def rows(self) -> int:
+#         return self.__array.contents.rows
+# 
+#     @property
+#     def cols(self) -> int:
+#         return self.__array.contents.cols
+# 
+#     @property
+#     def size(self) -> int:
+#         return self.rows * self.cols
+# 
+#     @property
+#     def array(self):
+#         return self.__array.contents.data
+# 
+#     @property
+#     def ptr(self) -> _NumpyArray3D:
+#         return self.__array
 
 
 class Interpolator:
@@ -373,7 +443,7 @@ if __name__ == "__main__":
     x_ = np.linspace(0, 1, points_n, dtype=np.float32)
     #
     # z = [[interpolator.interpolate_pt(xi, yi, 2) for xi in x]for yi in x]
-    z_ = interpolator.interpolate_x_derivative2(x_, x_, 2)
+    z_ = interpolator.interpolate2(x_, x_, 2)
     # with timer:
     #    z = interpolator.interpolate_x_derivative2(x, x, 2)
     #print(f"loop time: {timer.last_loop_time}")
