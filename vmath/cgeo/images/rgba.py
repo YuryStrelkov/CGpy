@@ -240,7 +240,7 @@ class RGBA:
     def to_bin(self) -> str:
         return bin(self._rgba)
 
-
+"""
 if __name__ == "__main__":
     color1 = RGBA()
     color1[0] = 10
@@ -280,3 +280,4 @@ if __name__ == "__main__":
 
 
                 # print(f"color2 += color1: {color2}")
+"""

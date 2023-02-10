@@ -1,8 +1,9 @@
 import random
 from ctypes import Structure, POINTER, c_int8, c_int32, CDLL, c_float
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import numpy as np
 import os
+
 
 from cgeo import Vec3, LoopTimer
 
@@ -364,8 +365,9 @@ class Interpolator:
         return res
 
 
+"""
 if __name__ == "__main__":
-
+    from matplotlib import pyplot as plt
     pts = np.array([[random.uniform(-5.0, 5.0) for _ in range(32)]for _ in range(32)], dtype=np.float32)
 
     interpolator = Interpolator(pts)
@@ -373,10 +375,12 @@ if __name__ == "__main__":
     x_ = np.linspace(0, 1, points_n, dtype=np.float32)
     #
     # z = [[interpolator.interpolate_pt(xi, yi, 2) for xi in x]for yi in x]
-    z_ = interpolator.interpolate_x_derivative2(x_, x_, 2)
+    z_ = interpolator.interpolate2(x_, x_, 0)
     # with timer:
     #    z = interpolator.interpolate_x_derivative2(x, x, 2)
     #print(f"loop time: {timer.last_loop_time}")
     plt.imshow(z_)
     plt.show()
     #print(interpolator.interpolate_pt(0.1, 0.1))
+"""
+

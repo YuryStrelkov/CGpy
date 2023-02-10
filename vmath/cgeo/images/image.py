@@ -12,8 +12,8 @@ import os
 
 path = os.getcwd()
 #E:\GitHub\CGpy\vmath\cgeo\images\Images\x64\Release
-#image_op_lib = CDLL(path + "\Images.dll")
-image_op_lib = CDLL(r"E:\GitHub\CGpy\vmath\cgeo\images\Images\x64\Release\Images.dll")
+image_op_lib = CDLL(path + "\Images.dll")
+# image_op_lib = CDLL(r"E:\GitHub\CGpy\vmath\cgeo\images\Images\x64\Release\Images.dll")
 
 
 class _Image(Structure):
