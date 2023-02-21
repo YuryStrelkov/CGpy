@@ -1,4 +1,3 @@
-
 from cgeo.circ_buffer import CircBuffer
 from typing import Callable
 from cgeo import mutils

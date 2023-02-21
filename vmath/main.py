@@ -1,6 +1,6 @@
 from typing import Tuple
 
-from matplotlib import pyplot as plt
+# from matplotlib import pyplot as plt
 
 from cgeo import rotate_x, rotate_y, rotate_z, rot_m_to_euler_angles, mutils, Quaternion
 from cgeo.bezier.bezier_curve_3 import BezierCurve3
@@ -227,27 +227,27 @@ if __name__ == '__main__':
     p3 = Vec2(-0.9, 0.9)
 
     # casted_tris, flag = line_cast(p2.x, p2.y, p1.x, p1.y)
-    casted_tris = triangle_cast(p1, p2, p3)
+    # casted_tris = triangle_cast(p1, p2, p3)
 
-    [print(v) for v in casted_tris]
+    # [print(v) for v in casted_tris]
 
-    plt.plot([-1, 1, 1, -1, -1], [-1, -1, 1, 1, -1], 'r')
+    # plt.plot([-1, 1, 1, -1, -1], [-1, -1, 1, 1, -1], 'r')
 
-    plt.plot([p1.x, p2.x, p3.x, p1.x], [p1.y, p2.y, p3.y, p1.y], 'g')
+    # plt.plot([p1.x, p2.x, p3.x, p1.x], [p1.y, p2.y, p3.y, p1.y], 'g')
 
-    plt.plot([v.x for v in casted_tris], [v.y for v in casted_tris], 'b')
+    # plt.plot([v.x for v in casted_tris], [v.y for v in casted_tris], 'b')
 
-    plt.show()
+    # plt.show()
 
-    exit(-1)
+    # exit(-1)
 
-    pnts = [(5.0, 5.0), (10.0, 10.0), (15.0, 5.0), (20.0, -10.0), (15.0, 10.0), (15.0, 20.0), (50, -5)]
-    xy = mutils.quad_interpolate_line2(pnts)
-    x = [v[0] for v in xy]
-    y = [v[1] for v in xy]
-    plt.plot(x, y, 'r')
-    [plt.plot(px, py, "go") for (px, py) in pnts]
-    plt.show()
+    # pnts = [(5.0, 5.0), (10.0, 10.0), (15.0, 5.0), (20.0, -10.0), (15.0, 10.0), (15.0, 20.0), (50, -5)]
+    # xy = mutils.quad_interpolate_line2(pnts)
+    # x = [v[0] for v in xy]
+    # y = [v[1] for v in xy]
+    # plt.plot(x, y, 'r')
+    # [plt.plot(px, py, "go") for (px, py) in pnts]
+    # plt.show()
 
     ax = 36.0  # in [0:180)
     ay = 47.0  # in [0:90)
@@ -277,7 +277,7 @@ if __name__ == '__main__':
 
     print(f"<= ax: {angles_q.x/np.pi*180:3} | ay: {angles_q.y/np.pi*180:3} | az: {angles_q.z/np.pi*180:3}")
 
-    exit()
+    # exit()
     str_ = ""
     cntr = 0
     for row in range(16):

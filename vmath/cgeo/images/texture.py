@@ -1,28 +1,11 @@
-import ctypes
-
 from cgeo.transforms.transform2 import Transform2
+from cgeo import gutils, mutils, LoopTimer
 from cgeo.images.rgba import RGBA
 from cgeo.vectors import Vec2
 from typing import Tuple
-from cgeo import gutils, mutils, LoopTimer  # , LoopTimer
 from PIL import Image
 import numpy as np
-from ctypes import Structure, POINTER, c_int8, c_int32, CDLL
 
-
-image_op_lib = CDLL(r"E:\GitHub\CGpy\vmath\cgeo\images\Images.dll")
-
-
-class _Texture(Structure):
-    _fields_ = ("data", POINTER(c_int8)), \
-               ("bpp",  c_int8 ), \
-               ("rows", c_int32), \
-               ("cols", c_int32)
-
-
-get_color_nearest   = image_op_lib.nearest32
-get_color_bi_cubic  = image_op_lib.bicubic32
-get_color_bi_linear = image_op_lib.bilinear32
 
 _bicubic_poly_coefficients = (1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
                               0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
