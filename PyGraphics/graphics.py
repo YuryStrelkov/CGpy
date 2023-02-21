@@ -257,7 +257,7 @@ def draw_bezier(buffer: FrameBuffer, curve: BezierCurve2, color: RGB = RGB(np.ui
                     round(a2.y), RGB(np.uint8(255), np.uint8(255), np.uint8(255)))
         draw_point(buffer, round(a1.x), round(a1.y), RGB(np.uint8(0), np.uint8(0), np.uint8(255)))
         draw_point(buffer, round(a2.x), round(a2.y), RGB(np.uint8(0), np.uint8(0), np.uint8(255)))
-        draw_point(buffer, round(p.x), round(p.y), RGB(np.uint8(255), np.uint8(0), np.uint8(0)))
+        draw_point(buffer, round(p.x), round(p.y),   RGB(np.uint8(255), np.uint8(0), np.uint8(0)))
 
 
 ################
