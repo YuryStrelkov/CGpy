@@ -432,7 +432,6 @@ void expand_bounds(const Mat3& tm, const Image& src, I32& width, I32& height)
 
 DLL_EXPORT Image* transform(const F32* transform, const Image* src, const  UI8 interp_f, const UI8 expand)
 {
-
 	const Mat3* transform_m = (const Mat3*)transform;
 
 	Image* dst;
@@ -448,7 +447,6 @@ DLL_EXPORT Image* transform(const F32* transform, const Image* src, const  UI8 i
 		expand_bounds(*transform_m, *src, w, h);
 		dst = image_new(w, h, src->bpp());
 	}
-
 
 	F32 i_src_scl_x = 1.0f / src_scl_x / src_scl_x;
 	F32 i_src_scl_y = 1.0f / src_scl_y / src_scl_y;
