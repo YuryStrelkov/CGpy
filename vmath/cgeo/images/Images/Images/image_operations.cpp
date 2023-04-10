@@ -481,7 +481,6 @@ DLL_EXPORT Image* transform(const F32* transform, const Image* src, const  UI8 i
 	return dst;
 }
 
-
 DLL_EXPORT Image* rescale(const F32* transform, const Image* src, const  UI8 interp_f, const UI8 expand)
 {
 	const Mat3* transform_m = (const Mat3*)transform;
