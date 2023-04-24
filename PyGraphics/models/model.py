@@ -1,3 +1,5 @@
+from typing import List
+
 from models.tris_mesh import TrisMesh, BoundingBox
 from transforms.transform import Transform
 from materials.material import Material
@@ -9,8 +11,8 @@ import models.tris_mesh
 
 class Model(object):
     def __init__(self, geometry_origin: str = "", material_origin: str = ""):
-        self.__meshes: [TrisMesh] = models.tris_mesh.read_obj_mesh(geometry_origin)
-        self.__materials: [Material] = materials.material.read_material(material_origin)
+        self.__meshes: List[TrisMesh] = models.tris_mesh.read_obj_mesh(geometry_origin)
+        self.__materials: List[Material] = materials.material.read_material(material_origin)
         self.__transform: Transform = Transform()
         self.__mesh_origin: str = ""
         self.__bbox: BoundingBox = BoundingBox()
