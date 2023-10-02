@@ -1,3 +1,5 @@
+from PIL import Image
+
 from transforms.transform import Transform
 from shapes.bezier2 import BezierCurve2
 from surfaces.patch import CubicPatch
@@ -110,17 +112,90 @@ def interactive_shading(render_camera: Camera = None):
 
     gr.draw_model_shaded_interactive(frame_buffer, model, render_camera)
 
+
+def mapping():
+    im = Image.open("terrain_map_1.png")
+    pixels = im.load()
+    colors = []
+    for index in range(im.size[0] * im.size[1]):
+        row, col = divmod(index, im.size[1])
+        if pixels[row, col] == (255, 255, 255, 255):
+            colors.append(0)
+            continue
+        colors.append(3)
+    print(im.size[0] / 16)
+    for index, color in enumerate(colors):
+        row, col = divmod(index, im.size[1])
+        if row % 16 != 0:
+            continue
+        if col % 16 != 0:
+            continue
+        if col == 0:
+            print()
+        print(color, end=", ")
+
+
+
 if __name__ == '__main__':
-    #t = Transform()
+    # mapping()
+    # exit()
+    im = Image.open("rock.png")
+    tile_size = 8
+    n_tile_x = im.size[0]//tile_size
+    n_tile_y = im.size[1]//tile_size
+    pixels = im.load()
+    print(n_tile_x, n_tile_y)
+    # print(pixels[0, 0])
+
+    maps = []
+    RED = (255, 0, 0, 255)
+    for index in range(n_tile_x * n_tile_y):
+        row, col = divmod(index, n_tile_x)
+        # tile_map = ["1" if pixels[0  + col * 16,  0 + row * 16][-1] == 255 else "0",
+        #             "1" if pixels[15 + col * 16,  0 + row * 16][-1] == 255 else "0",
+        #             "1" if pixels[0  + col * 16, 15 + row * 16][-1] == 255 else "0",
+        #             "1" if pixels[15 + col * 16, 15 + row * 16][-1] == 255 else "0"]
+        a =  1 if pixels[                col * tile_size,                 row * tile_size][-1] == 255 else 0
+        b =  2 if pixels[tile_size - 1 + col * tile_size,                 row * tile_size][-1] == 255 else 0
+        c =  4 if pixels[                col * tile_size, tile_size - 1 + row * tile_size][-1] == 255 else 0
+        d =  8 if pixels[tile_size - 1 + col * tile_size, tile_size - 1 + row * tile_size][-1] == 255 else 0
+        tile_map = a | b | c | d
+        if tile_map == 0:
+            continue
+
+        u0 = col * tile_size / im.size[0]
+        v0 = row * tile_size / im.size[1]
+
+        u1 = (tile_size + col * tile_size) / im.size[0]
+        v1 = (tile_size + row * tile_size) / im.size[1]
+
+        maps.append((index, tile_map, u0, v0, u1, v1))
+    with open("tiles.json", "wt") as out:
+        for (index, tile_map, u0, v0, u1, v1) in maps:
+            print(f"{{ \"tile_id\": {index:3}, \"tile_mask\": {tile_map:3}, \"u0\": {u0:>.5f}, \"v0\": {v0:>.5f}, \"u1\": {u1:>.5f}, \"v1\": {v1:>.5f}}},", file=out)
+        # for row in range(n_tile_y):
+        #     print(",". join(f"{{\"tile_id\" : {str(i + row * 9):>3}, \"tile_mask\": {str(maps[i + row * 9]):>3}}}"for i in range(9)), file=out)
+
+    t0 = time.perf_counter()
+    v = [i for i in range(1000000)]
+    c = sum(v)
+    print(c)
+    print(time.perf_counter() - t0)
+
+    t0 = time.perf_counter()
+    c = sum((i for i in range(1000000)))
+    print(c)
+    print(time.perf_counter() - t0)
+
     #t.up = Vec3(1, 1, 0).normalized()
     ##t.angles = Vec3(math.pi/6, math.pi/4, math.pi/3)
     #print(t.angles * 180 / math.pi)
-    #print(t)
+    #print(t)f
     #cam = Camera()
     # print(cam)
     # bezier_intersection_test()
     # bezier_curve_test()
-    interactive_shading()
+    # interactive_shading()
     #interactive_solid_color()
     #static_solid_color()
     #static_shading()
