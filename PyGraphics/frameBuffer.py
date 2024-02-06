@@ -32,7 +32,7 @@ class FrameBuffer(object):
     def set_pixel(self, x: int, y: int, color: RGB = RGB(np.uint8(255), np.uint8(0), np.uint8(0))):
         self.__frame_texture.set_color(x, y, color)
 
-    def set_depth(self, x: int, y: int, depth: np.float) -> bool:
+    def set_depth(self, x: int, y: int, depth: float) -> bool:
         pix: int = self.width * y + x
         if pix < 0:
             return False

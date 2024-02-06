@@ -3,6 +3,7 @@ from typing import Tuple, Any, List
 import numpy as np
 import operator
 
+from cgeo.tris_mesh.fourier import img_to_pow_2_size
 
 _2pij = 2j * pi
 
@@ -469,18 +470,14 @@ def _fast_fourier_transform(signal: np.ndarray) -> None:
 
 # @numba.njit(fastmath=True)
 def fft(x: np.ndarray, do_copy: bool = True) -> np.ndarray:
-    _x = x
-    if do_copy:
-        _x = x.copy()
+    _x = x.copy() if do_copy else x
     _fast_fourier_transform(_x)
     return _x
 
 
-# @numba.njit(fastmath=True)
+@numba.njit(fastmath=True)
 def ifft(x: np.ndarray, do_copy: bool = True) -> np.ndarray:
-    _x = x
-    if do_copy:
-        _x = x.copy()
+    _x = x.copy() if do_copy else x
     _x = _x.conjugate()
     _fast_fourier_transform(_x)
     _x = _x.conjugate()
@@ -488,37 +485,27 @@ def ifft(x: np.ndarray, do_copy: bool = True) -> np.ndarray:
     return _x
 
 
-# @numba.njit(parallel=True)
+@numba.njit(parallel=True)
 def fft_2d(x: np.ndarray, do_copy: bool = True) -> np.ndarray:
     if x.ndim != 2:
         raise ValueError("fft2 :: x.ndim != 2")
-    _x = img_to_pow_2_size(x)
-    if do_copy:
-        _x = img_to_pow_2_size(x.copy())
-
+    _x = img_to_pow_2_size(x.copy()) if do_copy else img_to_pow_2_size(x)
     for i in range(_x.shape[0]):
         _x[i, :] = fft(_x[i, :])
-
     for i in range(_x.shape[1]):
         _x[:, i] = fft(_x[:, i])
-
     return _x
 
 
-# @numba.njit(parallel=True)
+@numba.njit(parallel=True)
 def ifft_2d(x: np.ndarray, do_copy: bool = True) -> np.ndarray:
     if x.ndim != 2:
         raise ValueError("fft2 :: x.ndim != 2")
-    _x = x
-    if do_copy:
-        _x = x.copy()
-
-    for i in range(_x.shape[0]):
+    _x = x.copy() if do_copy else x
+    for i in prange(_x.shape[0]):
         _x[i, :] = ifft(_x[i, :])
-
-    for i in range(_x.shape[1]):
+    for i in prange(_x.shape[1]):
         _x[:, i] = ifft(_x[:, i])
-
     return _x
 
 
@@ -534,16 +521,7 @@ def img_crop(img: np.ndarray, rows_bound: Vector2, cols_bound: Vector2) -> np.nd
     return img[y_min: y_max, x_min: x_max, :]
 
 
-# @numba.njit(fastmath=True)
-def img_to_pow_2_size(img: np.ndarray) -> np.ndarray:
-    if img.ndim < 2:
-        raise RuntimeError("img_to_pow_2_size:: image has to be 2-dimensional, but 1-dimensional was given...")
-    rows, cols = img.shape[0], img.shape[1]
-    rows2, cols2 = 2 ** int(np.log2(rows)), 2 ** int(np.log2(cols))
-    if rows == rows2 and cols2 == cols:
-        return img
-    return img_crop(img, ((rows - rows2) // 2, (rows + rows2) // 2),
-                    ((cols - cols2) // 2, (cols + cols2) // 2))
+
 
 
 # @numba.njit(fastmath=True, parallel=True)

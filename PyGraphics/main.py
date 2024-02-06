@@ -1,3 +1,5 @@
+# import numba
+import matplotlib.pyplot as plt
 from PIL import Image
 
 from transforms.transform import Transform
@@ -135,14 +137,147 @@ def mapping():
         print(color, end=", ")
 
 
+# @numba.njit(fastmath=True)
+def clamp(val: float, min_: float, max_: float) -> float:
+    """
+    :param val: значение
+    :param min_: минимальная граница
+    :param max_: максимальная граница
+    :return: возвращает указанное значение val в границах от min до max
+    """
+    if val < min_:
+        return min_
+    if val > max_:
+        return max_
+    return val
+
+
+# @numba.njit(fastmath=True, parallel=True)
+def bi_linear_interp(x: np.ndarray, y: np.ndarray, points: np.ndarray,
+                     width: float = 1.0, height: float = 1.0, target_type=float) -> np.ndarray:
+    """
+    Билинейная иетерполяция диапазона точек x, y
+    :param x: x - координаты точек
+    :param y: y - координаты точек
+    :param points: одномерный список узловых точек
+    :param width: ширина области интеполяции
+    :param height: высота области интеполяции
+    :param target_type: target_type
+    :return:
+    """
+    if points.ndim < 2:
+        raise RuntimeError("bi_linear_interp_pt :: points array has to be at least 2 dimensional")
+
+    rows, cols = points.shape[0], points.shape[1]
+
+    depth = points.shape[2] if points.ndim >= 3 else 1
+
+    result = np.zeros((y.size, x.size, depth), dtype=target_type)
+
+    dx_ = width / (cols - 1.0)
+
+    dy_ = height / (rows - 1.0)
+
+    for i in range(y.size * x.size):
+
+        res_row_, res_col_ = divmod(i, x.size)
+
+        x_ = clamp(x[res_col_], 0.0, width)
+
+        y_ = clamp(y[res_row_], 0.0, height)
+
+        col_ = int((x_ / width) * (cols - 1))
+
+        row_ = int((y_ / height) * (rows - 1))
+
+        col_1 = min(col_ + 1, cols - 1)
+
+        row_1 = min(row_ + 1, rows - 1)
+
+        # q11 = nodes[row_, col_]
+        # q00____q01
+        # |       |
+        # |       |
+        # q10____q11
+
+        tx = (x_ - dx_ * col_) / dx_
+        ty = (y_ - dy_ * row_) / dy_
+        for layer in range(depth):
+            q00: float = points[row_,  col_,  layer]
+            q01: float = points[row_,  col_1, layer]
+            q10: float = points[row_1, col_,  layer]
+            q11: float = points[row_1, col_1, layer]
+            result[res_row_, res_col_, layer] = \
+                q00 + (q01 - q00) * tx + (q10 - q00) * ty + tx * ty * (q00 - q01 - q10 + q11)
+    return result if depth >= 3 else result.reshape((rows, cols))
+
+
+def make_tile_set(image_src: str, tile_per_row: int = 4, tile_per_col: int = 4):
+    im = Image.open(image_src)
+    # pixels = im.load()
+    pixels = np.array(im.getdata()).reshape(im.height, im.width, 3)
+    plt.show()
+    tile_h = 1.0 / tile_per_row
+    tile_w = 1.0 / tile_per_col
+    x = np.linspace(0.0, tile_w, 512, dtype=float)
+    y = np.linspace(0.0, tile_h, 512, dtype=float)
+    tiles_images = []
+    for index in range(tile_per_row * tile_per_col):
+        row, col = divmod(index, tile_per_col)
+        image = bi_linear_interp(x + col  * tile_w, y + row  * tile_h, pixels)
+        tiles_images.append({"img_id": index,
+                             "img": image,
+                             "up": (-1, 1e32, -1),
+                             "right": (-1, 1e32, -1),
+                             "down": (-1, 1e32, -1),
+                             "left": (-1, 1e32, -1)})
+        Image.fromarray(np.uint8(image)).convert('RGB').save(f"tilesets/tile {row:>3}, {col:>3}.jpg")
+
+    def check_sides(pretender_img, img_side):
+        sides = {0: abs((pretender_img[-1, :, :] - img_side).sum()),
+                 1: abs((pretender_img[:, -1, :] - img_side).sum()),
+                 2: abs((pretender_img[0,  :, :] - img_side).sum()),
+                 3: abs((pretender_img[:,  0, :] - img_side).sum())}
+        index = 0
+        min_v = 1e32
+        for i, v in sides.items():
+            if min_v < v:
+                continue
+            min_v = v
+            index = i
+        return index, min_v
+
+    for img in tiles_images:
+        for pretender in tiles_images:
+            if pretender["img_id"] == img["img_id"]:
+                continue
+            side_id, side_val = check_sides(pretender["img"], img["img"][:,  0, :])
+            if side_val < img["left"][1]:
+                img["left"] = (pretender["img_id"], side_val, side_id)
+
+            side_id, side_val = check_sides(pretender["img"], img["img"][:, -1, :])
+            if side_val < img["left"][1]:
+                img["left"] = (pretender["img_id"], side_val, side_id)
+
+            side_id, side_val = check_sides(pretender["img"], img["img"][-1, :, :])
+            if side_val < img["down"][1]:
+                img["down"] = (pretender["img_id"], side_val, side_id)
+
+            side_id, side_val = check_sides(pretender["img"], img["img"][0,  :, :])
+            if side_val < img["up"][1]:
+                img["up"] = (pretender["img_id"], side_val, side_id)
+    return tiles_images
+
 
 if __name__ == '__main__':
+
+    tiles_images = make_tile_set('img.png')
     # mapping()
-    # exit()
+    exit()
     im = Image.open("rock.png")
     tile_size = 8
-    n_tile_x = im.size[0]//tile_size
-    n_tile_y = im.size[1]//tile_size
+    n_tile_x = im.size[0] // tile_size
+    n_tile_y = im.size[1] // tile_size
     pixels = im.load()
     print(n_tile_x, n_tile_y)
     # print(pixels[0, 0])

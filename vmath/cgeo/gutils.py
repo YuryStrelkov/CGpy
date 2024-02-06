@@ -273,7 +273,7 @@ def _bezier_coordinate(t: float, x1: float, x2: float, x3: float, x4: float) -> 
 
 def _section_bounds_1d(x1: float, x2: float, x3: float, x4: float) -> Tuple[float, float]:
     a: float = -3 * x1 + 9 * x2 - 9 * x3 + 3 * x4
-    b: float = 6 * x1 - 12 * x2 + 6 * x3
+    b: float =  6 * x1 - 12 * x2 + 6 * x3
     c: float = -3 * x1 + 3 * x2
     if abs(a) < 1e-6:
         if abs(b) < 1e-6:
